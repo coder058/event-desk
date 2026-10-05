@@ -1,0 +1,48 @@
+# Fixture environment. No owner keys; local-only exposure, PostgreSQL stays internal.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: eventdesk
+      POSTGRES_USER: fixture
+      POSTGRES_PASSWORD: fixture-not-production
+    volumes: ["fixture-db:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fixture -d eventdesk"]
+      interval: 2s # GUESS: startup polling, not a model threshold.
+      timeout: 2s
+      retries: 30
+  migrate:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://fixture:fixture-not-production@db/eventdesk
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db: {condition: service_healthy}
+  seed-model:
+    build: .
+    user: root
+    command: ["python", "fixtures/train_fixture.py"]
+    volumes: ["fixture-model:/models"]
+  api:
+    build: .
+    environment: &fixture-env
+      DATABASE_URL: postgresql+psycopg://fixture:fixture-not-production@db/eventdesk
+      EVENTDESK_FIXTURE_MODE: "true"
+      EVENTDESK_MODEL_PATH: /models/fixture.joblib
+    ports: ["127.0.0.1:8000:8000"]
+    volumes: ["fixture-model:/models:ro"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      seed-model: {condition: service_completed_successfully}
+  worker:
+    build: .
+    environment: *fixture-env
+    command: ["python", "-m", "eventdesk.worker"]
+    volumes: ["fixture-model:/models:ro"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      seed-model: {condition: service_completed_successfully}
+volumes:
+  fixture-db:
+  fixture-model:

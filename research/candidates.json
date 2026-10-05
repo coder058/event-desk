@@ -1,0 +1,10 @@
+{
+  "declared_at": "2026-10-05",
+  "train_quarters": ["2025Q4", "2026Q1", "2026Q2"],
+  "validation_quarter": "2026Q3",
+  "facts_baseline": {"alpha": 3, "min_df": 5, "max_features": 60000},
+  "enriched": {"alpha": 3, "min_df": 5, "max_features": 60000},
+  "parameter_source": "Existing Claude local_model.py; not calibrated optimal values",
+  "selection": "higher delta_r_squared_imputed on Q3; tie chooses facts baseline",
+  "limits": "Q3 was already examined in prior research; it is development validation, not an untouched test. No sweep or LLM blend selected here."
+}

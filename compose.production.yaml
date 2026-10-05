@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: /etc/eventdesk/database.env
+    volumes: ["production-db:/var/lib/postgresql/data"]
+    command: ["postgres", "-c", "statement_timeout=10000"] # GUESS: guard below official ACK limit.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventdesk -d eventdesk"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 256m # UNCALIBRATED GUESS: operational resource budget; verify on this VPS.
+  migrate:
+    build: .
+    env_file: /etc/eventdesk/runtime.env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: [/etc/eventdesk/env, /etc/eventdesk/runtime.env]
+    ports: ["127.0.0.1:8800:8000"] # SOURCE: loopback-only origin for authenticated local SSH preview.
+    volumes: ["/var/lib/eventdesk/models:/models:ro"]
+    mem_limit: 256m # UNCALIBRATED GUESS: measure real RSS and ACK behavior.
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: [/etc/eventdesk/env, /etc/eventdesk/runtime.env]
+    command: ["python", "-m", "eventdesk.worker"]
+    volumes: ["/var/lib/eventdesk/models:/models:ro"]
+    mem_limit: 512m # UNCALIBRATED GUESS: fitted sparse model plus shared I/O workers.
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes: ["./ops/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy-data:/data", "caddy-config:/config"]
+    depends_on: [api]
+    mem_limit: 128m # UNCALIBRATED GUESS: existing VPS operational budget.
+volumes:
+  production-db:
+  caddy-data:
+  caddy-config:

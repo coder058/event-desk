@@ -1,0 +1,10 @@
+# SOURCE: versions measured in the environment used to train/evaluate the deployed artifact.
+scikit-learn==1.8.0
+numpy==2.4.4
+pandas==3.0.2
+joblib==1.5.3
+fastapi==0.141.1
+uvicorn==0.52.4
+httpx==0.28.1
+pydantic==2.12.5
+sqlalchemy==2.0.52

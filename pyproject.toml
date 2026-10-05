@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "event-desk"
+version = "0.1.0"
+description = "Durable local-first market-event prediction service"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn>=0.32,<1", "httpx>=0.28,<1",
+  "pydantic>=2.10,<3", "sqlalchemy>=2.0,<3", "psycopg[binary]>=3.2,<4",
+  "alembic>=1.14,<2", "scikit-learn>=1.6,<2", "pandas>=2.2,<4", "joblib>=1.4,<2"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.14,<2", "types-requests", "pandas-stubs"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+eventdesk = ["dashboard.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+exclude = ["src/eventdesk/vendor"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src/eventdesk"]
+exclude = ["vendor/"]
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "joblib", "eventdesk.vendor.*"]
+ignore_missing_imports = true
+follow_imports = "skip"

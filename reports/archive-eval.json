@@ -1,0 +1,123 @@
+{
+  "created_at": "2026-10-05T21:20:14.355257+00:00",
+  "config": {
+    "declared_at": "2026-10-05",
+    "train_quarters": [
+      "2025Q4",
+      "2026Q1",
+      "2026Q2"
+    ],
+    "validation_quarter": "2026Q3",
+    "facts_baseline": {
+      "alpha": 3,
+      "min_df": 5,
+      "max_features": 60000
+    },
+    "enriched": {
+      "alpha": 3,
+      "min_df": 5,
+      "max_features": 60000
+    },
+    "parameter_source": "Existing Claude local_model.py; not calibrated optimal values",
+    "selection": "higher delta_r_squared_imputed on Q3; tie chooses facts baseline",
+    "limits": "Q3 was already examined in prior research; it is development validation, not an untouched test. No sweep or LLM blend selected here."
+  },
+  "sklearn_version": "1.8.0",
+  "datasets": {
+    "2025Q4": {
+      "sha256": "7021d33e414eb8227245ab83be4183b0bc91c763ac157fc2bf38406162ca4712",
+      "events": 1849
+    },
+    "2026Q1": {
+      "sha256": "148747f1315db5fe41b1d4a10ababeb17d1e9a083fdc017f0291f0297d743d0a",
+      "events": 2391
+    },
+    "2026Q2": {
+      "sha256": "04c3b1af2a900261c608ba1a92662ee76eb94db969f76841e27c2335eb6ae011",
+      "events": 2060
+    },
+    "2026Q3": {
+      "sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c",
+      "events": 2362
+    }
+  },
+  "candidates": {
+    "facts_baseline": {
+      "train_rows": 6299,
+      "validation_rows": 2362,
+      "train_seconds": 14.797749500001373,
+      "batch_prediction_ms": 4087.331599999743,
+      "score": {
+        "n_obs": 2275,
+        "imputed_mean": 0.5067650145937945,
+        "imputed_event_count": 0,
+        "r_squared_surprise": 0.08365468562935308,
+        "r_squared_surprise_imputed": 0.08365468562935308,
+        "r_squared": 0.12460783640466433,
+        "r_squared_imputed": 0.12460783640466433,
+        "delta_r_squared": 0.04095315077531125,
+        "delta_r_squared_imputed": 0.04095315077531125,
+        "beta": 0.8753000258009711,
+        "beta_imputed": 0.8753000258009711,
+        "beta_surprise": 0.24401959814799484,
+        "beta_surprise_imputed": 0.24401959814799484,
+        "alpha": -0.06601604238637773,
+        "alpha_imputed": -0.06601604238637773,
+        "mse": 0.0728487199152893,
+        "mse_imputed": 0.0728487199152893
+      }
+    },
+    "enriched": {
+      "train_rows": 6299,
+      "validation_rows": 2362,
+      "train_seconds": 16.023015799997665,
+      "batch_prediction_ms": 16050.452600000426,
+      "score": {
+        "n_obs": 2275,
+        "imputed_mean": 0.4915655332169342,
+        "imputed_event_count": 0,
+        "r_squared_surprise": 0.08365468562935308,
+        "r_squared_surprise_imputed": 0.08365468562935308,
+        "r_squared": 0.10614052947775243,
+        "r_squared_imputed": 0.10614052947775243,
+        "delta_r_squared": 0.022485843848399356,
+        "delta_r_squared_imputed": 0.022485843848399356,
+        "beta": 0.7367791276307557,
+        "beta_imputed": 0.7367791276307557,
+        "beta_surprise": 0.2613696169885053,
+        "beta_surprise_imputed": 0.2613696169885053,
+        "alpha": 0.006705153805424829,
+        "alpha_imputed": 0.006705153805424829,
+        "mse": 0.07438553932704059,
+        "mse_imputed": 0.07438553932704059
+      }
+    }
+  },
+  "legacy_double_argsort": {
+    "n_obs": 2275,
+    "imputed_mean": 0.5067645354302335,
+    "imputed_event_count": 0,
+    "r_squared_surprise": 0.08365468562935308,
+    "r_squared_surprise_imputed": 0.08365468562935308,
+    "r_squared": 0.1246074273566028,
+    "r_squared_imputed": 0.1246074273566028,
+    "delta_r_squared": 0.04095274172724972,
+    "delta_r_squared_imputed": 0.04095274172724972,
+    "beta": 0.8752949172489864,
+    "beta_imputed": 0.8752949172489864,
+    "beta_surprise": 0.24401978196570942,
+    "beta_surprise_imputed": 0.24401978196570942,
+    "alpha": -0.06601312605038447,
+    "alpha_imputed": -0.06601312605038447,
+    "mse": 0.07284875395560735,
+    "mse_imputed": 0.07284875395560735
+  },
+  "selected": "facts_baseline",
+  "artifact_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "official_scorer_sha256": "990717aad244cbf79ca7f411c1c7d0b8bb33ccf3f04bc6d6f9ec0f84a2cd4c72",
+  "limits": [
+    "Q3 is development validation after previous research inspection, not untouched test",
+    "LLM and fitted blend not evaluated yet",
+    "No live competition or trading performance"
+  ]
+}

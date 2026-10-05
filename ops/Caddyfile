@@ -1,0 +1,9 @@
+52.17.192.36.sslip.io {
+    reverse_proxy api:8000
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        -Server
+    }
+    # Access logging intentionally disabled: incoming metadata/signed URL fragments must not leak.
+}
