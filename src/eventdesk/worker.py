@@ -4,16 +4,21 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import logging
+import os
 import socket
 import time
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
 
+from eventdesk.blend import BlendModel
 from eventdesk.config import COMPETITION_ORIGIN, Settings
-from eventdesk.materials import select_items
+from eventdesk.llm import PROMPT_HASH, Router, prompt_materials, providers_from_env
+from eventdesk.materials import input_hash, select_items
 from eventdesk.model import LocalModel
+from eventdesk.quotas import Quotas
 from eventdesk.schemas import Prediction, SubmissionPayload
 from eventdesk.store import Store, Work
 
@@ -35,12 +40,22 @@ class Worker:
     def __init__(self, settings: Settings, store: Store, model: LocalModel,
                  http: httpx.AsyncClient) -> None:
         self.settings, self.store, self.model, self.http = settings, store, model, http
+        self.router: Router | None = None
+        self.blend: BlendModel | None = None
+        if os.getenv("EVENTDESK_LLM_ENABLED", "false").lower() == "true" and not settings.fixture_mode:
+            self.router = Router(Quotas(store), http, providers_from_env())
+            blend_path = os.getenv("EVENTDESK_BLEND_PATH")
+            if blend_path:
+                self.blend = BlendModel(Path(blend_path))
 
     async def process(self, work: Work) -> None:
         payload = work.payload
         if payload is None:
             items: dict[str, Any] = {}
             fallback: str | None = None
+            method = "local"
+            selected_model_hash = self.model.sha256
+            trace: dict[str, Any] | None = None
             if work.event.event_type == "TEST":
                 # SOURCE: official starter neutral prediction for TEST (never scored).
                 value = 0.5
@@ -48,7 +63,9 @@ class Worker:
             else:
                 try:
                     if self.settings.fixture_mode:
-                        items = {"earnings-call-facts": ["Revenue increased and guidance was maintained."]}
+                        supplied_fixture = (work.event.model_extra or {}).get("fixture_materials")
+                        items = select_items(supplied_fixture) if isinstance(supplied_fixture, dict) else {
+                            "earnings-call-facts": ["Revenue increased and guidance was maintained."]}
                     elif work.event.information_url:
                         await allowed_material_url(work.event.information_url, self.settings.material_hosts)
                         # SOURCE: starter materials timeout 15 seconds; bounded by actual remaining deadline.
@@ -61,7 +78,30 @@ class Worker:
                 except (httpx.HTTPError, ValueError, OSError):
                     fallback = "materials_unavailable"
                 value = await asyncio.to_thread(self.model.predict, items)
-                fallback = fallback or "llm_not_enabled"
+                if self.router and items and fallback is None:
+                    local_value = value
+                    result = await self.router.analyze(items, work.deadline)
+                    trace = {"prompt_hash": PROMPT_HASH,
+                        "llm_inputs_hash": input_hash(prompt_materials(items)),
+                        "provider": result.provider, "model": result.model,
+                        "latency_ms": result.latency_ms, "attempts": list(result.attempts),
+                        "analysis": result.analysis.model_dump() if result.analysis else None,
+                        "local_prediction": local_value, "affects_prediction": False}
+                    if result.analysis and self.blend and result.provider and result.model:
+                        try:
+                            value = self.blend.predict(local_value, result.analysis, prompt_hash=PROMPT_HASH,
+                                                       provider=result.provider, provider_model=result.model)
+                            method = "fitted_blend"
+                            selected_model_hash = self.model.sha256 + ":" + self.blend.sha256
+                            trace["affects_prediction"] = True
+                            trace["blend_hash"] = self.blend.sha256
+                        except ValueError:
+                            fallback = "blend_provenance_mismatch"
+                    elif result.analysis:
+                        fallback = "llm_shadow_no_approved_blend"
+                    else:
+                        fallback = "llm_unavailable"
+                fallback = fallback or ("llm_not_enabled" if not self.router else None)
             # Current official earnings events have event-level materials; same fitted model applied to each
             # asset until an asset-specific model is actually trained and evaluated.
             payload = SubmissionPayload(event_id=work.event.event_id,
@@ -69,7 +109,7 @@ class Worker:
                                                                 predicted_percentile=value)
                                                      for asset in work.event.focal_assets]).model_dump(mode="json")
             await asyncio.to_thread(self.store.persist_prediction, work.id, payload, items,
-                                    self.model.sha256, fallback)
+                                    selected_model_hash, fallback, method, trace)
         remaining = work.deadline - time.time()
         if remaining <= 0:
             await asyncio.to_thread(self.store.retry, work.id, "deadline_expired", 0, time.time())

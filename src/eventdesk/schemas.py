@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -47,7 +47,8 @@ class SubmissionPayload(BaseModel):
 
 class Evidence(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    item_id: str
+    # SOURCE: only these official text materials can supply verbatim evidence.
+    item_id: Literal["earnings-call-facts", "earnings-preview"]
     quote: str = Field(min_length=1)
 
 

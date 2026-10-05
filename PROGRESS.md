@@ -41,3 +41,22 @@ test. No Event Desk deployment or archived model result is claimed yet.
 
 Next: unblock verified public HTTPS while implementing the free-provider router,
 quota persistence and structured archive calibration. Phase A1 remains incomplete.
+
+## 2026-10-05 — provider reliability work (not a fitted hybrid yet)
+
+- Gemini 3.1 Flash-Lite produced validated structured scores and exact evidence on
+  an archived event in 7.468 seconds using 835 reported tokens. Subsequent archived
+  calls included valid results and an actual 503 outage.
+- Groq GPT-OSS 120B initially appended array indices to evidence item IDs, which
+  strict verification rejected. Constrained allowed item IDs in the output schema;
+  two subsequent archive responses passed validation (1,299 and 1,276 reported
+  tokens), followed by a real HTTP 429. Provider failures are retained, not hidden.
+- Quota reservations and cooldowns now have persistent database schemas and tests.
+- Runtime leaves the mission's 30-second submission reserve and never enables
+  browsing or an additional/paid provider.
+- Review corrected a crash gap: evidence and immutable prediction now commit in
+  one transaction. An unapproved blend artifact is rejected; shadow evidence
+  cannot change the local percentile without a fitted, approved mapping.
+- Sixteen non-load tests passed with strict application typing. LLM code is not
+  yet deployed; the current live worker is still local-only. Archive collection
+  is insufficient for a fitted hybrid or an LLM performance claim.

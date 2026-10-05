@@ -17,7 +17,8 @@ for provider, url, headers in calls:
         print(provider, "http", response.status_code)
         if response.status_code == 200:
             body = response.json()
-            models = [item.get("name", item.get("id")) for item in body.get("models", body.get("data", []))]
+            models = [item.get("name") if provider == "gemini" else item.get("id")
+                      for item in body.get("models", body.get("data", []))]
             print(provider, "candidate_ids", [m for m in models if isinstance(m, str) and ("flash" in m or "gpt-oss" in m)])
             if provider == "groq":
                 print(provider, "root_fields", list(body), "model_ids", models)

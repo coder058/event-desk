@@ -41,6 +41,7 @@ class Job(Base):
     submitted_at: Mapped[float | None] = mapped_column(Float, nullable=True)
     latency_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    analysis_trace: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
 
 class Delivery(Base):
@@ -132,7 +133,8 @@ class Store:
             return int(result.rowcount)  # type: ignore[attr-defined]
 
     def persist_prediction(self, job_id: int, payload: dict[str, Any], items: dict[str, Any],
-                           model_hash: str, fallback: str | None, provider: str = "local") -> None:
+                           model_hash: str, fallback: str | None, provider: str = "local",
+                           analysis_trace: dict[str, Any] | None = None) -> None:
         from eventdesk.materials import input_hash
         with Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
@@ -144,6 +146,8 @@ class Store:
                 return
             job.payload, job.inputs, job.inputs_hash = payload, items, input_hash(items)
             job.model_hash, job.fallback, job.provider = model_hash, fallback, provider
+            # Outbox and analysis must commit together; a crash between separate commits loses coverage.
+            job.analysis_trace = analysis_trace
 
     def finish(self, job_id: int, response: dict[str, Any], state: str, now: float) -> None:
         with Session(self.engine) as session, session.begin():
@@ -190,5 +194,5 @@ class Store:
                     "knowledge_cutoff": job.event.get("knowledge_cutoff"),
                     "official_items": job.inputs, "prediction": job.payload,
                     "inputs_hash": job.inputs_hash, "model_hash": job.model_hash,
-                    "provider": job.provider, "fallback": job.fallback,
+                    "provider": job.provider, "fallback": job.fallback, "analysis_trace": job.analysis_trace,
                     "state": job.state, "error": job.error}
