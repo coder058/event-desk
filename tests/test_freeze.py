@@ -14,7 +14,9 @@ def test_freeze_blocks_unrecorded_artifact_blend_and_provider_changes(model, tmp
     config["model_sha256"] = model.sha256
     path = tmp_path / "fixture-declaration.json"
     path.write_text(json.dumps(config))
-    expected = hashlib.sha256(path.read_bytes()).hexdigest()
+    expected = hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    assert verify_freeze(path, model, hybrid_enabled=False, provider_models={}) == expected
+    path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
     assert verify_freeze(path, model, hybrid_enabled=False, provider_models={}) == expected
     with pytest.raises(ValueError, match="blend"):
         verify_freeze(path, model, hybrid_enabled=True)

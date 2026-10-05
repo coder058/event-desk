@@ -169,3 +169,9 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
   429 (used 199,245 of 200,000; requested 1,221; Retry-After 202 seconds). Gemini
   3.5 returned 429 with no recognized numeric dimension. Attempts are retained;
   no amount of repeated requests is treated as new calibration evidence.
+
+- Declared-config worker startup verified on Dublin at 329265b, real artifact and
+  schema 007. Before any received event, comparison against public Git found the
+  configuration's working-copy CRLF produced a different raw hash than Git LF.
+  Normalized only line endings in the hash and tested both encodings; updated
+  the declaration to the public-file hash. Predictions/features did not change.

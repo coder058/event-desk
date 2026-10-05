@@ -5,11 +5,13 @@ the initial local prediction method, not a claim that registration/network testi
 is complete. Public HTTPS and the actual portal test remain pending.
 
 Canonical configuration: `competition-config.json`.
-SHA-256: `8fb8ab4da4c57c0863a28a0425b31398a51a52bbc96201eeea7ac2c61d1f6f76`.
+SHA-256 (canonical LF file): `7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1`.
 The worker verifies model bytes before deserialization, full feature-builder source,
 prediction code, rule-linked scorer, evidence prompt and enabled provider pins.
 An undocumented artifact or prediction-affecting blend cannot start this worker.
 Configuration hashes are retained with each new immutable prediction and heartbeat.
+Before any event was received, review corrected a Windows CRLF/Git LF hash mismatch;
+the normalized hash above matches the public Git file. The prediction method did not change.
 
 ## Training and initial selection
 

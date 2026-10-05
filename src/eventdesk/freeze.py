@@ -73,4 +73,5 @@ def verify_freeze(path: Path, model: LocalModel, *, hybrid_enabled: bool,
     if provider_models is not None and any(freeze.provider_models.get(name) != model_name
                                           for name, model_name in provider_models.items()):
         raise ValueError("Runtime provider/model pins differ from the declaration")
-    return hashlib.sha256(raw).hexdigest()
+    # SOURCE: repository .gitattributes declares LF. Windows CRLF formatting must not change a version hash.
+    return hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest()
