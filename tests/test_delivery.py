@@ -58,6 +58,27 @@ def test_nonstandard_json_numbers_rejected_before_durable_ack(settings, store):
     assert store.health()["states"] == {}
 
 
+def test_slow_stream_cannot_spend_the_receipt_budget_before_database_work(settings, store, monkeypatch):
+    import eventdesk.api
+    # GUESS: injected short test guard; production retains the documented ten-second budget.
+    monkeypatch.setattr(eventdesk.api, "RECEIPT_GUARD_SECONDS", .02)
+    e = event()
+    raw = e.model_dump_json().encode()
+
+    async def slow_body():
+        yield raw[:1]
+        await asyncio.Event().wait()
+        yield raw[1:]
+
+    async def run():
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=create_app(settings, store)),
+                                     base_url="http://fixture") as client:
+            response = await client.post("/competition/webhook", content=slow_body(), headers=signed(raw, e.id))
+            assert response.status_code == 503
+    asyncio.run(run())
+    assert store.health()["states"] == {}
+
+
 def test_concurrent_duplicate_and_immutable_outbox(store):
     e = event()
     raw = e.model_dump_json().encode()

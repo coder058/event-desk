@@ -116,3 +116,16 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
   queries prevent evidence from one submission being displayed for another.
 - Public HTTPS, the owner's portal test, hybrid calibration, frozen registration,
   EDGAR and future scored days remain incomplete. No live score is claimed.
+
+- Commit 7a34a6c passed CI 37384262617 and deployed the contribution/health views.
+  Actual PostgreSQL/HTTP receipt races passed: twenty simultaneous duplicate ACKs
+  produced one job/one delivery; twenty new delivery IDs retained one job and its
+  first deadline; both changed body and changed focal identity returned HTTP 409.
+- Subsequent 400-event Dublin fixture replay completed in 8.470834 seconds, ACK
+  p95 586.061 ms, maximum 922.017 ms. Different contention/locking conditions prevent
+  attributing the entire speedup to one change; this is one replay, not capacity proof.
+- Browser verified real production zero-event state and separately inspected actual
+  synthetic pre-submission contributions. Production screenshot retained in docs.
+- Senior review found streaming the request body was outside the receipt timer.
+  Added one shared guard across body, validation and durable receipt; an injected
+  stalled-stream test returns 503 without persisting an event rather than ACKing.

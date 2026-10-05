@@ -32,7 +32,7 @@ async function refresh(){try{
  el('latency').textContent=s.receipt_to_response_p95_ms==null?'—':number(s.receipt_to_response_p95_ms/1000,2)+' s';
  el('pending').textContent=(h.states.pending||0)+' / '+(h.states.working||0);el('fallbacks').textContent=s.material_fallbacks;
  el('worker').textContent=fresh?'Recent heartbeat · '+stamp(h.worker.seen_at):'No recent heartbeat verified';
- const d=h.worker?.details;el('method').textContent=d?(d.hybrid_enabled?'Approved fitted hybrid':d.llm_enabled?'Local model + post-submission AI review':'Trained local model · LLM disabled'):'Unverified';
+ const d=h.worker?.details;el('method').textContent=h.fixture_mode?'Synthetic fixture model · not the archived model':d?(d.hybrid_enabled?'Approved fitted hybrid':d.llm_enabled?'Local model + post-submission AI review':'Trained local model · LLM disabled'):'Unverified';
  el('deadline').textContent=h.deadline_at_risk?'Warning: a queued deadline has reached its submission reserve.':'No queued deadline in the submission reserve.';
  el('connection').textContent='Database reachable · '+h.test_events+' TEST events · '+s.simulated+' fixture completions · updated '+new Date().toLocaleTimeString();
  const a=s.archive_validation;if(a){el('archive-score').textContent=a.quarter+' ΔR² '+number(a.delta_r_squared_imputed);el('archive-rows').textContent=a.predicted_rows+' predictions / '+a.scorer_rows+' scorer rows';el('archive-limits').textContent=a.limits}

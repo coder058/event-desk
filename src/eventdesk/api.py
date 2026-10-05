@@ -16,6 +16,10 @@ from eventdesk.schemas import Event
 from eventdesk.store import ConflictError, Store
 from eventdesk.vendor.webhook_verification import WebhookVerificationError, verify_webhook
 
+# SOURCE: official ACK maximum is 20 seconds; the stricter whole-receipt guard below
+# is an UNCALIBRATED GUESS leaving network headroom, not an observed network guarantee.
+RECEIPT_GUARD_SECONDS = 10
+
 
 def create_app(settings: Settings, store: Store) -> FastAPI:
     app = FastAPI(title="Event Desk", docs_url=None, redoc_url=None)
@@ -30,16 +34,23 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
     @app.post("/competition/webhook/{slot}")
     async def receive(request: Request, slot: str = "s1") -> Response:
         started = time.time()
+        budget_started = time.monotonic()
         submission = settings.submissions.get(slot)
         if submission is None:
             raise HTTPException(404)
         # GUESS: 1 MiB ceiling for small official event metadata; not a content/model calibration.
         max_bytes = 1024 * 1024
-        raw = bytearray()
-        async for chunk in request.stream():
-            raw.extend(chunk)
-            if len(raw) > max_bytes:
-                raise HTTPException(413)
+        async def read_raw() -> bytes:
+            raw = bytearray()
+            async for chunk in request.stream():
+                raw.extend(chunk)
+                if len(raw) > max_bytes:
+                    raise HTTPException(413)
+            return bytes(raw)
+        try:
+            raw = await asyncio.wait_for(read_raw(), timeout=RECEIPT_GUARD_SECONDS)
+        except TimeoutError:
+            raise HTTPException(503, "Receipt body timeout") from None
         try:
             parsed = verify_webhook(raw_body=bytes(raw), headers=request.headers,
                                     secret=submission.webhook_secret)
@@ -56,10 +67,12 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
         except (ValidationError, ValueError):
             raise HTTPException(400, "Invalid event schema") from None
         try:
-            # SOURCE: 20-second official ACK limit; this stricter 10-second guard is an UNCALIBRATED GUESS
-            # leaving room for network/verification. PostgreSQL statement timeout is configured separately.
+            remaining = RECEIPT_GUARD_SECONDS - (time.monotonic() - budget_started)
+            if remaining <= 0:
+                raise TimeoutError
+            # Body reading, signature/schema validation and DB acceptance share one receipt budget.
             await asyncio.wait_for(asyncio.to_thread(store.receive, slot, delivery_id, bytes(raw), event, started),
-                                   timeout=10)
+                                   timeout=remaining)
         except ConflictError:
             raise HTTPException(409, "Conflicting delivery") from None
         except (SQLAlchemyError, TimeoutError):

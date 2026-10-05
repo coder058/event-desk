@@ -18,6 +18,9 @@ override.write_text(json.dumps({'services':services}))
 compose=['sudo','docker','compose','-p','eventdesk-fixture','-f','compose.yaml','-f',str(override)]
 try:
  subprocess.run(compose+['up','--no-build','--wait','--wait-timeout','60'],cwd=root,check=True)
+ subprocess.run(['sudo','docker','cp',str(root/'fixtures/receipt_concurrency.py'),
+                 'eventdesk-fixture-api-1:/tmp/receipt_concurrency.py'],check=True)
+ subprocess.run(compose+['exec','-T','api','python','/tmp/receipt_concurrency.py'],cwd=root,check=True)
  subprocess.run(compose+['exec','-T','api','python','fixtures/load_test.py'],cwd=root,check=True)
  report=root/'reports/dublin-fixture-load.json'
  subprocess.run(['sudo','docker','cp','eventdesk-fixture-api-1:/tmp/eventdesk-fixture-load.json',str(report)],check=True)
