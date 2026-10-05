@@ -10,7 +10,10 @@ SEC ingestion and live scoring are not yet operational.
 ## Pipeline
 
 Signed event → durable queue → official materials → trained local prediction →
-best-effort free LLM evidence → frozen prediction → competition acknowledgement.
+frozen prediction → competition acknowledgement.
+
+Until a fitted hybrid is approved, optional free LLM evidence runs afterward in a
+separate durable queue. Those quoted sub-scores do not change the local percentile.
 
 The local model provides coverage when free APIs are unavailable. Structured
 sub-scores make LLM outputs auditable. Evaluation is chronological, and configuration

@@ -77,8 +77,14 @@ class Worker:
                         fallback = "materials_missing_url"
                 except (httpx.HTTPError, ValueError, OSError):
                     fallback = "materials_unavailable"
-                value = await asyncio.to_thread(self.model.predict, items)
-                if self.router and items and fallback is None:
+                try:
+                    value = await asyncio.to_thread(self.model.predict, items)
+                except (ValueError, TypeError, KeyError, IndexError):
+                    # SOURCE: already-fitted target mean, not an invented fallback prediction.
+                    value = self.model.training_mean
+                    fallback = "invalid_materials_or_model_output"
+                    LOG.error("local_inference_fallback event=%s", work.event.event_id)
+                if self.router and self.blend and items and fallback is None:
                     local_value = value
                     result = await self.router.analyze(items, work.deadline)
                     trace = {"prompt_hash": PROMPT_HASH,
@@ -101,7 +107,9 @@ class Worker:
                         fallback = "llm_shadow_no_approved_blend"
                     else:
                         fallback = "llm_unavailable"
-                fallback = fallback or ("llm_not_enabled" if not self.router else None)
+                if fallback is None:
+                    fallback = "llm_not_enabled" if not self.router else (
+                        "llm_shadow_deferred" if self.blend is None else None)
             # Current official earnings events have event-level materials; same fitted model applied to each
             # asset until an asset-specific model is actually trained and evaluated.
             payload = SubmissionPayload(event_id=work.event.event_id,
@@ -109,7 +117,10 @@ class Worker:
                                                                 predicted_percentile=value)
                                                      for asset in work.event.focal_assets]).model_dump(mode="json")
             await asyncio.to_thread(self.store.persist_prediction, work.id, payload, items,
-                                    selected_model_hash, fallback, method, trace)
+                                    selected_model_hash, fallback, method, trace,
+                                    bool(self.router and not self.blend and items and
+                                         fallback == "llm_shadow_deferred" and
+                                         work.event.event_type != "TEST"))
         remaining = work.deadline - time.time()
         if remaining <= 0:
             await asyncio.to_thread(self.store.retry, work.id, "deadline_expired", 0, time.time())
@@ -139,19 +150,60 @@ class Worker:
             # An uncertain POST may have reached the server. Reusing the outbox prevents a revised prediction.
             await asyncio.to_thread(self.store.retry, work.id, "submission_transport_uncertain", 2, time.time())
 
-    async def loop(self) -> None:
+    async def shadow_loop(self) -> None:
+        """One optional evidence lane; never shares the deadline-critical worker pool."""
+        if self.router is None or self.blend is not None:
+            return
         while True:
+            work = await asyncio.to_thread(self.store.claim_shadow, time.time())
+            if work is None:
+                # GUESS: same bounded queue polling as receipt processing; not market timing.
+                await asyncio.sleep(0.25)
+                continue
+            try:
+                result = await self.router.analyze(work.items, work.deadline)
+                trace: dict[str, Any] = {"prompt_hash": PROMPT_HASH,
+                    "llm_inputs_hash": input_hash(prompt_materials(work.items)),
+                    "provider": result.provider, "model": result.model,
+                    "latency_ms": result.latency_ms, "attempts": list(result.attempts),
+                    "analysis": result.analysis.model_dump() if result.analysis else None,
+                    "local_prediction": work.local_prediction, "affects_prediction": False,
+                    "timing": "after_local_submission"}
+                await asyncio.to_thread(self.store.finish_shadow, work.id, trace,
+                                        "validated" if result.analysis else "unavailable")
+            except Exception as exc:
+                LOG.error("shadow_failure event=%s exception_type=%s", work.event_id, type(exc).__name__)
+                await asyncio.to_thread(self.store.finish_shadow, work.id,
+                    {"affects_prediction": False, "timing": "after_local_submission",
+                     "error_type": type(exc).__name__}, "failed")
+
+    async def process_claimed(self, work: Work) -> None:
+        try:
+            await self.process(work)
+        except Exception as exc:
+            # Never print exception text: SDK exceptions can include signed URLs or credentials.
+            LOG.error("worker_failure event=%s exception_type=%s", work.event.event_id, type(exc).__name__)
+            await asyncio.to_thread(self.store.retry, work.id, "worker_" + type(exc).__name__, 2, time.time())
+
+    async def dispatch(self) -> None:
+        # GUESS: same eight simultaneous I/O jobs as the tested original pool; one idle poller
+        # prevents multiplying empty database queries by eight on the small existing VPS.
+        concurrency = 8
+        active: set[asyncio.Task[None]] = set()
+        while True:
+            for task in tuple(active):
+                if task.done():
+                    active.remove(task)
+                    task.result()
+            if len(active) >= concurrency:
+                await asyncio.wait(active, return_when=asyncio.FIRST_COMPLETED)
+                continue
             work = await asyncio.to_thread(self.store.claim, time.time())
             if work is None:
                 # GUESS: bounded polling interval; latency must be measured under the busy-day test.
                 await asyncio.sleep(0.25)
                 continue
-            try:
-                await self.process(work)
-            except Exception as exc:
-                # Never print exception text: SDK exceptions can include signed URLs or credentials.
-                LOG.error("worker_failure event=%s exception_type=%s", work.event.event_id, type(exc).__name__)
-                await asyncio.to_thread(self.store.retry, work.id, "worker_" + type(exc).__name__, 2, time.time())
+            active.add(asyncio.create_task(self.process_claimed(work)))
 
 
 async def run() -> None:
@@ -164,8 +216,7 @@ async def run() -> None:
     LOG.info("worker_started model_hash=%s fixture=%s", model.sha256, settings.fixture_mode)
     async with httpx.AsyncClient(follow_redirects=False) as http:
         worker = Worker(settings, store, model, http)
-        # GUESS: eight I/O workers sharing one fitted artifact; evaluate load rather than claim capacity.
-        await asyncio.gather(*(worker.loop() for _ in range(8)))
+        await asyncio.gather(worker.shadow_loop(), worker.dispatch())
 
 
 if __name__ == "__main__":

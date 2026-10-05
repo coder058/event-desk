@@ -23,6 +23,12 @@ These do not block Phase A.
 ## Verification still to perform
 
 - Public inbound HTTPS on Dublin (certificate issuance succeeded).
-- Reproduction of the supplied archive results; do not quote them as our findings yet.
-- Free-tier model availability and account-specific quota limits.
+- Archive baseline reproduction completed; measured results are in reports/archive-eval.md.
+- Gemini is intermittently unavailable (503); Groq has returned 429 even when
+  its minute-token header showed capacity. Numeric quota diagnostics are retained;
+  account-wide usage and additional limits can differ from this project's counters.
+- Hybrid calibration remains insufficient: collect current-prompt Q2/Q3 samples
+  under those limits, then evaluate the fitted mapping before approving deployment.
+- Full HTTP/PostgreSQL 400-event fixture replay on Dublin has not passed yet.
+  Startup ordering was corrected; ACK failure diagnosis remains in progress.
 - Ten scoring days are future observations, not an engineering shortcut.

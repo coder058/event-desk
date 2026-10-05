@@ -4,7 +4,9 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import math
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -54,6 +56,54 @@ class AnalysisResult:
     model: str | None
     latency_ms: float
     attempts: tuple[dict[str, Any], ...]
+
+
+def safe_quota_headers(headers: httpx.Headers) -> dict[str, float]:
+    """Only documented numeric counters/durations, never arbitrary headers or error bodies."""
+    # SOURCE: https://console.groq.com/docs/rate-limits — requests=day, tokens=minute.
+    result: dict[str, float] = {}
+    for name in ("retry-after", "x-ratelimit-limit-requests", "x-ratelimit-limit-tokens",
+                 "x-ratelimit-remaining-requests", "x-ratelimit-remaining-tokens"):
+        raw = headers.get(name)
+        if raw is None:
+            continue
+        try:
+            value = float(raw)
+        except ValueError:
+            continue
+        if math.isfinite(value) and value >= 0:
+            result[name] = value
+    for name in ("x-ratelimit-reset-requests", "x-ratelimit-reset-tokens"):
+        raw = headers.get(name, "")
+        if not re.fullmatch(r"(?:\d+(?:\.\d+)?[hms])+", raw):
+            continue
+        # SOURCE: SI hour/minute/second conversions, not inferred quota thresholds.
+        seconds = sum(float(value) * {"h": 3600, "m": 60, "s": 1}[unit]
+                      for value, unit in re.findall(r"(\d+(?:\.\d+)?)([hms])", raw))
+        if math.isfinite(seconds):
+            result[name + "-seconds"] = seconds
+    return result
+
+
+def safe_limit_error(response: httpx.Response) -> dict[str, Any]:
+    """Extract only quota dimension and numeric counts; never retain the raw error message."""
+    try:
+        body = response.json()
+        error = body.get("error") if isinstance(body, dict) else None
+        message = error.get("message") if isinstance(error, dict) else None
+    except ValueError:
+        return {}
+    if not isinstance(message, str):
+        return {}
+    result: dict[str, Any] = {}
+    dimension = re.search(r"\b(TPM|TPD|RPM|RPD|ITPM|OTPM)\b", message)
+    if dimension:
+        result["dimension"] = dimension.group(1)
+    for name in ("Limit", "Used", "Requested"):
+        number = re.search(r"\b" + name + r"\s*[:=]?\s*(\d+)", message)
+        if number:
+            result[name.lower()] = int(number.group(1))
+    return result
 
 
 def providers_from_env() -> tuple[Provider, ...]:
@@ -126,19 +176,17 @@ class Router:
             else:
                 raise ValueError("Unauthorized provider")
             actual: int | None = None
+            quota: dict[str, float] = {}
             try:
                 response = await self.http.post(url, headers=headers, json=body, timeout=timeout)
+                quota = safe_quota_headers(response.headers)
                 if response.status_code != 200:
                     status = "http_" + str(response.status_code)
                     cooldown = float(DEFAULT_COOLDOWN_SECONDS)
-                    retry = response.headers.get("retry-after")
-                    if retry:
-                        try:
-                            cooldown = max(cooldown, float(retry))
-                        except ValueError:
-                            pass
+                    cooldown = max(cooldown, quota.get("retry-after", 0))
                     await asyncio.to_thread(self.quotas.settle, reservation, None, status, cooldown)
-                    attempts.append({"provider": provider.name, "model": provider.model, "status": status})
+                    attempts.append({"provider": provider.name, "model": provider.model, "status": status,
+                                     "quota_headers": quota, "quota_error": safe_limit_error(response)})
                     continue
                 result = response.json()
                 if provider.name == "gemini":
@@ -162,12 +210,12 @@ class Router:
                     raise
                 await asyncio.to_thread(self.quotas.settle, reservation, actual, "validated")
                 attempts.append({"provider": provider.name, "model": provider.model,
-                                 "status": "validated", "actual_tokens": actual})
+                                 "status": "validated", "actual_tokens": actual, "quota_headers": quota})
                 return AnalysisResult(analysis, provider.name, provider.model,
                                       (time.perf_counter() - started) * 1000, tuple(attempts))
             except (httpx.HTTPError, ValidationError, ValueError, KeyError, IndexError, TypeError) as error:
                 status = "invalid_or_unavailable_" + type(error).__name__
                 await asyncio.to_thread(self.quotas.settle, reservation, actual, status, DEFAULT_COOLDOWN_SECONDS)
                 attempts.append({"provider": provider.name, "model": provider.model, "status": status,
-                                 "actual_tokens": actual})
+                                 "actual_tokens": actual, "quota_headers": quota})
         return AnalysisResult(None, None, None, (time.perf_counter() - started) * 1000, tuple(attempts))

@@ -4,7 +4,7 @@ import time
 
 import httpx
 
-from eventdesk.llm import Provider, Router
+from eventdesk.llm import Provider, Router, safe_limit_error, safe_quota_headers
 from eventdesk.quotas import Limits, Quotas
 
 
@@ -79,3 +79,21 @@ def test_router_rejects_fabricated_quote(store):
     assert result.analysis is None
     assert result.attempts[0]["status"] == "evidence_not_verbatim"
     assert result.attempts[-1]["status"].startswith("invalid_or_unavailable")
+
+
+def test_quota_diagnostics_exclude_secrets_and_nonfinite_values():
+    headers = httpx.Headers({"Authorization": "never-emit", "X-Provider-Diagnostic": "never-emit",
+        "x-ratelimit-limit-tokens": "8000", "x-ratelimit-remaining-tokens": "NaN",
+        "x-ratelimit-reset-tokens": "1m7.66s", "x-ratelimit-reset-requests": "secret-value",
+        "retry-after": "8", "x-ratelimit-limit-requests": "1000"})
+    result = safe_quota_headers(headers)
+    assert result == {"retry-after": 8, "x-ratelimit-limit-tokens": 8000,
+                      "x-ratelimit-limit-requests": 1000, "x-ratelimit-reset-tokens-seconds": 67.66}
+
+
+def test_limit_errors_keep_only_numeric_counts_and_dimension():
+    response = httpx.Response(429, json={"error": {"message":
+        "Secret organization never-emit; tokens per day (TPD): Limit 200000 Used 199900 Requested 1293."}})
+    assert safe_limit_error(response) == {"dimension": "TPD", "limit": 200000,
+                                           "used": 199900, "requested": 1293}
+    assert safe_limit_error(httpx.Response(503, content=b"never-emit")) == {}

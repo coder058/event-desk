@@ -26,4 +26,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("provider_usage")
     op.drop_table("provider_state")
-

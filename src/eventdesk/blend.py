@@ -41,4 +41,3 @@ class BlendModel:
             raise ValueError("Invalid fitted blend prediction")
         # SOURCE: official output interval; clipping is included in the calibration evaluation.
         return float(np.clip(value, 0, 1))
-

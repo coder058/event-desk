@@ -4,8 +4,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_
 WORKDIR /app
 COPY pyproject.toml .
 COPY constraints.txt .
+# SOURCE: runtime dependencies and build-backend requirement come from pyproject.toml.
+# Cache the large scientific dependency layer independently of source edits on the existing small VPS.
+RUN python -c "import subprocess,sys,tomllib;from pathlib import Path;c=tomllib.loads(Path('pyproject.toml').read_text());subprocess.check_call([sys.executable,'-m','pip','install','--no-cache-dir','-c','constraints.txt',*c['project']['dependencies'],*c['build-system']['requires'],'wheel'])"
 COPY src src
-RUN pip install --no-cache-dir -c constraints.txt .
+RUN pip install --no-cache-dir --no-deps --no-build-isolation .
 COPY alembic.ini .
 COPY migrations migrations
 COPY research research

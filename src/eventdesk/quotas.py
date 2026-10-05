@@ -89,4 +89,3 @@ class Quotas:
         with Session(self.store.engine) as session:
             return {state.provider: {"cooldown_until": state.cooldown_until, "last_status": state.last_status}
                     for state in session.scalars(select(ProviderState))}
-

@@ -25,3 +25,12 @@ are not generally equivalent. Do not normalize predictions using future live eve
 Existing VPS and free Gemini/Groq only. No paid-model fallback. Train a local
 model from closed archive quarters before enabling competition predictions.
 Without a fitted blend, report LLM evidence separately and retain local predictions.
+
+## 2026-10-05 — optional evidence cannot block coverage
+
+Until a hybrid is approved, local predictions are frozen and submitted before
+the optional structured-LLM analysis. That analysis uses the same retained official
+inputs in a separate durable queue; its trace explicitly says it did not affect
+the percentile. Restart recovery preserves that distinction. It is not a
+retrospective explanation of why the local regression produced its value.
+An approved inline hybrid still needs a fault/load review before activation.

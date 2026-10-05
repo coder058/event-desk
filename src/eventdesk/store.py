@@ -42,6 +42,8 @@ class Job(Base):
     latency_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     analysis_trace: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    shadow_state: Mapped[str | None] = mapped_column(String, nullable=True)
+    shadow_lease_until: Mapped[float] = mapped_column(Float, default=0)
 
 
 class Delivery(Base):
@@ -63,6 +65,15 @@ class Work:
     deadline: float
     received_at: float
     payload: dict[str, Any] | None
+
+
+@dataclass(frozen=True)
+class ShadowWork:
+    id: int
+    event_id: str
+    items: dict[str, Any]
+    deadline: float
+    local_prediction: float
 
 
 class ConflictError(Exception):
@@ -130,11 +141,12 @@ class Store:
         from sqlalchemy import update
         with Session(self.engine) as session, session.begin():
             result = session.execute(update(Job).where(Job.state == "working").values(lease_until=0))
+            session.execute(update(Job).where(Job.shadow_state == "working").values(shadow_lease_until=0))
             return int(result.rowcount)  # type: ignore[attr-defined]
 
     def persist_prediction(self, job_id: int, payload: dict[str, Any], items: dict[str, Any],
                            model_hash: str, fallback: str | None, provider: str = "local",
-                           analysis_trace: dict[str, Any] | None = None) -> None:
+                           analysis_trace: dict[str, Any] | None = None, defer_shadow: bool = False) -> None:
         from eventdesk.materials import input_hash
         with Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
@@ -148,6 +160,35 @@ class Store:
             job.model_hash, job.fallback, job.provider = model_hash, fallback, provider
             # Outbox and analysis must commit together; a crash between separate commits loses coverage.
             job.analysis_trace = analysis_trace
+            job.shadow_state = "pending" if defer_shadow else None
+
+    def claim_shadow(self, now: float) -> ShadowWork | None:
+        """Optional AI evidence cannot occupy prediction workers or run before acceptance."""
+        with self._fixture_lock, Session(self.engine) as session, session.begin():
+            job = session.scalar(select(Job).where(Job.state == "api_accepted",
+                Job.shadow_state.in_(["pending", "working"]), Job.shadow_lease_until <= now)
+                .order_by(Job.deadline, Job.id).limit(1).with_for_update(skip_locked=True))
+            if job is None:
+                return None
+            if job.deadline <= now:
+                job.shadow_state = "expired"
+                return None
+            if not job.inputs or not job.payload:
+                job.shadow_state = "invalid"
+                return None
+            job.shadow_state, job.shadow_lease_until = "working", job.deadline
+            return ShadowWork(job.id, job.event_id, job.inputs, job.deadline,
+                              float(job.payload["predictions"][0]["predicted_percentile"]))
+
+    def finish_shadow(self, job_id: int, trace: dict[str, Any], state: str) -> None:
+        with Session(self.engine) as session, session.begin():
+            job = session.get(Job, job_id, with_for_update=True)
+            if job is None or job.state != "api_accepted" or job.provider != "local":
+                raise ConflictError("Shadow evidence requires an accepted immutable local prediction")
+            if trace.get("affects_prediction") is not False:
+                raise ConflictError("Shadow evidence cannot change a prediction")
+            # Evidence attaches to the retained input hash; payload/provider/submission timestamps stay immutable.
+            job.analysis_trace, job.shadow_state = trace, state
 
     def finish(self, job_id: int, response: dict[str, Any], state: str, now: float) -> None:
         with Session(self.engine) as session, session.begin():
@@ -182,6 +223,7 @@ class Store:
                      "predictions": j.payload["predictions"] if j.payload else None,
                      "model_hash": j.model_hash, "inputs_hash": j.inputs_hash,
                      "provider": j.provider, "fallback": j.fallback, "latency_ms": j.latency_ms,
+                     "shadow_state": j.shadow_state,
                      "error": j.error, "submission_status": j.response.get("status") if j.response else None}
                     for j in jobs]
 
@@ -195,4 +237,5 @@ class Store:
                     "official_items": job.inputs, "prediction": job.payload,
                     "inputs_hash": job.inputs_hash, "model_hash": job.model_hash,
                     "provider": job.provider, "fallback": job.fallback, "analysis_trace": job.analysis_trace,
+                    "shadow_state": job.shadow_state,
                     "state": job.state, "error": job.error}

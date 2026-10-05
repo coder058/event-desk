@@ -19,4 +19,3 @@ The initial competition deployment remains facts-only. No guessed blend weight i
 
 The archive Q3 has previously been inspected and is not sealed. This is development
 validation; Oct12 onward is the prospective scored observation period.
-

@@ -52,7 +52,9 @@ async def main() -> None:
                 response = await client.post(args.origin + "/competition/webhook", content=raw,
                     headers={"Webhook-Id": delivery_id, "Webhook-Timestamp": timestamp,
                              "Webhook-Signature": "v1," + signature})
-                assert response.status_code == 200
+                if response.status_code != 200:
+                    # GUESS: bounded fixture-only diagnostic; this script refuses production beforehand.
+                    raise RuntimeError(f"Fixture ACK failed: HTTP {response.status_code}; {response.text[:200]}")
                 ack_ms.append((time.perf_counter() - sent) * 1000)
         await asyncio.gather(*(send(index) for index in range(EVENTS)))
         while time.perf_counter() - started < 300:  # SOURCE: official five-minute submission budget.

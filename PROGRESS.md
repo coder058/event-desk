@@ -60,3 +60,34 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - Sixteen non-load tests passed with strict application typing. LLM code is not
   yet deployed; the current live worker is still local-only. Archive collection
   is insufficient for a fitted hybrid or an LLM performance claim.
+
+## 2026-10-05 — coverage isolation and real load attempts
+
+- Commit 6c99929 passed GitHub CI 37378515533 and deployed provider-budget and
+  evidence migrations on Dublin with LLM use still disabled.
+- Senior review found an unnecessary deadline risk: unapproved shadow LLM work
+  was awaited before submitting local predictions. Replaced this with a separate
+  durable post-submission evidence queue, tested for immutable prediction and
+  restart recovery. Nineteen non-load tests and strict typing/lint passed locally.
+- Real fixture replay attempt one failed on API startup; added an actual readiness
+  check. Attempt two failed on an ACK response. Further diagnosis is required;
+  neither attempt establishes 400-event coverage. Production remained separate
+  with zero received events and a reachable database after cleanup.
+- Groq validated one additional current-prompt Q2 sample (1,293 reported tokens),
+  then returned 429 with Retry-After 353 seconds. Retained documented numeric
+  headers; no error body, owner credential or signed URL was printed.
+- Gemini current-prompt archive collection returned 503 and stopped. No fitted
+  blend, full LLM evaluation, portal test or official live coverage is claimed.
+
+- Added a single queue dispatcher with eight concurrent processing slots to avoid
+  eight independent idle pollers. Fault test held cloud analysis indefinitely while
+  24 synthetic predictions completed, including a fitted-mean fallback for malformed
+  official facts. Twenty-one non-load tests passed; latest local 400-event plumbing
+  replay completed in 39.144 seconds. These are not Dublin load results.
+- The next Groq sample validated on Q3 (1,241 reported tokens); subsequent 429 was
+  explicitly TPD: limit 200,000, used 199,841, requested 1,457. The account-wide daily
+  budget, not the project's minute bucket, is the observed constraint.
+- Third Dublin fixture attempt timed out at API readiness during resource contention;
+  no successful full replay is claimed. Added health diagnostics before fixture cleanup.
+- Dependency-image rebuilds consumed minutes on this VPS. Split Docker dependency
+  installation from application packaging so reviewed source edits can reuse layers.

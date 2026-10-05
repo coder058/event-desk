@@ -19,13 +19,16 @@ class LocalModel:
         self.artifact = cast(dict[str, Any], joblib.load(path))
         if self.artifact.get("schema_version") != "eventdesk-local-v1":
             raise ValueError("Unknown model artifact schema")
+        self.training_mean = float(self.artifact["training_mean"])
+        if not np.isfinite(self.training_mean) or not 0 <= self.training_mean <= 1:
+            raise ValueError("Invalid fitted fallback mean")
 
     def predict(self, items: dict[str, Any]) -> float:
         enriched = bool(self.artifact["enriched"])
         row = feature_row(items, enriched=enriched)
         # SOURCE: fitted training mean when official materials cannot be obtained, not invented 0.5.
         if not row["text"].strip():
-            return float(self.artifact["training_mean"])
+            return self.training_mean
         frame = pd.DataFrame([row])
         raw = float(self.artifact["pipeline"].predict(frame)[0])
         if not np.isfinite(raw):
