@@ -34,6 +34,9 @@ baseline prediction blocks never enter the feature builder.
 ## Operational provenance and limits
 
 Source/scorer/data/model hashes are retained with predictions and reports.
+The initial configuration is declared in PREREGISTRATION.md and checked before
+production model deserialization/startup. New immutable predictions retain its
+configuration hash; earlier rows are not rewritten when versions change.
 Receipt, immutable outbox and result are stored in PostgreSQL before success
 is claimed. API acceptance is separate from score eligibility.
 

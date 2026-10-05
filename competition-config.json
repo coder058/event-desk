@@ -1,0 +1,28 @@
+{
+  "schema_version": "eventdesk-competition-freeze-v1",
+  "declared_at": "2026-10-05T23:00:41.894235+00:00",
+  "method": "facts_tfidf_ridge",
+  "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "prediction_code_sha256": "e3c5fe283e40142e87882954c2c3f4085af82f2220655928497de205c09cad69",
+  "feature_code_sha256": "d6a5e7b2d179a3ae3eb62273b6c4ab91b6e161a1c478c86902d5ab95f615fb3e",
+  "scorer_sha256": "990717aad244cbf79ca7f411c1c7d0b8bb33ccf3f04bc6d6f9ec0f84a2cd4c72",
+  "scorer_commit": "501bd3182cd42cf61a727e05bd4b3089b8d1338d",
+  "prompt_sha256": "79d28bfb5f92ff28b0e9f376b100074ab25641e5646c75bdceeff8c240547c81",
+  "train_quarters": [
+    "2025Q4",
+    "2026Q1",
+    "2026Q2"
+  ],
+  "validation_quarter": "2026Q3",
+  "validation_limits": "Q3 was previously examined and remains unsealed; development validation, not an untouched test.",
+  "provider_models": {
+    "gemini": "gemini-3.1-flash-lite",
+    "groq": "openai/gpt-oss-120b"
+  },
+  "submission_origin": "https://api.explainingmarkets.ai/v1",
+  "prediction_budget_seconds": 300,
+  "submission_reserve_seconds": 30,
+  "llm_affects_prediction": false,
+  "post_submission_evidence_allowed": true,
+  "parameter_source": "Existing Claude facts baseline: ridge alpha 3, min_df 5, max_features 60000; inherited, not calibrated optimal. Budgets follow official rules/mission."
+}

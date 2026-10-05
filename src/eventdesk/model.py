@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 from pathlib import Path
 from typing import Any, cast
 
@@ -13,10 +14,14 @@ from eventdesk.materials import feature_row
 
 
 class LocalModel:
-    def __init__(self, path: Path) -> None:
-        self.sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    def __init__(self, path: Path, *, expected_sha256: str | None = None) -> None:
+        raw = path.read_bytes()
+        self.sha256 = hashlib.sha256(raw).hexdigest()
+        if expected_sha256 is not None and self.sha256 != expected_sha256:
+            raise ValueError("Trained artifact hash differs from the declaration")
         # Artifact is created by our trainer and mounted read-only, never downloaded from a webhook.
-        self.artifact = cast(dict[str, Any], joblib.load(path))
+        # Load precisely the bytes hashed above, not a pathname that could be replaced between reads.
+        self.artifact = cast(dict[str, Any], joblib.load(io.BytesIO(raw)))
         if self.artifact.get("schema_version") != "eventdesk-local-v1":
             raise ValueError("Unknown model artifact schema")
         self.training_mean = float(self.artifact["training_mean"])

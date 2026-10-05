@@ -18,5 +18,6 @@ jobs:
       - run: pytest -q -s
       - run: docker compose up --build -d
       - run: python fixtures/smoke.py
+      - run: docker compose exec -T api python fixtures/receipt_concurrency.py
       - if: always()
         run: docker compose down

@@ -16,6 +16,7 @@ import httpx
 
 from eventdesk.blend import BlendModel
 from eventdesk.config import COMPETITION_ORIGIN, Settings
+from eventdesk.freeze import CompetitionFreeze, verify_freeze
 from eventdesk.llm import PROMPT_HASH, Router, prompt_materials, providers_from_env
 from eventdesk.materials import input_hash, select_items
 from eventdesk.model import LocalModel
@@ -43,6 +44,7 @@ class Worker:
         self.settings, self.store, self.model, self.http = settings, store, model, http
         self.router: Router | None = None
         self.blend: BlendModel | None = None
+        self.configuration_hash: str | None = None
         if os.getenv("EVENTDESK_LLM_ENABLED", "false").lower() == "true" and not settings.fixture_mode:
             self.router = Router(Quotas(store), http, providers_from_env())
             blend_path = os.getenv("EVENTDESK_BLEND_PATH")
@@ -136,7 +138,7 @@ class Worker:
                                     selected_model_hash, fallback, method, trace,
                                     bool(self.router and not self.blend and items and
                                          fallback == "llm_shadow_deferred" and
-                                         work.event.event_type != "TEST"), local_trace)
+                                         work.event.event_type != "TEST"), local_trace, self.configuration_hash)
         remaining = work.deadline - time.time()
         if remaining <= 0:
             await asyncio.to_thread(self.store.retry, work.id, "deadline_expired", 0, time.time())
@@ -203,6 +205,8 @@ class Worker:
 
     async def heartbeat(self) -> None:
         details: dict[str, Any] = {"model_hash": self.model.sha256,
+            "configuration_hash": self.configuration_hash,
+            "synthetic_model": bool(self.model.artifact.get("fixture_only")),
             "llm_enabled": self.router is not None, "hybrid_enabled": self.blend is not None,
             "fixture_mode": self.settings.fixture_mode}
         while True:
@@ -234,13 +238,20 @@ class Worker:
 async def run() -> None:
     settings = Settings.from_env()
     store = Store(settings.database_url)
-    model = LocalModel(settings.model_path)
+    configuration = None if settings.fixture_mode else CompetitionFreeze.model_validate_json(
+        Path("competition-config.json").read_bytes())
+    model = LocalModel(settings.model_path, expected_sha256=configuration.model_sha256 if configuration else None)
     if model.artifact.get("fixture_only") and not settings.fixture_mode:
         raise RuntimeError("Refusing synthetic fixture model in production")
-    await asyncio.to_thread(store.recover)
-    LOG.info("worker_started model_hash=%s fixture=%s", model.sha256, settings.fixture_mode)
     async with httpx.AsyncClient(follow_redirects=False) as http:
         worker = Worker(settings, store, model, http)
+        if not settings.fixture_mode:
+            worker.configuration_hash = verify_freeze(Path("competition-config.json"), model,
+                hybrid_enabled=worker.blend is not None,
+                provider_models={provider.name: provider.model for provider in providers_from_env()})
+        await asyncio.to_thread(store.recover)
+        LOG.info("worker_started model_hash=%s configuration_hash=%s fixture=%s",
+                 model.sha256, worker.configuration_hash, settings.fixture_mode)
         await asyncio.gather(worker.heartbeat(), worker.shadow_loop(), worker.dispatch())
 
 

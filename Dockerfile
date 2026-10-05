@@ -14,6 +14,7 @@ COPY migrations migrations
 COPY research research
 COPY fixtures fixtures
 COPY reports reports
+COPY competition-config.json .
 RUN useradd --uid 10001 --create-home eventdesk
 # GUESS: isolated unprivileged application UID; no relation to model calibration.
 USER eventdesk

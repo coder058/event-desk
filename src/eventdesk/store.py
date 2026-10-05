@@ -48,6 +48,7 @@ class Job(Base):
     shadow_state: Mapped[str | None] = mapped_column(String, nullable=True)
     shadow_lease_until: Mapped[float] = mapped_column(Float, default=0)
     local_trace: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    configuration_hash: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class Delivery(Base):
@@ -173,7 +174,7 @@ class Store:
     def persist_prediction(self, job_id: int, payload: dict[str, Any], items: dict[str, Any],
                            model_hash: str, fallback: str | None, provider: str = "local",
                            analysis_trace: dict[str, Any] | None = None, defer_shadow: bool = False,
-                           local_trace: dict[str, Any] | None = None) -> None:
+                           local_trace: dict[str, Any] | None = None, configuration_hash: str | None = None) -> None:
         from eventdesk.materials import input_hash
         with Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
@@ -189,6 +190,7 @@ class Store:
             job.analysis_trace = analysis_trace
             job.shadow_state = "pending" if defer_shadow else None
             job.local_trace = local_trace
+            job.configuration_hash = configuration_hash
 
     def claim_shadow(self, now: float) -> ShadowWork | None:
         """Optional AI evidence cannot occupy prediction workers or run before acceptance."""
@@ -289,6 +291,7 @@ class Store:
                      "received_at": j.received_at, "deadline": j.deadline, "state": j.state,
                      "predictions": j.payload["predictions"] if j.payload else None,
                      "model_hash": j.model_hash, "inputs_hash": j.inputs_hash,
+                     "configuration_hash": j.configuration_hash,
                      "provider": j.provider, "fallback": j.fallback, "latency_ms": j.latency_ms,
                      "shadow_state": j.shadow_state,
                      "error": j.error, "submission_status": j.response.get("status") if j.response else None}
@@ -303,6 +306,7 @@ class Store:
                     "knowledge_cutoff": job.event.get("knowledge_cutoff"),
                     "official_items": job.inputs, "prediction": job.payload,
                     "inputs_hash": job.inputs_hash, "model_hash": job.model_hash,
+                    "configuration_hash": job.configuration_hash,
                     "provider": job.provider, "fallback": job.fallback, "analysis_trace": job.analysis_trace,
                     "local_trace": job.local_trace,
                     "shadow_state": job.shadow_state,

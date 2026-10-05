@@ -152,3 +152,20 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - Remaining recovery limit: the private age identity exists only on Frankfurt.
   Loss of both hosts lacks an offline recovery copy; no full-host recovery time
   or automatic destructive production restore is claimed.
+
+## 2026-10-05 — initial prediction declaration, not live eligibility
+
+- Declared the initial facts-only method before prospective scoring. Frozen
+  configuration/source/scorer/artifact/prompt hashes are in PREREGISTRATION.md.
+  Q3's previously inspected, unsealed status and the lower enriched result remain
+  explicit; generative samples have not approved a hybrid or a win probability.
+- Added startup mismatch guards and verification before joblib deserialization.
+  Hashing/deserializing the same byte buffer avoids a pathname replacement gap.
+  Optional missing provider keys cannot prevent the trained local fallback.
+- Configuration hashes are stored atomically with immutable predictions. Tested
+  mismatched artifact/source/provider pins and rejection of an undeclared blend.
+  Pending: actual deployment/startup verification of these new guards.
+- Latest collection added one valid Groq Q2 analysis (1,190 tokens), then a TPD
+  429 (used 199,245 of 200,000; requested 1,221; Retry-After 202 seconds). Gemini
+  3.5 returned 429 with no recognized numeric dimension. Attempts are retained;
+  no amount of repeated requests is treated as new calibration evidence.

@@ -93,6 +93,7 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
             report = json.loads(report_path.read_text(encoding="utf-8"))
             candidate = report["candidates"]["facts_baseline"]
             result["archive_validation"] = {"quarter": report["config"]["validation_quarter"],
+                "model_sha256": report["artifact_sha256"],
                 "delta_r_squared_imputed": candidate["score"]["delta_r_squared_imputed"],
                 "scorer_rows": candidate["score"]["n_obs"], "predicted_rows": candidate["validation_rows"],
                 "limits": report["config"]["limits"]}
