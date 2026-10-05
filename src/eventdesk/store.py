@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import hashlib
+import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from threading import RLock
 from typing import Any
@@ -10,7 +13,7 @@ from sqlalchemy import JSON, Float, Integer, String, Text, UniqueConstraint, cre
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
-from eventdesk.config import PREDICTION_BUDGET_SECONDS
+from eventdesk.config import PREDICTION_BUDGET_SECONDS, SUBMISSION_RESERVE_SECONDS
 from eventdesk.schemas import Event
 
 
@@ -44,6 +47,7 @@ class Job(Base):
     analysis_trace: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     shadow_state: Mapped[str | None] = mapped_column(String, nullable=True)
     shadow_lease_until: Mapped[float] = mapped_column(Float, default=0)
+    local_trace: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
 
 class Delivery(Base):
@@ -55,6 +59,13 @@ class Delivery(Base):
     body_hash: Mapped[str] = mapped_column(String)
     event_id: Mapped[str] = mapped_column(String)
     received_at: Mapped[float] = mapped_column(Float)
+
+
+class ServicePulse(Base):
+    __tablename__ = "service_pulses"
+    name: Mapped[str] = mapped_column(String, primary_key=True)
+    seen_at: Mapped[float] = mapped_column(Float)
+    details: Mapped[dict[str, Any]] = mapped_column(JSON)
 
 
 @dataclass(frozen=True)
@@ -88,17 +99,32 @@ class Store:
         self.engine: Engine = create_engine(url, pool_pre_ping=True, connect_args=connect_args)
         self._fixture_lock = RLock()
 
+    @contextmanager
+    def fixture_guard(self) -> Iterator[None]:
+        if self.engine.dialect.name == "sqlite":
+            with self._fixture_lock:
+                yield
+        else:
+            yield
+
     def initialize_fixture(self) -> None:
         """Only fixture/test startup; production schemas are migrated by Alembic."""
         Base.metadata.create_all(self.engine)
 
     def receive(self, slot: str, webhook_id: str, raw: bytes, event: Event, now: float) -> bool:
         digest = hashlib.sha256(raw).hexdigest()
-        with self._fixture_lock, Session(self.engine) as session, session.begin():
-            # Serialize receipt per slot across processes without locking the whole inbox.
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
+            # Serialize only this event/delivery identity, not every distinct event in one submission.
             if self.engine.dialect.name == "postgresql":
                 from sqlalchemy import text
-                session.execute(text("SELECT pg_advisory_xact_lock(hashtext(:slot))"), {"slot": slot})
+                # SOURCE: PostgreSQL advisory keys are signed 64-bit integers (eight bytes).
+                # Ordered acquisition prevents deadlocks, including a hash collision across namespaces.
+                names = ("receipt-event:" + slot + ":" + event.event_id,
+                         "receipt-delivery:" + slot + ":" + webhook_id)
+                keys = sorted({int.from_bytes(hashlib.sha256(name.encode()).digest()[:8], signed=True)
+                               for name in names})
+                for key in keys:
+                    session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": key})
             existing = session.scalar(select(Delivery).where(Delivery.slot == slot, Delivery.webhook_id == webhook_id))
             if existing:
                 if existing.body_hash != digest:
@@ -119,7 +145,7 @@ class Store:
             return job is None
 
     def claim(self, now: float) -> Work | None:
-        with self._fixture_lock, Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             query = (select(Job).where(Job.state.in_(["pending", "working"]), Job.lease_until <= now)
                      .order_by(Job.deadline, Job.id).limit(1).with_for_update(skip_locked=True))
             job = session.scalar(query)
@@ -146,7 +172,8 @@ class Store:
 
     def persist_prediction(self, job_id: int, payload: dict[str, Any], items: dict[str, Any],
                            model_hash: str, fallback: str | None, provider: str = "local",
-                           analysis_trace: dict[str, Any] | None = None, defer_shadow: bool = False) -> None:
+                           analysis_trace: dict[str, Any] | None = None, defer_shadow: bool = False,
+                           local_trace: dict[str, Any] | None = None) -> None:
         from eventdesk.materials import input_hash
         with Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
@@ -161,10 +188,11 @@ class Store:
             # Outbox and analysis must commit together; a crash between separate commits loses coverage.
             job.analysis_trace = analysis_trace
             job.shadow_state = "pending" if defer_shadow else None
+            job.local_trace = local_trace
 
     def claim_shadow(self, now: float) -> ShadowWork | None:
         """Optional AI evidence cannot occupy prediction workers or run before acceptance."""
-        with self._fixture_lock, Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             job = session.scalar(select(Job).where(Job.state == "api_accepted",
                 Job.shadow_state.in_(["pending", "working"]), Job.shadow_lease_until <= now)
                 .order_by(Job.deadline, Job.id).limit(1).with_for_update(skip_locked=True))
@@ -212,7 +240,46 @@ class Store:
             counts: dict[str, int] = {row[0]: row[1] for row in
                                      session.execute(select(Job.state, func.count()).group_by(Job.state))}
             tests = session.scalar(select(func.count()).where(Job.event_type == "TEST"))
-            return {"states": counts, "test_events": tests, "database": "reachable"}
+            pulse = session.get(ServicePulse, "worker")
+            now = time.time()
+            # GUESS: three missed ten-second pulses signal degraded worker health; no market calibration.
+            worker_fresh = pulse is not None and now - pulse.seen_at <= 30
+            oldest = session.scalar(select(func.min(Job.deadline)).where(Job.state.in_(["pending", "working"])))
+            return {"states": counts, "test_events": tests, "database": "reachable",
+                    "worker": {"state": "recent_heartbeat" if worker_fresh else "unverified_or_stale",
+                        "seen_at": pulse.seen_at if pulse else None, "details": pulse.details if pulse else None},
+                    "deadline_at_risk": oldest is not None and oldest - now <= SUBMISSION_RESERVE_SECONDS}
+
+    def pulse(self, name: str, details: dict[str, Any], now: float) -> None:
+        with Session(self.engine) as session, session.begin():
+            row = session.get(ServicePulse, name)
+            if row is None:
+                session.add(ServicePulse(name=name, seen_at=now, details=details))
+            else:
+                row.seen_at, row.details = now, details
+
+    def scoreboard(self) -> dict[str, Any]:
+        """Receipt coverage is a different denominator from official calendar eligibility."""
+        with Session(self.engine) as session:
+            base = select(func.count()).select_from(Job).where(Job.event_type != "TEST")
+            received = int(session.scalar(base) or 0)
+            accepted = int(session.scalar(base.where(Job.state == "api_accepted")) or 0)
+            simulated = int(session.scalar(base.where(Job.state == "simulated")) or 0)
+            material_fallbacks = int(session.scalar(base.where(Job.fallback.in_([
+                "materials_missing_url", "materials_unavailable", "official_facts_missing",
+                "invalid_materials_or_model_output"]))) or 0)
+            latencies = list(session.scalars(select(Job.latency_ms).where(Job.event_type != "TEST",
+                Job.state == "api_accepted", Job.latency_ms.is_not(None)).order_by(Job.latency_ms)).all())
+            # SOURCE: empirical nearest-rank 95th percentile of observed receipt-to-API-response durations.
+            import math
+            p95 = latencies[math.ceil(.95 * len(latencies)) - 1] if latencies else None
+            return {"received_submission_events": received, "api_accepted": accepted,
+                "simulated": simulated, "material_fallbacks": material_fallbacks,
+                "api_acceptance_fraction": accepted / received if received else None,
+                "receipt_to_response_p95_ms": p95, "official_calendar_coverage": None,
+                "official_live_score": None,
+                "limits": "Received submission-events exclude TEST; multiple slots count separately. "
+                          "API acceptance is not verified score eligibility; official calendar denominator is unavailable."}
 
     def public_predictions(self) -> list[dict[str, Any]]:
         with Session(self.engine) as session:
@@ -227,15 +294,19 @@ class Store:
                      "error": j.error, "submission_status": j.response.get("status") if j.response else None}
                     for j in jobs]
 
-    def public_event(self, event_id: str) -> dict[str, Any] | None:
+    def public_event(self, event_id: str, slot: str = "s1") -> dict[str, Any] | None:
         with Session(self.engine) as session:
-            job = session.scalar(select(Job).where(Job.event_id == event_id))
+            job = session.scalar(select(Job).where(Job.event_id == event_id, Job.slot == slot))
             if not job:
                 return None
-            return {"event_id": job.event_id, "event_type": job.event_type,
+            return {"event_id": job.event_id, "slot": job.slot, "event_type": job.event_type,
                     "knowledge_cutoff": job.event.get("knowledge_cutoff"),
                     "official_items": job.inputs, "prediction": job.payload,
                     "inputs_hash": job.inputs_hash, "model_hash": job.model_hash,
                     "provider": job.provider, "fallback": job.fallback, "analysis_trace": job.analysis_trace,
+                    "local_trace": job.local_trace,
                     "shadow_state": job.shadow_state,
+                    "received_at": job.received_at, "deadline": job.deadline,
+                    "submitted_at": job.submitted_at, "latency_ms": job.latency_ms,
+                    "submission_response": job.response,
                     "state": job.state, "error": job.error}

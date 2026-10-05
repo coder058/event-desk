@@ -48,6 +48,16 @@ def test_receiver_commits_before_ack_and_preserves_duplicate_deadline(settings, 
     assert client.post("/competition/webhook", content=raw + b" ", headers=signed(raw, e.id)).status_code == 401
 
 
+def test_nonstandard_json_numbers_rejected_before_durable_ack(settings, store):
+    client = TestClient(create_app(settings, store))
+    e = event()
+    payload = e.model_dump(mode="json")
+    payload["extra_invalid"] = float("nan")
+    raw = json.dumps(payload).encode()
+    assert client.post("/competition/webhook", content=raw, headers=signed(raw, e.id)).status_code == 400
+    assert store.health()["states"] == {}
+
+
 def test_concurrent_duplicate_and_immutable_outbox(store):
     e = event()
     raw = e.model_dump_json().encode()

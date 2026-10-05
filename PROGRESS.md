@@ -91,3 +91,28 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
   no successful full replay is claimed. Added health diagnostics before fixture cleanup.
 - Dependency-image rebuilds consumed minutes on this VPS. Split Docker dependency
   installation from application packaging so reviewed source edits can reuse layers.
+
+## 2026-10-05 — verified Dublin load and inference; evidence review
+
+- Commit 273c70e passed CI 37380936693 and deployed deadline-isolated optional AI.
+- Fourth isolated Dublin fixture attempt passed: 400 ACKs and 400 simulated results
+  in 61.132923 seconds. ACK p95 5.048102 seconds, maximum 8.160653 seconds, below
+  the official 20-second limit in this test. Concurrent HTTP clients: 16, an
+  uncalibrated load choice. Readiness health requests timed out during load;
+  production stayed separate, with zero received events after fixture cleanup.
+- Read-only Dublin inference benchmark used 2,362 archived Q3 inputs without
+  transferring outcomes: cold model load 2,831.785 ms; prediction p50 1.946 ms,
+  p95 2.269 ms, maximum 5.754 ms. Maximum prediction difference against the local
+  Windows runtime was zero. These exclude HTTP, database and submission time.
+- Gemini 3.5 Flash-Lite returned six current-prompt valid archive analyses across
+  Q2/Q3; it is an offline candidate, not an approved deployed hybrid. That sample
+  is insufficient for a fitted mapping or an advantage claim.
+- Review found per-slot receipt locking serialized unrelated events. Changed to
+  sorted per-event/per-delivery PostgreSQL advisory keys; real concurrency replay
+  will verify the change before it is described as a demonstrated improvement.
+- Added persisted worker heartbeats and pre-submission linear-model contribution
+  traces. Explanation failures cannot replace a valid prediction. TEST/fixtures
+  stay separate from live acceptance/eligibility metrics. Slot-specific detail
+  queries prevent evidence from one submission being displayed for another.
+- Public HTTPS, the owner's portal test, hybrid calibration, frozen registration,
+  EDGAR and future scored days remain incomplete. No live score is claimed.

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
+import json
 import logging
 import os
 import socket
@@ -56,6 +57,7 @@ class Worker:
             method = "local"
             selected_model_hash = self.model.sha256
             trace: dict[str, Any] | None = None
+            local_trace: dict[str, Any] | None = None
             if work.event.event_type == "TEST":
                 # SOURCE: official starter neutral prediction for TEST (never scored).
                 value = 0.5
@@ -72,7 +74,10 @@ class Worker:
                         response = await self.http.get(work.event.information_url,
                                                        timeout=max(0.1, min(15, work.deadline - time.time())))
                         response.raise_for_status()
-                        items = select_items(response.json())
+                        bundle = response.json()
+                        # SOURCE: strict JSON numeric boundary; a bad official response uses the fitted fallback.
+                        json.dumps(bundle, allow_nan=False)
+                        items = select_items(bundle)
                     else:
                         fallback = "materials_missing_url"
                 except (httpx.HTTPError, ValueError, OSError):
@@ -82,8 +87,19 @@ class Worker:
                 except (ValueError, TypeError, KeyError, IndexError):
                     # SOURCE: already-fitted target mean, not an invented fallback prediction.
                     value = self.model.training_mean
+                    local_trace = {"kind": "fitted_training_mean", "prediction": value,
+                                   "limits": "Invalid material or model output; no valid textual inference"}
                     fallback = "invalid_materials_or_model_output"
                     LOG.error("local_inference_fallback event=%s", work.event.event_id)
+                if local_trace is None:
+                    try:
+                        local_trace = await asyncio.to_thread(self.model.explain, items)
+                    except (ValueError, TypeError, KeyError, IndexError):
+                        # Optional presentation cannot change a successfully computed forecast.
+                        local_trace = {"kind": "explanation_unavailable", "prediction": value}
+                        LOG.error("local_explanation_unavailable event=%s", work.event.event_id)
+                if fallback is None and local_trace.get("kind") == "fitted_training_mean":
+                    fallback = "official_facts_missing"
                 if self.router and self.blend and items and fallback is None:
                     local_value = value
                     result = await self.router.analyze(items, work.deadline)
@@ -120,7 +136,7 @@ class Worker:
                                     selected_model_hash, fallback, method, trace,
                                     bool(self.router and not self.blend and items and
                                          fallback == "llm_shadow_deferred" and
-                                         work.event.event_type != "TEST"))
+                                         work.event.event_type != "TEST"), local_trace)
         remaining = work.deadline - time.time()
         if remaining <= 0:
             await asyncio.to_thread(self.store.retry, work.id, "deadline_expired", 0, time.time())
@@ -185,6 +201,15 @@ class Worker:
             LOG.error("worker_failure event=%s exception_type=%s", work.event.event_id, type(exc).__name__)
             await asyncio.to_thread(self.store.retry, work.id, "worker_" + type(exc).__name__, 2, time.time())
 
+    async def heartbeat(self) -> None:
+        details: dict[str, Any] = {"model_hash": self.model.sha256,
+            "llm_enabled": self.router is not None, "hybrid_enabled": self.blend is not None,
+            "fixture_mode": self.settings.fixture_mode}
+        while True:
+            await asyncio.to_thread(self.store.pulse, "worker", details, time.time())
+            # GUESS: ten-second operational heartbeat; alert after three misses, verified in health tests.
+            await asyncio.sleep(10)
+
     async def dispatch(self) -> None:
         # GUESS: same eight simultaneous I/O jobs as the tested original pool; one idle poller
         # prevents multiplying empty database queries by eight on the small existing VPS.
@@ -216,7 +241,7 @@ async def run() -> None:
     LOG.info("worker_started model_hash=%s fixture=%s", model.sha256, settings.fixture_mode)
     async with httpx.AsyncClient(follow_redirects=False) as http:
         worker = Worker(settings, store, model, http)
-        await asyncio.gather(worker.shadow_loop(), worker.dispatch())
+        await asyncio.gather(worker.heartbeat(), worker.shadow_loop(), worker.dispatch())
 
 
 if __name__ == "__main__":

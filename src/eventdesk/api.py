@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from pathlib import Path
 
@@ -42,6 +43,8 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
         try:
             parsed = verify_webhook(raw_body=bytes(raw), headers=request.headers,
                                     secret=submission.webhook_secret)
+            # SOURCE: RFC 8259 JSON forbids NaN/Infinity; reject before PostgreSQL serialization.
+            json.dumps(parsed, allow_nan=False)
             event = Event.model_validate(parsed)
             delivery_id = request.headers["webhook-id"]
             if event.id != delivery_id:
@@ -50,7 +53,7 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
                 raise HTTPException(400, "Missing knowledge cutoff")
         except (WebhookVerificationError, UnicodeDecodeError):
             raise HTTPException(401, "Signature verification failed") from None
-        except ValidationError:
+        except (ValidationError, ValueError):
             raise HTTPException(400, "Invalid event schema") from None
         try:
             # SOURCE: 20-second official ACK limit; this stricter 10-second guard is an UNCALIBRATED GUESS
@@ -68,9 +71,27 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
     async def predictions() -> list[dict[str, object]]:
         return await asyncio.to_thread(store.public_predictions)
 
+    @app.get("/api/scoreboard")
+    async def scoreboard() -> dict[str, object]:
+        result = await asyncio.to_thread(store.scoreboard)
+        # Public reports contain aggregates and hashes only, never private archives or provider credentials.
+        report_path = Path("reports/archive-eval.json")
+        if report_path.is_file():
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            candidate = report["candidates"]["facts_baseline"]
+            result["archive_validation"] = {"quarter": report["config"]["validation_quarter"],
+                "delta_r_squared_imputed": candidate["score"]["delta_r_squared_imputed"],
+                "scorer_rows": candidate["score"]["n_obs"], "predicted_rows": candidate["validation_rows"],
+                "limits": report["config"]["limits"]}
+        else:
+            result["archive_validation"] = None
+        return result
+
     @app.get("/api/events/{event_id}")
-    async def event_detail(event_id: str) -> dict[str, object]:
-        result = await asyncio.to_thread(store.public_event, event_id)
+    async def event_detail(event_id: str, slot: str = "s1") -> dict[str, object]:
+        if slot not in settings.submissions:
+            raise HTTPException(404)
+        result = await asyncio.to_thread(store.public_event, event_id, slot)
         if result is None:
             raise HTTPException(404)
         return result

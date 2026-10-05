@@ -1,0 +1,14 @@
+{
+  "kind": "archived_single_event_inference_on_dublin",
+  "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "archive_sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c",
+  "events": 2362,
+  "model_cold_load_ms": 2831.7850140156224,
+  "single_event_p50_ms": 1.94582249969244,
+  "single_event_p95_ms": 2.268692763755098,
+  "single_event_p99_ms": 2.89668035460636,
+  "single_event_max_ms": 5.753909004852176,
+  "prediction_sha256": "a9caf7f2bda39ae765addd4b49e8dc59dcac972315bf3dbbe54d216686fa0cef",
+  "limits": "Archived Q3 inputs; no provider/material network, durable ACK, submission latency or live score measured",
+  "max_absolute_windows_dublin_difference": 0.0
+}

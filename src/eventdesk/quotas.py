@@ -41,7 +41,7 @@ class Quotas:
         self.store = store
 
     def reserve(self, provider: str, tokens: int, limits: Limits, now: float) -> int | None:
-        with self.store._fixture_lock, Session(self.store.engine) as session, session.begin():
+        with self.store.fixture_guard(), Session(self.store.engine) as session, session.begin():
             if self.store.engine.dialect.name == "postgresql":
                 session.execute(text("SELECT pg_advisory_xact_lock(hashtext(:provider))"),
                                 {"provider": "provider-budget:" + provider})

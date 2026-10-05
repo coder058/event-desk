@@ -29,6 +29,8 @@ These do not block Phase A.
   account-wide usage and additional limits can differ from this project's counters.
 - Hybrid calibration remains insufficient: collect current-prompt Q2/Q3 samples
   under those limits, then evaluate the fitted mapping before approving deployment.
-- Full HTTP/PostgreSQL 400-event fixture replay on Dublin has not passed yet.
-  Startup ordering was corrected; ACK failure diagnosis remains in progress.
+- Full HTTP/PostgreSQL fixture replay passed at source 273c70e: 400 durable ACKs
+  and 400 simulated results in 61.133 seconds; maximum ACK 8.161 seconds. This is
+  isolated infrastructure evidence, not official competition coverage. Initial
+  startup/load attempts failed and remain recorded in PROGRESS.md.
 - Ten scoring days are future observations, not an engineering shortcut.

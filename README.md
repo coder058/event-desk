@@ -27,6 +27,29 @@ and [external actions](BLOCKED.md).
 [Official competition](https://explainingmarkets.ai/) ·
 [Binding rules](https://explainingmarkets.ai/contest-rules)
 
+### Measured engineering evidence
+
+| Check | Actual result | Boundary |
+| --- | --- | --- |
+| Historical facts model | Q3 ΔR² 0.040953; 2,362 predictions | Development validation; archive unsealed |
+| Dublin single-event inference | p95 2.269 ms | Archived inputs; excludes HTTP/DB/submission |
+| Dublin busy-day fixture | 400 ACKs + 400 simulated results, 61.133 s | Not official predictions or live coverage |
+| Slowest fixture ACK | 8.161 s | One measured replay, below 20 s |
+
+Reports retain dataset, scorer and model hashes. The current live service has no
+official scored observations. Public HTTPS and the portal test are still blocked;
+the dashboard can be reached through the existing local SSH preview.
+
+## Run locally
+
+```sh
+docker compose up --build
+```
+
+Open `http://127.0.0.1:8000`. This uses a synthetic model, isolated PostgreSQL and
+fixture credentials; no owner keys or competition submissions. The full signed
+400-event replay is `docker compose exec api python fixtures/load_test.py`.
+
 ## Stack
 
 Python, FastAPI, PostgreSQL, Pydantic, scikit-learn, Docker and Caddy.
@@ -35,7 +58,8 @@ for competition predictions.
 
 ## Limits
 
-No verified live score, measured latency, calibrated win probability or profitability
-is claimed. Competition predictions are a research task, not broker executions.
+No verified live score, calibrated win probability or profitability is claimed.
+Measured fixture/inference latency does not establish live end-to-end latency.
+Competition predictions are a research task, not broker executions.
 Free APIs and a single existing VPS can fail. Ten scoring days and prospective
 event-study outcomes must actually occur before the full project is complete.

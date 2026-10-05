@@ -1,0 +1,14 @@
+{
+  "kind": "http_postgres_fixture_simulation",
+  "events": 400,
+  "ack_count": 400,
+  "completed_simulated": 400,
+  "seconds": 61.13292305206414,
+  "ack_p50_ms": 1688.2063270313665,
+  "ack_p95_ms": 5048.1024059292395,
+  "ack_p99_ms": 6646.411099083489,
+  "ack_max_ms": 8160.652710008435,
+  "concurrency": 16,
+  "limits": "Synthetic text/targets and simulated submission, not competition coverage or model accuracy",
+  "source_commit": "273c70e5099549c29a93102c7fc41344c2448058"
+}
