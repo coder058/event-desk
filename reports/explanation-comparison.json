@@ -1,0 +1,28 @@
+{
+  "kind": "paired_read_only_explanation_comparison",
+  "events": 400,
+  "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "baseline_source_sha256": "603f277904e335a7ce4ee723bb5782adacb1ddb7de3c1d41719bdf0e7e82df11",
+  "candidate_source_sha256": "5e2d6cad5c8366bf0c9e708bf165a6f4c8b9ef2212933436f7346797857c57eb",
+  "cold_load_ms": {
+    "baseline": 2268.757152953185,
+    "candidate": 513.7194480048493
+  },
+  "baseline": {
+    "p50_ms": 100.34538502804935,
+    "p95_ms": 175.56493784068152,
+    "max_ms": 239.82120992150158,
+    "sum_ms": 45470.59355932288
+  },
+  "candidate": {
+    "p50_ms": 2.7346660499460995,
+    "p95_ms": 4.194808495230973,
+    "max_ms": 11.28585496917367,
+    "sum_ms": 1189.457607571967
+  },
+  "max_prediction_difference": 1.1102230246251565e-16,
+  "max_displayed_math_difference": 5.551115123125783e-17,
+  "term_names_identical": true,
+  "limits": "Alternating paired order, same inputs/host/process; no HTTP, DB, official score or capacity measured; cold loads are sequential with different import/page-cache warmth and are not a controlled cold-start comparison",
+  "archive_sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c"
+}

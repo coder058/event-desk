@@ -34,3 +34,16 @@ inputs in a separate durable queue; its trace explicitly says it did not affect
 the percentile. Restart recovery preserves that distinction. It is not a
 retrospective explanation of why the local regression produced its value.
 An approved inline hybrid still needs a fault/load review before activation.
+
+## 2026-10-05 — reserve survives material-source outages
+
+The fifteen-second official-starter timeout is a maximum, not permission to consume
+the final submission reserve. Bound DNS and body reads by the remaining event budget
+minus the mission's thirty seconds. Late queued events use the fitted target mean
+and retain `materials_skipped_deadline_reserve`; an outage can therefore dilute
+the score even when predictions arrive. Broker/provider outages still prevent any
+guarantee of future coverage. Expired backlog cannot hold up newer valid work.
+
+Cache only static fitted explanation metadata and operate on nonzero sparse terms.
+Prediction and feature code stay frozen. Record the paired measurement and numerical
+differences; this improves evidence rendering, not model accuracy or a trading edge.

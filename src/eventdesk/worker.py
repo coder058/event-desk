@@ -15,7 +15,7 @@ from urllib.parse import urlsplit
 import httpx
 
 from eventdesk.blend import BlendModel
-from eventdesk.config import COMPETITION_ORIGIN, Settings
+from eventdesk.config import COMPETITION_ORIGIN, SUBMISSION_RESERVE_SECONDS, Settings
 from eventdesk.freeze import CompetitionFreeze, verify_freeze
 from eventdesk.llm import PROMPT_HASH, Router, prompt_materials, providers_from_env
 from eventdesk.materials import input_hash, select_items
@@ -71,18 +71,30 @@ class Worker:
                         items = select_items(supplied_fixture) if isinstance(supplied_fixture, dict) else {
                             "earnings-call-facts": ["Revenue increased and guidance was maintained."]}
                     elif work.event.information_url:
-                        await allowed_material_url(work.event.information_url, self.settings.material_hosts)
-                        # SOURCE: starter materials timeout 15 seconds; bounded by actual remaining deadline.
-                        response = await self.http.get(work.event.information_url,
-                                                       timeout=max(0.1, min(15, work.deadline - time.time())))
-                        response.raise_for_status()
-                        bundle = response.json()
-                        # SOURCE: strict JSON numeric boundary; a bad official response uses the fitted fallback.
-                        json.dumps(bundle, allow_nan=False)
-                        items = select_items(bundle)
+                        # SOURCE: mission's >=30-second submission reserve, also applied to DNS/body reads.
+                        budget = work.deadline - time.time() - SUBMISSION_RESERVE_SECONDS
+                        if budget <= 0:
+                            fallback = "materials_skipped_deadline_reserve"
+                        else:
+                            # SOURCE: official starter's 15-second materials timeout; reserve bounds the whole phase.
+                            async with asyncio.timeout(min(15, budget)):
+                                await allowed_material_url(work.event.information_url, self.settings.material_hosts)
+                                async with self.http.stream("GET", work.event.information_url,
+                                                            timeout=min(15, budget)) as response:
+                                    response.raise_for_status()
+                                    raw = bytearray()
+                                    async for chunk in response.aiter_bytes():
+                                        raw.extend(chunk)
+                                        # GUESS: 16 MiB memory ceiling for official materials; not a model threshold. # UNCALIBRATED GUESS
+                                        if len(raw) > 16 * 1024 * 1024:
+                                            raise ValueError("Material body exceeds memory ceiling")
+                                    bundle = json.loads(raw)
+                                    # SOURCE: strict JSON numeric boundary; invalid material uses fitted fallback.
+                                    json.dumps(bundle, allow_nan=False)
+                                    items = select_items(bundle)
                     else:
                         fallback = "materials_missing_url"
-                except (httpx.HTTPError, ValueError, OSError):
+                except (httpx.HTTPError, ValueError, OSError, TimeoutError):
                     fallback = "materials_unavailable"
                 try:
                     value = await asyncio.to_thread(self.model.predict, items)
@@ -161,7 +173,7 @@ class Worker:
                                         "rejected", time.time())
                 LOG.error("submission event=%s rejected_http=%s", work.event.event_id, response.status_code)
             else:
-                # GUESS: two-second retry delay for transport/server errors; always identical stored payload.
+                # GUESS: two-second retry delay for transport/server errors; always identical stored payload. # UNCALIBRATED GUESS
                 await asyncio.to_thread(self.store.retry, work.id, "submission_http_" + str(response.status_code),
                                         2, time.time())
         except (httpx.HTTPError, ValueError):
@@ -175,7 +187,7 @@ class Worker:
         while True:
             work = await asyncio.to_thread(self.store.claim_shadow, time.time())
             if work is None:
-                # GUESS: same bounded queue polling as receipt processing; not market timing.
+                # GUESS: same bounded queue polling as receipt processing; not market timing. # UNCALIBRATED GUESS
                 await asyncio.sleep(0.25)
                 continue
             try:
@@ -211,11 +223,11 @@ class Worker:
             "fixture_mode": self.settings.fixture_mode}
         while True:
             await asyncio.to_thread(self.store.pulse, "worker", details, time.time())
-            # GUESS: ten-second operational heartbeat; alert after three misses, verified in health tests.
+            # GUESS: ten-second operational heartbeat; alert after three misses, verified in health tests. # UNCALIBRATED GUESS
             await asyncio.sleep(10)
 
     async def dispatch(self) -> None:
-        # GUESS: same eight simultaneous I/O jobs as the tested original pool; one idle poller
+        # GUESS: same eight simultaneous I/O jobs as the tested original pool; one idle poller # UNCALIBRATED GUESS
         # prevents multiplying empty database queries by eight on the small existing VPS.
         concurrency = 8
         active: set[asyncio.Task[None]] = set()
@@ -229,7 +241,7 @@ class Worker:
                 continue
             work = await asyncio.to_thread(self.store.claim, time.time())
             if work is None:
-                # GUESS: bounded polling interval; latency must be measured under the busy-day test.
+                # GUESS: bounded polling interval; latency must be measured under the busy-day test. # UNCALIBRATED GUESS
                 await asyncio.sleep(0.25)
                 continue
             active.add(asyncio.create_task(self.process_claimed(work)))

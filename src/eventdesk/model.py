@@ -27,6 +27,11 @@ class LocalModel:
         self.training_mean = float(self.artifact["training_mean"])
         if not np.isfinite(self.training_mean) or not 0 <= self.training_mean <= 1:
             raise ValueError("Invalid fitted fallback mean")
+        pipeline = self.artifact["pipeline"]
+        # SOURCE: static fitted metadata; previously regenerated for every event's explanation.
+        self._feature_names = pipeline.named_steps["features"].get_feature_names_out()
+        self._coefficients = np.asarray(pipeline.named_steps["ridge"].coef_).ravel()
+        self._intercept = float(pipeline.named_steps["ridge"].intercept_)
 
     def predict(self, items: dict[str, Any]) -> float:
         enriched = bool(self.artifact["enriched"])
@@ -49,17 +54,23 @@ class LocalModel:
                     "limits": "Official facts missing; no textual inference was made"}
         pipeline = self.artifact["pipeline"]
         transformed = pipeline.named_steps["features"].transform(pd.DataFrame([row]))
-        values = np.asarray(transformed.toarray() if hasattr(transformed, "toarray") else transformed).ravel()
-        coefficients = np.asarray(pipeline.named_steps["ridge"].coef_).ravel()
+        if hasattr(transformed, "tocsr"):
+            sparse = transformed.tocsr()
+            sparse.sum_duplicates()
+            indices, values = sparse.indices, sparse.data
+        else:
+            dense = np.asarray(transformed).ravel()
+            indices = np.flatnonzero(dense)
+            values = dense[indices]
+        coefficients = self._coefficients[indices]
         contributions = values * coefficients
-        names = pipeline.named_steps["features"].get_feature_names_out()
-        intercept = float(pipeline.named_steps["ridge"].intercept_)
+        intercept = self._intercept
         raw = float(intercept + contributions.sum())
         if not np.isfinite(raw):
             raise ValueError("Nonfinite explanation")
-        # GUESS: five displayed terms per decision; a presentation cap, not a prediction threshold.
-        displayed = sorted(np.flatnonzero(contributions), key=lambda i: (-abs(contributions[i]), int(i)))[:5]
-        terms: list[dict[str, Any]] = [{"feature": str(names[i]), "feature_value": float(values[i]),
+        # GUESS: five displayed terms per decision; a presentation cap, not a prediction threshold. # UNCALIBRATED GUESS
+        displayed = sorted(np.flatnonzero(contributions), key=lambda i: (-abs(contributions[i]), int(indices[i])))[:5]
+        terms: list[dict[str, Any]] = [{"feature": str(self._feature_names[indices[i]]), "feature_value": float(values[i]),
                   "coefficient": float(coefficients[i]), "contribution": float(contributions[i])}
                  for i in displayed]
         return {"kind": "tf_idf_ridge_computation", "intercept": intercept,

@@ -1,0 +1,18 @@
+{
+  "kind": "http_postgres_fixture_simulation",
+  "events": 400,
+  "ack_count": 400,
+  "completed_simulated": 400,
+  "seconds": 66.41615476901643,
+  "ack_p50_ms": 257.4373360257596,
+  "ack_p95_ms": 823.359315173002,
+  "ack_p99_ms": 1214.8251411900856,
+  "ack_max_ms": 1700.7295079529285,
+  "concurrency": 16,
+  "fixture_input_kind": "archived_official_disclosures",
+  "worker_model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "limits": "Archived official inputs and simulated fixture submission; no outcomes, official coverage or model accuracy measured",
+  "archive_sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c",
+  "load_script_sha256": "8ff94fe1442c686fdb91271891aeccfda570f57f121f327c07da807b2d9683d6",
+  "engine_source_sha": "7b20bb0e5c58387e4210495c14a4a323f8c49d7b"
+}

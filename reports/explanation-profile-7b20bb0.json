@@ -1,0 +1,21 @@
+{
+  "kind": "read_only_dublin_prediction_and_explanation_profile",
+  "events": 400,
+  "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "predict": {
+    "p50_ms": 2.6123704155907035,
+    "p95_ms": 3.8509050209540874,
+    "max_ms": 7.7851429814472795,
+    "sum_ms": 1150.1564688514918
+  },
+  "explain": {
+    "p50_ms": 96.81306348647922,
+    "p95_ms": 176.13060948206112,
+    "max_ms": 249.9310759594664,
+    "sum_ms": 44936.48240796756
+  },
+  "max_prediction_explanation_difference": 1.1102230246251565e-16,
+  "limits": "Serial archived-input computation; no material HTTP, DB, submission, score or capacity measured",
+  "source_sha": "7b20bb0e5c58387e4210495c14a4a323f8c49d7b",
+  "archive_sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c"
+}

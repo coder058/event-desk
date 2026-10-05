@@ -97,7 +97,7 @@ class Store:
         connect_args: dict[str, Any] = {}
         if url.startswith("sqlite"):
             connect_args["check_same_thread"] = False
-        self.engine: Engine = create_engine(url, pool_pre_ping=True, connect_args=connect_args)
+        self.engine: Engine = create_engine(url, pool_pre_ping=True, hide_parameters=True, connect_args=connect_args)
         self._fixture_lock = RLock()
 
     @contextmanager
@@ -146,14 +146,16 @@ class Store:
             return job is None
 
     def claim(self, now: float) -> Work | None:
+        from sqlalchemy import update
         with self.fixture_guard(), Session(self.engine) as session, session.begin():
-            query = (select(Job).where(Job.state.in_(["pending", "working"]), Job.lease_until <= now)
+            # Expired backlog must not cost one dispatcher sleep per stale event after an outage.
+            session.execute(update(Job).where(Job.state.in_(["pending", "working"]),
+                Job.lease_until <= now, Job.deadline <= now).values(state="expired", error="deadline_expired"))
+            query = (select(Job).where(Job.state.in_(["pending", "working"]), Job.lease_until <= now,
+                                      Job.deadline > now)
                      .order_by(Job.deadline, Job.id).limit(1).with_for_update(skip_locked=True))
             job = session.scalar(query)
             if job is None:
-                return None
-            if job.deadline <= now:
-                job.state, job.error = "expired", "deadline_expired"
                 return None
             job.state = "working"
             # SOURCE: hold the lease to this event's actual deadline; a crashed worker must be recovered
@@ -166,7 +168,7 @@ class Store:
     def recover(self) -> int:
         """Call only when the single worker service starts; release abandoned leases."""
         from sqlalchemy import update
-        with Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             result = session.execute(update(Job).where(Job.state == "working").values(lease_until=0))
             session.execute(update(Job).where(Job.shadow_state == "working").values(shadow_lease_until=0))
             return int(result.rowcount)  # type: ignore[attr-defined]
@@ -176,7 +178,7 @@ class Store:
                            analysis_trace: dict[str, Any] | None = None, defer_shadow: bool = False,
                            local_trace: dict[str, Any] | None = None, configuration_hash: str | None = None) -> None:
         from eventdesk.materials import input_hash
-        with Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
             if job is None:
                 raise RuntimeError("Missing job")
@@ -194,14 +196,16 @@ class Store:
 
     def claim_shadow(self, now: float) -> ShadowWork | None:
         """Optional AI evidence cannot occupy prediction workers or run before acceptance."""
+        from sqlalchemy import update
         with self.fixture_guard(), Session(self.engine) as session, session.begin():
+            session.execute(update(Job).where(Job.state == "api_accepted",
+                Job.shadow_state.in_(["pending", "working"]), Job.shadow_lease_until <= now,
+                Job.deadline <= now).values(shadow_state="expired"))
             job = session.scalar(select(Job).where(Job.state == "api_accepted",
-                Job.shadow_state.in_(["pending", "working"]), Job.shadow_lease_until <= now)
+                Job.shadow_state.in_(["pending", "working"]), Job.shadow_lease_until <= now,
+                Job.deadline > now)
                 .order_by(Job.deadline, Job.id).limit(1).with_for_update(skip_locked=True))
             if job is None:
-                return None
-            if job.deadline <= now:
-                job.shadow_state = "expired"
                 return None
             if not job.inputs or not job.payload:
                 job.shadow_state = "invalid"
@@ -211,7 +215,7 @@ class Store:
                               float(job.payload["predictions"][0]["predicted_percentile"]))
 
     def finish_shadow(self, job_id: int, trace: dict[str, Any], state: str) -> None:
-        with Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
             if job is None or job.state != "api_accepted" or job.provider != "local":
                 raise ConflictError("Shadow evidence requires an accepted immutable local prediction")
@@ -221,7 +225,7 @@ class Store:
             job.analysis_trace, job.shadow_state = trace, state
 
     def finish(self, job_id: int, response: dict[str, Any], state: str, now: float) -> None:
-        with Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
             if job is None or job.payload is None:
                 raise RuntimeError("Cannot finish without persisted prediction")
@@ -229,7 +233,7 @@ class Store:
             job.submitted_at, job.latency_ms = now, (now - job.received_at) * 1000
 
     def retry(self, job_id: int, reason: str, delay: float, now: float) -> None:
-        with Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             job = session.get(Job, job_id, with_for_update=True)
             if job is None:
                 raise RuntimeError("Missing job")
@@ -244,7 +248,7 @@ class Store:
             tests = session.scalar(select(func.count()).where(Job.event_type == "TEST"))
             pulse = session.get(ServicePulse, "worker")
             now = time.time()
-            # GUESS: three missed ten-second pulses signal degraded worker health; no market calibration.
+            # GUESS: three missed ten-second pulses signal degraded worker health; no market calibration. # UNCALIBRATED GUESS
             worker_fresh = pulse is not None and now - pulse.seen_at <= 30
             oldest = session.scalar(select(func.min(Job.deadline)).where(Job.state.in_(["pending", "working"])))
             return {"states": counts, "test_events": tests, "database": "reachable",
@@ -253,7 +257,7 @@ class Store:
                     "deadline_at_risk": oldest is not None and oldest - now <= SUBMISSION_RESERVE_SECONDS}
 
     def pulse(self, name: str, details: dict[str, Any], now: float) -> None:
-        with Session(self.engine) as session, session.begin():
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
             row = session.get(ServicePulse, name)
             if row is None:
                 session.add(ServicePulse(name=name, seen_at=now, details=details))
@@ -269,7 +273,7 @@ class Store:
             simulated = int(session.scalar(base.where(Job.state == "simulated")) or 0)
             material_fallbacks = int(session.scalar(base.where(Job.fallback.in_([
                 "materials_missing_url", "materials_unavailable", "official_facts_missing",
-                "invalid_materials_or_model_output"]))) or 0)
+                "materials_skipped_deadline_reserve", "invalid_materials_or_model_output"]))) or 0)
             latencies = list(session.scalars(select(Job.latency_ms).where(Job.event_type != "TEST",
                 Job.state == "api_accepted", Job.latency_ms.is_not(None)).order_by(Job.latency_ms)).all())
             # SOURCE: empirical nearest-rank 95th percentile of observed receipt-to-API-response durations.
@@ -285,7 +289,7 @@ class Store:
 
     def public_predictions(self) -> list[dict[str, Any]]:
         with Session(self.engine) as session:
-            # GUESS: bounded public response of the latest 100 entries; operational pagination, not trading calibration.
+            # GUESS: bounded public response of the latest 100 entries; operational pagination, not trading calibration. # UNCALIBRATED GUESS
             jobs = session.scalars(select(Job).order_by(Job.id.desc()).limit(100)).all()
             return [{"event_id": j.event_id, "event_type": j.event_type, "slot": j.slot,
                      "received_at": j.received_at, "deadline": j.deadline, "state": j.state,

@@ -38,7 +38,7 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
         submission = settings.submissions.get(slot)
         if submission is None:
             raise HTTPException(404)
-        # GUESS: 1 MiB ceiling for small official event metadata; not a content/model calibration.
+        # GUESS: 1 MiB ceiling for small official event metadata; not a content/model calibration. # UNCALIBRATED GUESS
         max_bytes = 1024 * 1024
         async def read_raw() -> bytes:
             raw = bytearray()

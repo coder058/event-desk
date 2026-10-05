@@ -175,3 +175,46 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
   configuration's working-copy CRLF produced a different raw hash than Git LF.
   Normalized only line endings in the hash and tested both encodings; updated
   the declaration to the public-file hash. Predictions/features did not change.
+
+## 2026-10-05 — trained-artifact replay and deadline resilience
+
+- Production 7b20bb0 passed CI 37386883112, schema 007 and the canonical declaration
+  hash 7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1.
+- Replayed 400 chronological Q3 official material bundles with the actual trained
+  artifact in an isolated HTTP/PostgreSQL fixture. No outcomes were transmitted;
+  no competition/provider/broker request occurred. All 400 ACKs and simulated
+  results completed in 66.416155 seconds; maximum ACK 1,700.730 ms / p95 823.359 ms.
+  This measures that replay, not accuracy, live eligibility or maximum capacity.
+  Fixture containers were removed, volumes retained, production remained at zero.
+- Serial profile: prediction p50 2.612 ms / p95 3.851 ms; explanation p50 96.813 ms
+  / p95 176.131 ms. Rebuilding static vocabulary metadata dominated explanation work.
+- Paired alternating-order comparison on the same host/400 inputs: original
+  explanation p50 100.345 ms / p95 175.565 ms; cached sparse explanation p50
+  2.735 ms / p95 4.195 ms. Term names matched, maximum percentile difference
+  1.11e-16 and displayed-math difference 5.55e-17. Cold-load timings had unequal
+  import/page-cache warmth and cannot be compared as controlled cold starts.
+- Prediction function, feature builder and trained artifact remain declared and
+  unchanged. Tests verify sparse contributions and no per-event vocabulary rebuild.
+- Expired jobs are drained transactionally rather than sleeping once per expired
+  event. Tests put 400 expired jobs before a valid job, for both submission and shadow.
+- Material DNS/streaming share the download budget and leave the required 30-second
+  submission reserve. A late queued event explicitly uses the fitted training mean,
+  not invented text evidence; deadline/DNS/body stall tests verify the degradation.
+- Pending: deployed verification and a repeat trained-artifact replay of these changes.
+  Public HTTPS/portal delivery remain blocked; no live coverage or hybrid is claimed.
+
+- The full SQLite replay exposed write-lock contention after adding transactional
+  expiry cleanup. All fixture write transactions now share the same exclusion;
+  PostgreSQL's transaction/row locks remain unchanged. SQL exception parameters
+  are hidden so private material cannot leak through an unexpected database error.
+
+## 2026-10-05 — optional read-only MCP
+
+- Added the official SDK's four read-only tools over public HTTP records. Protocol
+  tests check exact tool inventory, read-only annotations, GET-only behavior,
+  slot-correct evidence and rejection of unapproved origins/invalid slot arguments.
+- Real stdio subprocess smoke read the actual deployed zero-event service through
+  localhost; a missing event returned an error. Expected errors use SDK ToolError,
+  avoiding traceback noise and invented fallback records.
+- Optional SDK setup is documented in docs/MCP.md. This is a stdio server, not a
+  claim that a public HTTPS MCP service or any official scored event exists.

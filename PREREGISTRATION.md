@@ -60,3 +60,11 @@ No official live score or ten-day eligible coverage exists yet. Archive ΔR² is
 profitability, calibrated trade probability or a portfolio return. Fixtures measured
 plumbing capacity under one load, not future network/provider reliability. SEC event
 studies and paper portfolios remain separate future stages.
+
+## Operational change log — 2026-10-05, before any received event
+
+Cached static explanation metadata and sparse contributions; prediction/features
+and artifact are unchanged. Material download now preserves the declared thirty-second
+reserve, with an explicit fitted-mean degradation reason for queued events that reach
+it. Expired queues drain before claiming valid work. These changes improve operational
+failure handling; they do not declare a new prediction model or a successful live test.

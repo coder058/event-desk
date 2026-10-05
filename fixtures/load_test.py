@@ -25,11 +25,15 @@ async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=Path("/tmp/eventdesk-fixture-load.json"))
     parser.add_argument("--origin", default="http://127.0.0.1:8000")
+    parser.add_argument("--material-file", type=Path)
     args = parser.parse_args()
     async with httpx.AsyncClient(timeout=20) as client:
         before = (await client.get(args.origin + "/healthz")).json()
         if before.get("fixture_mode") is not True:
             raise RuntimeError("Refusing load test against production")
+        replay_materials = json.loads(args.material_file.read_text()) if args.material_file else None
+        if replay_materials is not None and (not isinstance(replay_materials, list) or len(replay_materials) != EVENTS):
+            raise ValueError("Archived fixture must contain exactly the mission's event count")
         baseline = before["states"].get("simulated", 0)
         semaphore = asyncio.Semaphore(CONCURRENCY)
         prefix = "load-" + str(time.time_ns())
@@ -39,12 +43,14 @@ async def main() -> None:
         async def send(index: int) -> None:
             async with semaphore:
                 delivery_id = prefix + "-" + str(index)
+                materials = replay_materials[index] if replay_materials is not None else {
+                    "items": [{"id": "earnings-call-facts", "content": [
+                        "Revenue increased this quarter and management maintained full-year guidance.",
+                        "Operating costs declined, while the company reported uncertainty in customer demand."]}]}
                 raw = json.dumps({"id": delivery_id, "event_id": delivery_id,
                     "event_type": "EARNINGS_RELEASE", "knowledge_cutoff": "2026-01-01T00:00:00Z",
                     "focal_assets": [{"identifier_type": "TICKER", "identifier_value": "FIXTURE"}],
-                    "fixture_materials": {"items": [{"id": "earnings-call-facts", "content": [
-                        "Revenue increased this quarter and management maintained full-year guidance.",
-                        "Operating costs declined, while the company reported uncertainty in customer demand."]}]}}).encode()
+                    "fixture_materials": materials}).encode()
                 timestamp = str(int(time.time()))
                 signature = base64.b64encode(hmac.new(key, delivery_id.encode() + b"." + timestamp.encode() + b"." + raw,
                                                       hashlib.sha256).digest()).decode()
@@ -71,7 +77,11 @@ async def main() -> None:
                   "seconds": elapsed, "ack_p50_ms": statistics.median(ack_ms),
                   "ack_p95_ms": percentiles[94], "ack_p99_ms": percentiles[98],
                   "ack_max_ms": max(ack_ms), "concurrency": CONCURRENCY,
+                  "fixture_input_kind": "archived_official_disclosures" if replay_materials is not None else "synthetic",
+                  "worker_model_sha256": health.get("worker", {}).get("details", {}).get("model_hash"),
                   "limits": "Synthetic text/targets and simulated submission, not competition coverage or model accuracy"}
+        if replay_materials is not None:
+            report["limits"] = "Archived official inputs and simulated fixture submission; no outcomes, official coverage or model accuracy measured"
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
         print(json.dumps(report))

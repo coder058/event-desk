@@ -35,8 +35,8 @@ and [external actions](BLOCKED.md).
 | --- | --- | --- |
 | Historical facts model | Q3 ΔR² 0.040953; 2,362 predictions | Development validation; archive unsealed |
 | Dublin single-event inference | p95 2.269 ms | Archived inputs; excludes HTTP/DB/submission |
-| Dublin busy-day fixture | 400 ACKs + 400 simulated results, 61.133 s | Not official predictions or live coverage |
-| Slowest fixture ACK | 8.161 s | One measured replay, below 20 s |
+| Dublin trained-model fixture | 400 ACKs + 400 simulated results, 66.416 s | Real archived inputs; no outcomes or official POST |
+| Slowest trained-model fixture ACK | 1.701 s | One measured replay, below 20 s |
 
 Reports retain dataset, scorer and model hashes. The current live service has no
 official scored observations. Public HTTPS and the portal test are still blocked;
@@ -51,6 +51,9 @@ docker compose up --build
 Open `http://127.0.0.1:8000`. This uses a synthetic model, isolated PostgreSQL and
 fixture credentials; no owner keys or competition submissions. The full signed
 400-event replay is `docker compose exec api python fixtures/load_test.py`.
+
+[Read-only MCP setup](docs/MCP.md): four tools over retained public records,
+verified with the official SDK and an actual stdio subprocess. No trading tools.
 
 ## Stack
 
