@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
 @dataclass(frozen=True)
 class Submission:
     slot: str
-    api_key: str
-    webhook_secret: str
+    api_key: str = field(repr=False)
+    webhook_secret: str = field(repr=False)
 
 
 @dataclass(frozen=True)
