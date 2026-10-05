@@ -14,7 +14,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.14,<2", "types-requests", "pandas-stubs"]
+dev = ["pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.14,<2", "types-requests", "pandas-stubs", "mcp==2.3.0"]
+# SOURCE: official MCP SDK version inspected and protocol-tested for the read-only tools.
+mcp = ["mcp==2.3.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
