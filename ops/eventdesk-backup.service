@@ -1,0 +1,20 @@
+[Unit]
+Description=Event Desk encrypted backup to existing Frankfurt VPS
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/bin/flock -n /run/eventdesk-backup.lock /usr/bin/python3 -I /usr/local/libexec/eventdesk-backup.py
+# GUESS: bound a stuck backup operation at five minutes; not measured recovery-time assurance.
+TimeoutStartSec=300
+Nice=10
+# GUESS: lower scheduling priority preserves deadline processing during compression.
+IOSchedulingClass=idle
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/eventdesk/backups /run

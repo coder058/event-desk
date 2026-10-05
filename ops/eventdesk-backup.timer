@@ -1,0 +1,11 @@
+[Unit]
+Description=Nightly Event Desk encrypted backup
+
+[Timer]
+# SOURCE: mission requires nightly backup; 04:10 UTC scheduling is an UNCALIBRATED GUESS.
+OnCalendar=*-*-* 04:10:00 UTC
+Persistent=true
+Unit=eventdesk-backup.service
+
+[Install]
+WantedBy=timers.target

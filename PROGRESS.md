@@ -129,3 +129,26 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - Senior review found streaming the request body was outside the receipt timer.
   Added one shared guard across body, validation and durable receipt; an injected
   stalled-stream test returns 503 without persisting an event rather than ACKing.
+
+## 2026-10-05 — encrypted backup and recovery drill
+
+- Installed only the Ubuntu age package on the two existing hosts; no account,
+  paid plan, kernel upgrade or reboot. Frankfurt cursor-worker remains active with
+  its original 18 September start time. Fly Brain source/results were not touched.
+- Isolated Frankfurt receive-only key/path restricts command, filename, source IP
+  and overwrites; bounded receiver tests passed. Encryption happens on Dublin;
+  only ciphertext travels through the dedicated pinned-host SSH connection.
+- Initial backup helper failed because Ruff converted timezone.utc into the
+  Python-3.11 UTC name, unavailable in Dublin's host Python 3.10. Corrected the
+  host-helper compatibility explicitly; the application remains Python 3.12.
+- Two actual copies transferred. Hash/decryption checks verified all seven
+  archived files; an isolated database restore recovered 006_local_trace with
+  zero jobs and deliveries, matching the no-event snapshot. Production was never
+  a restore/drop target. Fixed a Windows closed-pipe diagnostic and repeated the
+  stream verification successfully. Public receipt: reports/backup-restore.json.
+- The hardened systemd service succeeded; nightly timer is active for 04:10 UTC.
+  That scheduling choice is uncalibrated. A scheduled future run has not occurred
+  yet; the successful manual service invocation does not prove every future copy.
+- Remaining recovery limit: the private age identity exists only on Frankfurt.
+  Loss of both hosts lacks an offline recovery copy; no full-host recovery time
+  or automatic destructive production restore is claimed.
