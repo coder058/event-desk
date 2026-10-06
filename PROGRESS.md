@@ -240,3 +240,27 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - Docker log rotation is bounded. Operational cadence/retention/age thresholds are
   uncalibrated choices, labelled in code. Telegram/Langfuse remain optional.
 - Pending: deployment, actual local spans and timer behavior, latest-schema backup.
+
+## 2026-10-06 — deployed observability and provider cooldown evidence
+
+- Source 6f9cdfc passed CI 37403411478 and deployed with schema 007 and the same
+  declared model/configuration. Production still had zero received events.
+- Independent host timer is active. Its actual state correctly reports only
+  `https_path_unverified`: worker heartbeat and backup transfer are healthy;
+  origin-side HTTPS and external inbound verification are still unavailable.
+- An isolated fixture process inside the deployed image exported correlated
+  job/inference OpenTelemetry spans. Source text was excluded and no network
+  request occurred. Evidence: reports/dublin-telemetry-fixture.json. This was
+  not a production event or a full distributed receipt-to-provider trace.
+- Actual encrypted backup/isolated restore verified nine files and schema
+  007_configuration_hash, with zero jobs/deliveries matching the snapshot.
+  Production was not a restore target. The nightly scheduled run is still pending;
+  reports/backup-restore.json records the manual run and measured ciphertext hash.
+- Groq rejected the next Q2 attempt: TPD 200,000, used 199,788, requested 1,195;
+  Retry-After 425 seconds. Gemini 3.5 rejected the next attempt with RPD 500 and
+  RetryInfo 77,956 seconds. These are actual response fields, not estimates of
+  remaining quota or an inferred limit for the deployed Gemini 3.1 model.
+- Added strict numeric-only parsing of Google's QuotaFailure/RetryInfo, with
+  project IDs, model dimensions and free text excluded. Tests verify persistent
+  cooldown respects the returned duration. No prompt, features or prediction
+  function changed; the small valid sample still does not justify a blend.

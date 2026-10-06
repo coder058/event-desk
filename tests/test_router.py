@@ -97,3 +97,25 @@ def test_limit_errors_keep_only_numeric_counts_and_dimension():
     assert safe_limit_error(response) == {"dimension": "TPD", "limit": 200000,
                                            "used": 199900, "requested": 1293}
     assert safe_limit_error(httpx.Response(503, content=b"never-emit")) == {}
+
+
+def test_google_structured_quota_retry_has_no_project_subject_or_free_text(store):
+    body = {"error": {"message": "never-emit API key or project", "details": [
+        {"@type": "type.googleapis.com/google.rpc.QuotaFailure", "violations": [
+            {"subject": "project:never-emit", "description": "never-emit",
+             "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+             "quotaValue": "20", "quotaDimensions": {"model": "never-emit"}}]},
+        {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "123.25s"}]}}
+    response = httpx.Response(429, json=body)
+    assert safe_limit_error(response) == {"retry_after_seconds": 123.25,
+                                          "google_violations": [{"dimension": "RPD", "limit": 20}]}
+    def handler(request):
+        return response
+    async def run():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
+            provider = Provider("gemini", "fixture-model", "fixture-key", Limits(10, 100, 100000, 100000))
+            return await Router(Quotas(store), http, (provider,)).analyze(
+                {"earnings-call-facts": ["Revenue increased."]}, time.time()+300)
+    result = asyncio.run(run())
+    assert "never-emit" not in json.dumps(result.attempts)
+    assert Quotas(store).summary()["gemini"]["cooldown_until"] >= time.time()+120

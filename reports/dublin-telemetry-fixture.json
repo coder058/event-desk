@@ -1,0 +1,35 @@
+{
+  "kind": "isolated_deployed_otel_fixture",
+  "spans": [
+    {
+      "attributes": {},
+      "end_ns": 1791253279696040045,
+      "kind": "otel_span",
+      "parent_span_id": "5593ffe2ac4ac5bd",
+      "span_id": "0c1fb2ae13d50799",
+      "stage": "eventdesk.local_inference",
+      "start_ns": 1791253279677340375,
+      "status": "UNSET",
+      "trace_id": "0463d0cb4d5c577399a91ead41e2da56"
+    },
+    {
+      "attributes": {
+        "eventdesk.fixture": true,
+        "eventdesk.job_id": 1,
+        "eventdesk.model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+        "eventdesk.slot": "s1"
+      },
+      "end_ns": 1791253279717043056,
+      "kind": "otel_span",
+      "parent_span_id": null,
+      "span_id": "5593ffe2ac4ac5bd",
+      "stage": "eventdesk.job",
+      "start_ns": 1791253279677234931,
+      "status": "UNSET",
+      "trace_id": "0463d0cb4d5c577399a91ead41e2da56"
+    }
+  ],
+  "source_content_excluded": true,
+  "network_requests": 0,
+  "limits": "Actual local SDK export from a fixture process, not official prediction or distributed receipt tracing"
+}

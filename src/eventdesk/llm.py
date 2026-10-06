@@ -93,9 +93,10 @@ def safe_limit_error(response: httpx.Response) -> dict[str, Any]:
         message = error.get("message") if isinstance(error, dict) else None
     except ValueError:
         return {}
-    if not isinstance(message, str):
+    if not isinstance(error, dict):
         return {}
     result: dict[str, Any] = {}
+    message = message if isinstance(message, str) else ""
     dimension = re.search(r"\b(TPM|TPD|RPM|RPD|ITPM|OTPM)\b", message)
     if dimension:
         result["dimension"] = dimension.group(1)
@@ -103,6 +104,41 @@ def safe_limit_error(response: httpx.Response) -> dict[str, Any]:
         number = re.search(r"\b" + name + r"\s*[:=]?\s*(\d+)", message)
         if number:
             result[name.lower()] = int(number.group(1))
+    # SOURCE: google/rpc/error_details.proto QuotaFailure + RetryInfo JSON field names.
+    details = error.get("details", [])
+    if not isinstance(details, list):
+        return result
+    google: list[dict[str, Any]] = []
+    for detail in details:
+        if not isinstance(detail, dict):
+            continue
+        if detail.get("@type") == "type.googleapis.com/google.rpc.RetryInfo":
+            retry = detail.get("retryDelay")
+            if isinstance(retry, str) and re.fullmatch(r"\d+(?:\.\d+)?s", retry):
+                value = float(retry[:-1])
+                if math.isfinite(value):
+                    result["retry_after_seconds"] = max(result.get("retry_after_seconds", 0), value)
+        elif detail.get("@type") == "type.googleapis.com/google.rpc.QuotaFailure":
+            violations = detail.get("violations", [])
+            if not isinstance(violations, list):
+                continue
+            for violation in violations:
+                if not isinstance(violation, dict):
+                    continue
+                # Do not export subject/project IDs, description, model dimensions or arbitrary metric strings.
+                identifier = str(violation.get("quotaId", "")).lower()
+                # Report only a recognizable count/period pair; unknown dimensions remain unknown.
+                count = "R" if "requests" in identifier else "T" if "tokens" in identifier else None
+                period = "D" if "perday" in identifier else "M" if "perminute" in identifier else None
+                unit = count+"P"+period if count and period else None
+                raw_limit = violation.get("quotaValue")
+                valid_limit = isinstance(raw_limit, (int, str)) and not isinstance(raw_limit, bool)
+                if unit and valid_limit and re.fullmatch(r"\d+", str(raw_limit)):
+                    google.append({"dimension": unit, "limit": int(str(raw_limit))})
+                elif unit:
+                    google.append({"dimension": unit})
+    if google:
+        result["google_violations"] = google
     return result
 
 
@@ -182,11 +218,12 @@ class Router:
                 quota = safe_quota_headers(response.headers)
                 if response.status_code != 200:
                     status = "http_" + str(response.status_code)
+                    quota_error = safe_limit_error(response)
                     cooldown = float(DEFAULT_COOLDOWN_SECONDS)
-                    cooldown = max(cooldown, quota.get("retry-after", 0))
+                    cooldown = max(cooldown, quota.get("retry-after", 0), quota_error.get("retry_after_seconds", 0))
                     await asyncio.to_thread(self.quotas.settle, reservation, None, status, cooldown)
                     attempts.append({"provider": provider.name, "model": provider.model, "status": status,
-                                     "quota_headers": quota, "quota_error": safe_limit_error(response)})
+                                     "quota_headers": quota, "quota_error": quota_error})
                     continue
                 result = response.json()
                 if provider.name == "gemini":

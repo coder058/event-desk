@@ -35,8 +35,8 @@ and [external actions](BLOCKED.md).
 | --- | --- | --- |
 | Historical facts model | Q3 ΔR² 0.040953; 2,362 predictions | Development validation; archive unsealed |
 | Dublin single-event inference | p95 2.269 ms | Archived inputs; excludes HTTP/DB/submission |
-| Dublin trained-model fixture | 400 ACKs + 400 simulated results, 66.416 s | Real archived inputs; no outcomes or official POST |
-| Slowest trained-model fixture ACK | 1.701 s | One measured replay, below 20 s |
+| Dublin trained-model fixture | 400 ACKs + 400 simulated results, 10.626 s | Real archived inputs; no outcomes or official POST |
+| Slowest trained-model fixture ACK | 1.249 s | One measured replay, below 20 s |
 
 Reports retain dataset, scorer and model hashes. The current live service has no
 official scored observations. Public HTTPS and the portal test are still blocked;
