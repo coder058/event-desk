@@ -24,3 +24,13 @@ The initial competition deployment remains facts-only. No guessed blend weight i
 
 The archive Q3 has previously been inspected and is not sealed. This is development
 validation; Oct12 onward is the prospective scored observation period.
+
+## Actual isolated local component — October 6
+
+`build_calibration_local.py` trained the inherited facts pipeline on 4,239 outcome
+rows from Q4/Q1 and produced 2,060 Q2 asset predictions. The official scorer used
+1,996 surprise-complete rows: imputed delta R-squared 0.008100532382788295.
+Hashes/configuration are in reports/calibration-local.json; artifact and per-asset
+predictions stay private. The deployed through-Q2 artifact's hash was verified
+unchanged. This is an input for future blend fitting, not an approved hybrid or a
+model-selection result. Q2 is now inspected development evidence.

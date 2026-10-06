@@ -280,3 +280,17 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
   alerts for stale/failed observations and official reported delivery failures.
   Full local suite: 47 passed in 69.27 seconds; strict typing passed in 15 modules.
   These changes still need deployment and actual PostgreSQL/browser verification.
+
+## 2026-10-06 — chronological local calibration component
+
+- Built a separate Q4/Q1-only facts model from 4,239 rows with the inherited fixed
+  settings, and 2,060 out-of-training-sample Q2 predictions. Official scorer used
+  1,996 surprise-complete rows; imputed delta R-squared 0.008100532382788295.
+  Actual hashes and dataset provenance: reports/calibration-local.json.
+- Private artifact/predictions remain outside deployment and cannot silently
+  overwrite retained evidence. The deployed through-Q2 model hash was unchanged.
+  This closes the in-sample local-feature problem for Q2 blend fitting, not the
+  insufficient LLM sample or final hybrid validation.
+- Two more current-prompt Groq Q2 analyses passed (1,253 / 1,235 tokens), then TPD
+  429: limit 200,000, used 199,730, requested 1,212; Retry-After 407 seconds.
+  That attempt is retained and collection stopped instead of bypassing the limit.
