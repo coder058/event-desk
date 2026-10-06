@@ -78,15 +78,20 @@ def main() -> None:
             if exporter.poll() is None:
                 exporter.kill()
                 exporter.communicate()
-        query = "SELECT version_num FROM alembic_version; SELECT count(*) FROM jobs; SELECT count(*) FROM deliveries;"
+        query = ("SELECT version_num FROM alembic_version; SELECT count(*) FROM jobs; "
+                 "SELECT count(*) FROM deliveries; SELECT count(*) FROM competition_calendars; "
+                 "SELECT count(*) FROM competition_observations;")
         checked = subprocess.run(SSH + [command + "psql -U eventdesk -d " + database + " -At -c " + shlex.quote(query)],
                                  capture_output=True, check=True)
         rows = checked.stdout.decode().splitlines()
-        if len(rows) != 3:
+        # SOURCE: this probe returns schema plus four exact table counts, including schema-008 observations.
+        if len(rows) != 5:
             raise RuntimeError("Unexpected isolated restore schema probe")
         report.update(verified)
         report.update({"restore_verified": True, "restored_schema": rows[0],
                        "restored_jobs": int(rows[1]), "restored_deliveries": int(rows[2]),
+                       "restored_competition_calendars": int(rows[3]),
+                       "restored_competition_observations": int(rows[4]),
                        "limits": "One encrypted backup hash-check and isolated DB restore; production was not overwritten"})
         Path("reports/backup-restore.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(report))

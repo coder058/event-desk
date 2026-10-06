@@ -15,9 +15,19 @@ acceptance remains unavailable, not a guessed time at midnight.
 `QuotedEvidence` checks exact character offsets/text hashes and rereads retained
 bytes. A fabricated unrelated text with a plausible quote/hash cannot be attached
 to another document. Initial quote scope is exact UTF-8 raw text, including HTML
-markup if present. HTML normalization, XML ownership extraction, PDF conversion,
-batch LLM extraction, durable ingestion cursor and daily collector are still to
-build. Unsupported encodings must remain raw-only, not be silently reinterpreted.
+markup if present. Initial Table I XML extraction is described in
+[ownership extraction](OWNERSHIP-EXTRACTION.md). HTML normalization, PDF conversion,
+batch LLM extraction and daily collector are still to build. Unsupported encodings
+must remain raw-only, not be silently reinterpreted.
+
+`Sources.commit_batch` verifies every referenced blob before one transaction
+appends metadata/batch hashes and advances the cursor. Compare-and-swap refuses
+stale writers; a retry of a committed batch cannot rewind a newer cursor. A later
+failure rolls back all metadata, leaving only harmless unreferenced raw objects.
+Cutoff reads recheck metadata hashes, timestamps and actual raw bytes. Initial
+SQLite tests cover retries, missing/corrupt bytes, rollback, cutoff filtering and
+concurrent calls. CI includes actual PostgreSQL duplicate/cross-feed races.
+The source tables are additive migrations, not a running daily ingestion service.
 
 No SEC HTTP request or real filing is claimed by the synthetic boundary tests.
 The configured SEC identity is still missing; see BLOCKED.md. Future network work

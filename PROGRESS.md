@@ -353,3 +353,32 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - Focused retry/router/shadow/scoreboard checks initially passed 14 tests. The
   complete suite then passed 54 tests in 52.27 seconds, with strict typing in
   17 modules and lint clean. No prediction code or trained artifact changed.
+
+## 2026-10-06 — source checkpoints and initial Form 4 extraction
+
+- Submission retry/public-boundary changes deployed at 0454c51; CI 37444275113
+  passed. Model and configuration hashes stayed unchanged; zero official TESTs.
+- New source capture manifests and batch/cursor updates commit atomically after
+  retained-byte verification. SQLite tests exercise duplicate races, cross-feed
+  identity, restart, stale writers, cutoff exclusion and rollback on cursor failure.
+  The new PostgreSQL race fixture and schema 009 await actual deployment/CI.
+- Initial Form 4/4-A Table I extractor retains exact original UTF-8 XML quotes,
+  filing-level 10b5-1 flag, joint owner identifiers and reported transactions.
+  Numeric/code interpretations follow SEC Ownership XML 5.5; DTDs are rejected.
+  It does not infer tax motives, per-row plan status, materiality or trading signals.
+- Full local suite passed 63 tests in 80.17 seconds; strict typing passed in
+  19 application modules; lint and exact owner-secret scan passed. No daily SEC
+  collector, actual filing extraction or event study is claimed.
+- First actual nightly backup ran at 04:10 UTC: encrypted file
+  eventdesk-20261006T041004Z.tar.gz.age was verified on Frankfurt and restored
+  into an isolated database. Nine archived files, schema 008, one calendar and
+  eleven observations were recovered. Production was never a restore target.
+- Groq supplied three additional valid current-prompt Q2 analyses, then the
+  collector stopped at its persistent local admission limit, not a new server
+  error. The current small Q2/Q3 sample still cannot justify hybrid deployment.
+- Read-only official snapshot retained 13 calendar versions and 45 observations;
+  latest calendar had 2,955 entries and peak 535 on November 5 in Central time.
+  Schedules change; measured 400-event drills do not prove 535-event outage capacity.
+
+Remaining: public inbound HTTPS/portal TEST, adequate chronological blend evidence,
+PostgreSQL source verification, identified live SEC reads and future scored coverage.

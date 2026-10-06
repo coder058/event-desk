@@ -19,5 +19,6 @@ jobs:
       - run: docker compose up --build -d
       - run: python fixtures/smoke.py
       - run: docker compose exec -T api python fixtures/receipt_concurrency.py
+      - run: docker compose exec -T api python fixtures/source_concurrency.py
       - if: always()
         run: docker compose down

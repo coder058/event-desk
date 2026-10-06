@@ -6,6 +6,8 @@ import shlex
 import subprocess
 from pathlib import Path
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from bootstrap import SSH
 
 PROBE = '''
@@ -42,7 +44,8 @@ if __name__ == "__main__":
     if result.returncode:
         raise RuntimeError("Deployed observer verification failed; output withheld")
     report = json.loads(result.stdout)
-    if (report["schema_counts"]["schema"] != "008_competition_observations"
+    expected_schema = ScriptDirectory.from_config(Config("alembic.ini")).get_current_head()
+    if (report["schema_counts"]["schema"] != expected_schema
             or not report["observer_running"] or report["observer_oom_killed"]):
         raise RuntimeError("Observer/schema deployment not verified")
     observations = report["official_observations"]

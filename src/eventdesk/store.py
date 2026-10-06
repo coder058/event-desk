@@ -99,6 +99,32 @@ class CompetitionObservation(Base):
     summary: Mapped[dict[str, Any]] = mapped_column(JSON)
 
 
+class SourceCapture(Base):
+    __tablename__ = "source_captures"
+    manifest_hash: Mapped[str] = mapped_column(String, primary_key=True)
+    source: Mapped[str] = mapped_column(String, index=True)
+    content_hash: Mapped[str] = mapped_column(String, index=True)
+    first_seen_at: Mapped[float] = mapped_column(Float)
+    accepted_at: Mapped[float | None] = mapped_column(Float, nullable=True)
+    provenance: Mapped[dict[str, Any]] = mapped_column(JSON)
+
+
+class SourceBatch(Base):
+    __tablename__ = "source_batches"
+    manifest_hash: Mapped[str] = mapped_column(String, primary_key=True)
+    feed_key: Mapped[str] = mapped_column(String, index=True)
+    completed_at: Mapped[float] = mapped_column(Float)
+    previous_head: Mapped[str | None] = mapped_column(String, ForeignKey("source_batches.manifest_hash"), nullable=True)
+    checkpoint: Mapped[dict[str, Any]] = mapped_column(JSON)
+    capture_hashes: Mapped[list[str]] = mapped_column(JSON)
+
+
+class SourceCursor(Base):
+    __tablename__ = "source_cursors"
+    feed_key: Mapped[str] = mapped_column(String, primary_key=True)
+    head: Mapped[str] = mapped_column(String, ForeignKey("source_batches.manifest_hash"))
+
+
 @dataclass(frozen=True)
 class Work:
     id: int

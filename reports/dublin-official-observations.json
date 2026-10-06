@@ -2,22 +2,22 @@
   "official_observations": {
     "submissions": {
       "s1": {
-        "request_started_at": 1791255399.8967013,
-        "observed_at": 1791255401.8476274,
-        "calendar_sha256": "be248d644b1a0e9d9d659a565b0ca3136635d02b2e8ac09d5bbeb59d371384b0",
-        "calendar_raw_sha256": "7583ae17022feaf503b407990a5cfde0fd13a103a8f22afc270c69098308b975",
+        "request_started_at": 1791279610.3976698,
+        "observed_at": 1791279612.218513,
+        "calendar_sha256": "e411e6ab686e5845b74e961df06e0b695fb887f0476789668c91e21b33cccd96",
+        "calendar_raw_sha256": "0718c2b4ef65f1e61f0db6291f889f631edc0edccc04a37575a3afc1d5bac41f",
         "health_raw_sha256": "baceadc2a7f38b13fe990804577527dcaae6901ef5b8085a37877c80e6311df6",
         "calendar": {
-          "scheduled_entries": 2970,
+          "scheduled_entries": 2955,
           "event_types": {
-            "EARNINGS_RELEASE": 2970
+            "EARNINGS_RELEASE": 2955
           },
           "timing_categories": {
-            "SCHEDULED": 2970
+            "SCHEDULED": 2955
           },
           "first_calendar_day_central": "2026-10-06",
           "last_calendar_day_central": "2026-11-05",
-          "scheduled_in_scoring_window": 2768,
+          "scheduled_in_scoring_window": 2769,
           "scheduled_due_in_scoring_window": 0,
           "scoring_window_daily_counts_central": {
             "2026-10-12": 2,
@@ -40,10 +40,10 @@
             "2026-11-02": 163,
             "2026-11-03": 312,
             "2026-11-04": 410,
-            "2026-11-05": 534
+            "2026-11-05": 535
           },
           "peak_scoring_window_day_central": "2026-11-05",
-          "peak_scoring_window_entries": 534,
+          "peak_scoring_window_entries": 535,
           "official_eligible_coverage": null,
           "limits": "Calendar entries are mutable schedules, not broadcasts or the final eligible scored set. Official health counters are a separate rolling 24-hour snapshot; coverage is not inferred."
         },
@@ -63,9 +63,9 @@
           "last_test_prediction_at": null
         },
         "collector": {
-          "checked_at": 1791255401.8476274,
+          "checked_at": 1791279612.218513,
           "state": "observed",
-          "scheduled_entries": 2970
+          "scheduled_entries": 2955
         }
       }
     },
@@ -77,8 +77,8 @@
   },
   "schema_counts": {
     "schema": "008_competition_observations",
-    "calendar_versions": 1,
-    "health_observations": 4,
+    "calendar_versions": 13,
+    "health_observations": 45,
     "observer_source_lf_sha256": "3dc0afc30bdda4de0d8bd8a6d13da5008a7b82863f91fc097ed9fdaf2cc93bc4"
   },
   "observer_running": true,
@@ -89,7 +89,7 @@
     "database": "reachable",
     "worker": {
       "state": "recent_heartbeat",
-      "seen_at": 1791255633.7677147,
+      "seen_at": 1791279653.9934194,
       "details": {
         "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
         "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
