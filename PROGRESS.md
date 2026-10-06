@@ -306,3 +306,32 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - Browser/UTF-8 code-point comparison exposed a pre-existing Windows encoding
   corruption since the older dashboard version. Recovered symbols from the actual
   bytes; the cosmetic fix still needs deployment and browser verification.
+
+## 2026-10-06 — real PostgreSQL outage/reserve drills
+
+- Cosmetic recovery is deployed at 620443b, CI 37405439200 passed; browser symbols
+  and the actual official-observation panel were verified. docs/dashboard.png is
+  a capture of the zero-event deployed service through the existing SSH preview.
+- Reserve-only drill: 400 events seeded with 30 seconds remaining completed 400
+  simulated submission responses in 6.743447 seconds. No material GET was attempted;
+  all retained `materials_skipped_deadline_reserve` with the actual fitted mean.
+- Full-source-outage drill: 400 synthetic events / real worker and isolated PG
+  database completed 400 simulated responses in 273.067230 seconds. 144 material
+  reads stalled; 256 were skipped as the reserve approached. All used the fitted
+  mean. Mock transport could not access the public network; database was disposed.
+  Reports: dublin-material-reserve.json and dublin-material-source_outage.json.
+- This closes the tested material-outage queue scenario, not a live network/ACK
+  latency guarantee or model accuracy claim. An external submission outage can
+  still prevent delivery; constant mean outputs provide no event-specific skill.
+- Groq supplied one additional current-prompt Q3 analysis (1,428 tokens), then TPD
+  429: limit 200,000, used 199,736, requested 1,319; Retry-After 456 seconds.
+  There is still insufficient chronological evidence for hybrid deployment.
+
+## 2026-10-06 — source evidence foundation
+
+- Added content-addressed immutable bytes, strict capture/acceptance/cutoff times
+  and exact quotes verified against reread source bytes. Synthetic tests check
+  concurrency, corruption, traversal, later capture and forged text attribution.
+- This is initial raw UTF-8 quote/storage support, not a daily EDGAR collector,
+  full HTML/PDF/XML parser, event study or LLM extraction. Those limits and the
+  missing identified SEC contact are explicit in docs/EVIDENCE-BOUNDARIES.md.

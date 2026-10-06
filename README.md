@@ -7,7 +7,7 @@ Booth "Explaining Markets" competition and on our own public scoreboard.**
 This is the product objective. Competition infrastructure is under construction;
 SEC ingestion and live scoring are not yet operational.
 
-![Deployed dashboard: zero received events; portal verification pending](docs/dashboard.jpg)
+![Deployed dashboard: zero received events; portal verification pending](docs/dashboard.png)
 
 ## Pipeline
 
