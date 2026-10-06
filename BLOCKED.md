@@ -20,6 +20,17 @@ or paid provider is required. Do not paste credentials in chat.
 Telegram and Langfuse variables are empty. Local alerts/traces will be used.
 These do not block Phase A.
 
+## SEC ingestion identity, before external EDGAR collection
+
+No SEC_USER_AGENT is configured. The public Git author address is a noreply
+address, not a verified admin contact. Before automated SEC reads, add
+`SEC_USER_AGENT="EventDesk Research your-existing-admin-email"` to the existing
+root-owned `/etc/eventdesk/env`, using an actual contact address. This needs no
+new account or API key; do not paste the address/credentials into this chat.
+The contact will be sent in the User-Agent header to SEC, as its fair-access
+guidance requests. It is not published on our page or in Git. Parser/storage work
+can continue without claiming live EDGAR ingestion; Phase A is independent.
+
 ## Verification still to perform
 
 - Public inbound HTTPS on Dublin (certificate issuance succeeded).
