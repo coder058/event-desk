@@ -17,6 +17,10 @@ transfer age and the HTTPS origin. Alerts are logged only when conditions change
 an operational summary is logged once per UTC day, using cumulative receipt counts.
 It cannot establish eligible daily calendar coverage or a live score.
 
+The separate official observer retains read-only calendar and rolling-counter
+snapshots. Host alerts check its failures/age and official reported delivery or
+submission errors; [observation limits](OFFICIAL-OBSERVATIONS.md) remain explicit.
+
 An origin-side HTTPS request cannot prove the external Lightsail inbound rule.
 That alert also requires a separately recorded verified external probe. Public
 443 is currently blocked; do not declare the webhook ready from a self-request.

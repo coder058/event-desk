@@ -294,3 +294,15 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - Two more current-prompt Groq Q2 analyses passed (1,253 / 1,235 tokens), then TPD
   429: limit 200,000, used 199,730, requested 1,212; Retry-After 407 seconds.
   That attempt is retained and collection stopped instead of bypassing the limit.
+
+- The official observer is now deployed at a3a49d8: actual PostgreSQL schema
+  008, one retained calendar version/health observation, collector running without
+  OOM, and the unchanged trained prediction worker remained healthy. Host monitor
+  was updated and still reports only the unresolved HTTPS path.
+- Browser verification showed calendar/counters and no fabricated coverage or
+  events. Capacity grouped in Central shows a peak of 534 on November 5, versus
+  535 in the earlier UTC-date diagnostic: timezone grouping changes that count.
+  The declared display convention does not determine scoring eligibility.
+- Browser/UTF-8 code-point comparison exposed a pre-existing Windows encoding
+  corruption since the older dashboard version. Recovered symbols from the actual
+  bytes; the cosmetic fix still needs deployment and browser verification.

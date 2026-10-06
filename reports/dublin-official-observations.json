@@ -1,0 +1,106 @@
+{
+  "official_observations": {
+    "submissions": {
+      "s1": {
+        "request_started_at": 1791254416.7018802,
+        "observed_at": 1791254418.7247264,
+        "calendar_sha256": "be248d644b1a0e9d9d659a565b0ca3136635d02b2e8ac09d5bbeb59d371384b0",
+        "calendar_raw_sha256": "7583ae17022feaf503b407990a5cfde0fd13a103a8f22afc270c69098308b975",
+        "health_raw_sha256": "baceadc2a7f38b13fe990804577527dcaae6901ef5b8085a37877c80e6311df6",
+        "calendar": {
+          "scheduled_entries": 2970,
+          "event_types": {
+            "EARNINGS_RELEASE": 2970
+          },
+          "timing_categories": {
+            "SCHEDULED": 2970
+          },
+          "first_calendar_day_central": "2026-10-06",
+          "last_calendar_day_central": "2026-11-05",
+          "scheduled_in_scoring_window": 2768,
+          "scheduled_due_in_scoring_window": 0,
+          "scoring_window_daily_counts_central": {
+            "2026-10-12": 2,
+            "2026-10-13": 22,
+            "2026-10-14": 23,
+            "2026-10-15": 24,
+            "2026-10-16": 19,
+            "2026-10-19": 32,
+            "2026-10-20": 74,
+            "2026-10-21": 121,
+            "2026-10-22": 143,
+            "2026-10-23": 34,
+            "2026-10-26": 68,
+            "2026-10-27": 180,
+            "2026-10-28": 240,
+            "2026-10-29": 307,
+            "2026-10-30": 58,
+            "2026-10-31": 1,
+            "2026-11-01": 1,
+            "2026-11-02": 163,
+            "2026-11-03": 312,
+            "2026-11-04": 410,
+            "2026-11-05": 534
+          },
+          "peak_scoring_window_day_central": "2026-11-05",
+          "peak_scoring_window_entries": 534,
+          "official_eligible_coverage": null,
+          "limits": "Calendar entries are mutable schedules, not broadcasts or the final eligible scored set. Official health counters are a separate rolling 24-hour snapshot; coverage is not inferred."
+        },
+        "official_rolling_24h_counters": {
+          "webhook_n_2xx": 0,
+          "webhook_n_4xx": 0,
+          "webhook_n_5xx": 0,
+          "webhook_n_timeout": 0,
+          "webhook_consecutive_failures": 0,
+          "submission_n_total": 0,
+          "submission_n_duplicate": 0,
+          "submission_n_late": 0,
+          "submission_n_pre_broadcast": 0,
+          "submission_n_invalid_event": 0,
+          "webhook_last_delivery_at": null,
+          "submission_last_at": null,
+          "last_test_prediction_at": null
+        },
+        "collector": {
+          "checked_at": 1791254418.7247264,
+          "state": "observed",
+          "scheduled_entries": 2970
+        }
+      }
+    },
+    "official_eligible_coverage": null,
+    "limits": "Read-only calendar and rolling counters; this does not establish scoring eligibility.",
+    "configured_slots": [
+      "s1"
+    ]
+  },
+  "schema_counts": {
+    "schema": "008_competition_observations",
+    "calendar_versions": 1,
+    "health_observations": 1,
+    "observer_source_lf_sha256": "3dc0afc30bdda4de0d8bd8a6d13da5008a7b82863f91fc097ed9fdaf2cc93bc4"
+  },
+  "observer_running": true,
+  "observer_oom_killed": false,
+  "worker_health": {
+    "states": {},
+    "test_events": 0,
+    "database": "reachable",
+    "worker": {
+      "state": "recent_heartbeat",
+      "seen_at": 1791254540.533767,
+      "details": {
+        "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+        "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+        "synthetic_model": false,
+        "llm_enabled": false,
+        "hybrid_enabled": false,
+        "fixture_mode": false
+      }
+    },
+    "deadline_at_risk": false,
+    "fixture_mode": false
+  },
+  "limits": "Actual read-only API snapshots; no official webhook or score eligibility verified"
+}
