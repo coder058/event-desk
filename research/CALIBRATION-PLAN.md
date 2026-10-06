@@ -56,3 +56,14 @@ The exploratory artifact is always unapproved. Small chronological cohorts can
 cover only a few days and cannot establish deployment readiness or representative
 quarter-wide skill. Further collection is evidence gathering, not a parameter
 sweep on Q3. No fit/evaluation result is asserted before running it.
+
+## Actual first fixed blend probe — October 6
+
+`reports/blend-probe-20261006T103757.json` retains the actual 42-row Q2 fit and
+28-row Q3 response cohort. The official scorer used 25 surprise-complete paired
+rows. Blend underperformed local both on the paired cohort and full local-fallback
+quarter; no deployment approval was granted. Matrix rank was six for seven
+features, with constant `surprise_vs_preview`. Groq stopped collection on an
+actual TPD 429 (200,000 limit, 198,677 used, 1,637 requested); local ledger usage
+did not imply available account capacity. Do not bypass that account limit.
+Further evidence must remain label-blind; do not tune repeatedly on this cohort.

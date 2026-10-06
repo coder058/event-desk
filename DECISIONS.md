@@ -56,3 +56,12 @@ health observations are separate sequential requests and rolling counters. Do no
 infer an eligible-event denominator from mutable schedules or compare rolling
 official counts with cumulative local ledger counts as if their windows matched.
 Failed reads cannot replace the last complete observation or fabricate coverage.
+
+## 2026-10-06 — retain a negative structured-AI result
+
+The fixed exploratory Groq mapping was fitted and actually evaluated. It scored
+lower than local-only on the same available cohort and full Q3 local-fallback
+view. Do not activate it to satisfy the product label. Keep production local-only;
+retain the unapproved artifact, exact input snapshots and negative public report.
+Small early-quarter cohorts and a constant feature further limit the inference.
+This is not evidence that every LLM or future event method must underperform.

@@ -96,3 +96,60 @@ def test_checkpoint_transaction_failure_rolls_back_all_metadata(store, tmp_path)
     sources.commit_batch(source="sec", feed="fixture", documents=[document],
         checkpoint={}, completed_at=now, expected_head=None)
     assert sources.cursor("sec", "fixture") is not None
+
+
+def test_checkpoint_detaches_nested_caller_mutation_before_blob_read(store, tmp_path, monkeypatch):
+    sources, document, now = setup_sources(store, tmp_path)
+    checkpoint = {"seen": ["original"], "nested": {"offset": "original"}}
+    read = sources.objects.read
+    def mutate(digest):
+        checkpoint["seen"].append("changed during admission")
+        checkpoint["nested"]["offset"] = "changed"
+        return read(digest)
+    monkeypatch.setattr(sources.objects, "read", mutate)
+    sources.commit_batch(source="sec", feed="fixture", documents=[document], checkpoint=checkpoint,
+        completed_at=now, expected_head=None)
+    monkeypatch.setattr(sources.objects, "read", read)
+    assert sources.cursor("sec", "fixture")["checkpoint"] == {
+        "seen": ["original"], "nested": {"offset": "original"}}
+
+
+@pytest.mark.parametrize("checkpoint", [{1: "implicit key coercion"}, {"tuple": ("not", "JSON")},
+    {"nonfinite": float("nan")}], ids=["nonstring-key", "tuple", "nan"])
+def test_checkpoint_rejects_implicit_coercion_and_nonfinite_values(store, tmp_path, checkpoint):
+    sources, document, now = setup_sources(store, tmp_path)
+    with pytest.raises(ValueError):
+        sources.commit_batch(source="sec", feed="fixture", documents=[document], checkpoint=checkpoint,
+            completed_at=now, expected_head=None)
+    assert sources.cursor("sec", "fixture") is None
+
+
+@pytest.mark.parametrize("field,value", [("checkpoint", {"changed": True}), ("feed_key", "sec:other"),
+    ("capture_hashes", []), ("completed_at", 0)], ids=["checkpoint", "feed", "captures", "time"])
+def test_corrupt_batch_cannot_be_read_retried_or_extended(store, tmp_path, field, value):
+    sources, document, now = setup_sources(store, tmp_path)
+    args = {"source": "sec", "feed": "fixture", "documents": [document],
+        "checkpoint": {}, "completed_at": now, "expected_head": None}
+    head = sources.commit_batch(**args)
+    with Session(store.engine) as session, session.begin():
+        setattr(session.get(SourceBatch, head), field, value)
+    for operation in (lambda: sources.cursor("sec", "fixture"), lambda: sources.commit_batch(**args),
+        lambda: sources.commit_batch(**{**args, "expected_head": head,
+            "completed_at": now+timedelta(seconds=1)})):
+        with pytest.raises(ValueError, match="Retained source batch"):
+            operation()
+    with Session(store.engine) as session:
+        assert session.get(SourceCursor, "sec:fixture").head == head
+        assert session.scalar(select(func.count()).select_from(SourceBatch)) == 1
+
+
+def test_capture_source_tamper_is_rejected_before_cutoff_use_and_checkpoint_read(store, tmp_path):
+    sources, document, now = setup_sources(store, tmp_path)
+    sources.commit_batch(source="sec", feed="fixture", documents=[document], checkpoint={},
+        completed_at=now, expected_head=None)
+    with Session(store.engine) as session, session.begin():
+        session.scalar(select(SourceCapture)).source = "defense_contracts"
+    with pytest.raises(ValueError, match="metadata"):
+        sources.captured_before(now)
+    with pytest.raises(ValueError, match="metadata"):
+        sources.cursor("sec", "fixture")

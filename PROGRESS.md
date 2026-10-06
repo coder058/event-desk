@@ -450,3 +450,25 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
 - Existing local AWS CLI/SDK, credential files and AWS credential environment names
   were absent. No credential contents were read or additional account created.
   The already documented owner AWS login remains needed for inbound HTTPS review.
+
+## 2026-10-06 — actual structured-AI evaluation and source checkpoint review
+
+- CI 37450534423 passed for c69209b; deployment verified schema 009, recent worker
+  heartbeat, unchanged trained model/configuration and local-only flags. Official
+  rolling counters still show no webhook/test/prediction. This is not live readiness.
+- Groq collection stopped on a real daily-token 429, retaining that failed attempt.
+  Current-prompt validated cohorts are 42 Q2 and 28 Q3 events. No limit bypass.
+- Ran the prepared fixed chronological blend probe once. Training used Q4/Q1-only
+  local features; Q3 evaluation used the deployed through-Q2 local artifact.
+  Exact evidence snapshots/hashes remain private; aggregate report is public.
+  Full imputed ΔR²: local 0.04095315077531125; AI-only 0.000300660765378602;
+  blend 0.03871855275695035. Paired scorer rows: 25, not all 28 response events.
+  Blend also underperformed local there. No deployment approval; no LLM advantage.
+- Self-review found caller-owned nested checkpoints could mutate after hashing,
+  and existing batches were returned without digest/capture revalidation. Added
+  detached finite-JSON checkpoint admission and retained-batch/capture verification
+  before cursor reads, retries or extensions. Tamper and mutation checks passed
+  in the focused 15-test run. Full suite passed 93 tests in 86.99 seconds;
+  strict typing/lint and owner-secret scan passed. Actual PostgreSQL verification
+  remains to run for this change. An initial full-test shell call used a mistyped
+  working directory and never launched; the corrected command produced that result.

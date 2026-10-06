@@ -10,8 +10,13 @@ No future live-event batch ranks are used. Missing materials use the fitted
 training-target mean. TEST events use the official neutral test prediction.
 
 The current deployed version does not use a generative model or LLM blend.
-Gemini/Groq evidence and a fitted hybrid version are under development; this
-description must be updated when those methods actually affect predictions.
+Gemini/Groq structured evidence is under development. A fixed Groq blend was
+actually fitted on 42 Q2 events and validated on 28 Q3 events (25 surprise-complete
+scorer rows). Its full imputed ΔR² was 0.03871855275695035 versus the local model's
+0.04095315077531125, and its paired score was also lower. It remains unapproved;
+these small cohorts do not establish a generative advantage. Exact hashes,
+coverage policies and limits are in reports/archive-eval.md. This description
+must change before another method actually affects production predictions.
 
 ## Evaluation
 

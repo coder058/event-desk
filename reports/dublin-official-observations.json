@@ -2,18 +2,18 @@
   "official_observations": {
     "submissions": {
       "s1": {
-        "request_started_at": 1791282450.9415271,
-        "observed_at": 1791282452.5937207,
-        "calendar_sha256": "16b7b2bc64769490e0352661b6b1659e5445b2af2ed0b4df43299a5b70e95f18",
-        "calendar_raw_sha256": "b380e8493bee08a51f1b41a4124e0debd39cb4fc4d1d51485c1597aab4376984",
+        "request_started_at": 1791282827.0009208,
+        "observed_at": 1791282828.8158193,
+        "calendar_sha256": "f2e7653ece35a0d47174a59c4fb66cd3991fd2eaa9b9013aa0bd5d453d753656",
+        "calendar_raw_sha256": "113810c4f24264d7514b8b8904bb520f31a19899a550241ac04eb2f3942a8ede",
         "health_raw_sha256": "baceadc2a7f38b13fe990804577527dcaae6901ef5b8085a37877c80e6311df6",
         "calendar": {
-          "scheduled_entries": 2942,
+          "scheduled_entries": 2941,
           "event_types": {
-            "EARNINGS_RELEASE": 2942
+            "EARNINGS_RELEASE": 2941
           },
           "timing_categories": {
-            "SCHEDULED": 2942
+            "SCHEDULED": 2941
           },
           "first_calendar_day_central": "2026-10-06",
           "last_calendar_day_central": "2026-11-05",
@@ -63,9 +63,9 @@
           "last_test_prediction_at": null
         },
         "collector": {
-          "checked_at": 1791282452.5937207,
+          "checked_at": 1791282828.8158193,
           "state": "observed",
-          "scheduled_entries": 2942
+          "scheduled_entries": 2941
         }
       }
     },
@@ -77,8 +77,8 @@
   },
   "schema_counts": {
     "schema": "009_source_checkpoints",
-    "calendar_versions": 16,
-    "health_observations": 50,
+    "calendar_versions": 17,
+    "health_observations": 51,
     "observer_source_lf_sha256": "3dc0afc30bdda4de0d8bd8a6d13da5008a7b82863f91fc097ed9fdaf2cc93bc4"
   },
   "observer_running": true,
@@ -89,7 +89,7 @@
     "database": "reachable",
     "worker": {
       "state": "recent_heartbeat",
-      "seen_at": 1791282620.4000604,
+      "seen_at": 1791283039.7277489,
       "details": {
         "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
         "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",

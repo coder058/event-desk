@@ -29,6 +29,15 @@ SQLite tests cover retries, missing/corrupt bytes, rollback, cutoff filtering an
 concurrent calls. CI includes actual PostgreSQL duplicate/cross-feed races.
 The source tables are additive migrations, not a running daily ingestion service.
 
+Checkpoint payloads are detached from caller-owned nested containers before
+admission. Only finite JSON values with string object keys are allowed; tuples
+and implicit key coercion are rejected. Cursor reads, idempotent retries and
+extensions reverify the retained batch digest, feed identity, capture metadata
+and source bytes. Corrupt existing metadata cannot silently count as an already
+committed successful batch or become the parent of a new checkpoint. These
+checks detect retained corruption; they are not a full hostile-database threat
+model or a signature from the SEC.
+
 No SEC HTTP request or real filing is claimed by the synthetic boundary tests.
 The configured SEC identity is still missing; see BLOCKED.md. Future network work
 must follow [SEC fair access](https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data)
