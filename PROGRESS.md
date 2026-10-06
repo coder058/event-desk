@@ -264,3 +264,19 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
   project IDs, model dimensions and free text excluded. Tests verify persistent
   cooldown respects the returned duration. No prompt, features or prediction
   function changed; the small valid sample still does not justify a blend.
+
+## 2026-10-06 — official read-only calendar/counters
+
+- Source b5f105d passed CI 37404395942 and deployed; trained worker heartbeat,
+  unchanged model/configuration and zero received events were verified afterward.
+- Authenticated GET /events and GET /health returned 2,970 scheduled entries,
+  zero rolling delivery/submission counters and no reported portal-test prediction.
+  The returned calendar is a current partial schedule, not official scored coverage.
+- Added a separate production metadata observer with no POST route. Tests verify
+  GET-only requests, fixture isolation, bounded reads, ignored unknown fields,
+  Central-time scoring boundaries and unavailable eligibility. Changed calendars
+  are versioned; failed observations preserve the last complete snapshot.
+- Added append-only schema 008 observations, dashboard aggregates and independent
+  alerts for stale/failed observations and official reported delivery failures.
+  Full local suite: 47 passed in 69.27 seconds; strict typing passed in 15 modules.
+  These changes still need deployment and actual PostgreSQL/browser verification.

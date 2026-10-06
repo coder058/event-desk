@@ -47,3 +47,12 @@ guarantee of future coverage. Expired backlog cannot hold up newer valid work.
 Cache only static fitted explanation metadata and operate on nonzero sparse terms.
 Prediction and feature code stay frozen. Record the paired measurement and numerical
 differences; this improves evidence rendering, not model accuracy or a trading edge.
+
+## 2026-10-06 — official observations are independent from predictions
+
+Read the existing production calendar/counters in an isolated observer, not in the
+receipt or inference path. Retain calendar versions and original-response hashes;
+health observations are separate sequential requests and rolling counters. Do not
+infer an eligible-event denominator from mutable schedules or compare rolling
+official counts with cumulative local ledger counts as if their windows matched.
+Failed reads cannot replace the last complete observation or fabricate coverage.

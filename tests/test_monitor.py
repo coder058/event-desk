@@ -23,3 +23,22 @@ def test_monitor_distinguishes_worker_deadline_backup_and_https_conditions(tmp_p
     monitor.atomic_record(record, {"active_alerts": ["https_path_unverified"]})
     assert json.loads(record.read_text())["active_alerts"] == ["https_path_unverified"]
     assert not list(record.parent.glob(".monitor-*"))
+
+
+def test_official_snapshot_failure_and_staleness_do_not_become_coverage():
+    # PLACEHOLDER: synthetic times/counters exercise observability, not actual delivery.
+    now = 10000
+    assert monitor.evaluate_official(None, now) == ["official_observations_unverified"]
+    record = {"observed_at": now, "collector": {"state": "observed"},
+              "official_rolling_24h_counters": {"submission_n_total": 2}}
+    official = {"configured_slots": ["s1"], "submissions": {"s1": record}}
+    assert monitor.evaluate_official(official, now) == []
+    record["collector"]["state"] = "observation_failed"
+    assert monitor.evaluate_official(official, now) == ["official_observation_failed"]
+    record["official_rolling_24h_counters"]["submission_n_late"] = 1
+    assert monitor.evaluate_official(official, now+1201) == ["official_delivery_or_submission_failures",
+        "official_observation_failed", "official_observations_stale"]
+    official["configured_slots"].append("s2")
+    assert "official_observations_unverified" in monitor.evaluate_official(official, now)
+    record["collector"] = None
+    assert "official_observation_failed" in monitor.evaluate_official(official, now)

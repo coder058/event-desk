@@ -110,6 +110,12 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
             raise HTTPException(404)
         return result
 
+    @app.get("/api/competition")
+    async def official_observations() -> dict[str, object]:
+        result = await asyncio.to_thread(store.competition_overview)
+        result["configured_slots"] = list(settings.submissions)
+        return result
+
     @app.get("/", response_class=HTMLResponse)
     async def index() -> str:
         return Path(__file__).with_name("dashboard.html").read_text(encoding="utf-8")

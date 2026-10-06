@@ -77,6 +77,29 @@ def atomic_record(path: Path, record: dict) -> None:
         Path(temporary).unlink(missing_ok=True)
 
 
+def evaluate_official(observations: dict | None, now: float) -> list[str]:
+    if observations is None or not observations.get("configured_slots"):
+        return ["official_observations_unverified"]
+    alerts = set()
+    for slot in observations["configured_slots"]:
+        record = observations.get("submissions", {}).get(slot)
+        # GUESS: tolerate two ten-minute collector periods; operational threshold.
+        # UNCALIBRATED GUESS
+        if not record or not isinstance(record.get("observed_at"), (int, float)):
+            alerts.add("official_observations_unverified")
+            continue
+        age = now-record["observed_at"]
+        if age < 0 or age > 1200:
+            alerts.add("official_observations_stale")
+        if (record.get("collector") or {}).get("state") != "observed":
+            alerts.add("official_observation_failed")
+        health = record.get("official_rolling_24h_counters", {})
+        if any(health.get(name) for name in ("webhook_n_4xx", "webhook_n_5xx", "webhook_n_timeout",
+                                            "submission_n_late", "submission_n_invalid_event")):
+            alerts.add("official_delivery_or_submission_failures")
+    return sorted(alerts)
+
+
 def telegram(message: str) -> str:
     token, chat = os.getenv("TELEGRAM_BOT_TOKEN", ""), os.getenv("TELEGRAM_CHAT_ID", "")
     if not token or not chat:
@@ -102,10 +125,11 @@ def run() -> None:
     previous = json.loads(path.read_text()) if path.is_file() else {}
     now = time.time()
     day = datetime.fromtimestamp(now, timezone.utc).date().isoformat()
-    health, scoreboard, backup = None, None, None
+    health, scoreboard, backup, official = None, None, None, None
     try:
         health = read_json(ORIGIN+"/healthz")
         scoreboard = read_json(ORIGIN+"/api/scoreboard")
+        official = read_json(ORIGIN+"/api/competition")
     except (OSError, ValueError, urllib.error.URLError):
         pass
     try:
@@ -124,6 +148,7 @@ def run() -> None:
     except (OSError, ValueError):
         external_https_verified = False
     alerts = evaluate(health, backup, now, origin_https_verified and external_https_verified)
+    alerts = sorted(set(alerts+evaluate_official(official, now)))
     old = set(previous.get("active_alerts", []))
     new, resolved = sorted(set(alerts)-old), sorted(old-set(alerts))
     if new or resolved:

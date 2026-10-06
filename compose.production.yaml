@@ -51,6 +51,15 @@ services:
     volumes: ["./ops/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy-data:/data", "caddy-config:/config"]
     depends_on: [api]
     mem_limit: 128m # UNCALIBRATED GUESS: existing VPS operational budget.
+  official-observer:
+    logging: *local-logging
+    build: .
+    restart: unless-stopped
+    env_file: [/etc/eventdesk/env, /etc/eventdesk/runtime.env]
+    command: ["python", "-m", "eventdesk.competition"]
+    mem_limit: 128m # GUESS: isolated metadata collector; measure RSS. # UNCALIBRATED GUESS
+    depends_on:
+      migrate: {condition: service_completed_successfully}
 volumes:
   production-db:
   caddy-data:

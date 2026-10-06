@@ -9,7 +9,18 @@ from dataclasses import dataclass
 from threading import RLock
 from typing import Any
 
-from sqlalchemy import JSON, Float, Integer, String, Text, UniqueConstraint, create_engine, func, select
+from sqlalchemy import (
+    JSON,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    create_engine,
+    func,
+    select,
+)
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
@@ -67,6 +78,25 @@ class ServicePulse(Base):
     name: Mapped[str] = mapped_column(String, primary_key=True)
     seen_at: Mapped[float] = mapped_column(Float)
     details: Mapped[dict[str, Any]] = mapped_column(JSON)
+
+
+class CompetitionCalendar(Base):
+    __tablename__ = "competition_calendars"
+    content_hash: Mapped[str] = mapped_column(String, primary_key=True)
+    events: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+
+
+class CompetitionObservation(Base):
+    __tablename__ = "competition_observations"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slot: Mapped[str] = mapped_column(String, index=True)
+    started_at: Mapped[float] = mapped_column(Float)
+    observed_at: Mapped[float] = mapped_column(Float)
+    calendar_hash: Mapped[str] = mapped_column(String, ForeignKey("competition_calendars.content_hash"))
+    calendar_raw_hash: Mapped[str] = mapped_column(String)
+    health_raw_hash: Mapped[str] = mapped_column(String)
+    health: Mapped[dict[str, Any]] = mapped_column(JSON)
+    summary: Mapped[dict[str, Any]] = mapped_column(JSON)
 
 
 @dataclass(frozen=True)
@@ -263,6 +293,43 @@ class Store:
                 session.add(ServicePulse(name=name, seen_at=now, details=details))
             else:
                 row.seen_at, row.details = now, details
+
+    def record_competition_observation(self, slot: str, calendar: list[dict[str, Any]],
+            health: dict[str, Any], raw_calendar_hash: str, raw_health_hash: str,
+            summary: dict[str, Any], started_at: float, observed_at: float) -> None:
+        import json
+        # Unchanged normalized calendars are stored once; health observations remain append-only.
+        canonical = json.dumps(sorted(calendar, key=lambda event: event["event_id"]),
+                               sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+        digest = hashlib.sha256(canonical).hexdigest()
+        with self.fixture_guard(), Session(self.engine) as session, session.begin():
+            if self.engine.dialect.name == "postgresql":
+                from sqlalchemy import text
+                key = int.from_bytes(bytes.fromhex(digest)[:8], signed=True)
+                session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": key})
+            if session.get(CompetitionCalendar, digest) is None:
+                session.add(CompetitionCalendar(content_hash=digest, events=calendar))
+                session.flush()
+            session.add(CompetitionObservation(slot=slot, started_at=started_at, observed_at=observed_at,
+                calendar_hash=digest, calendar_raw_hash=raw_calendar_hash, health_raw_hash=raw_health_hash,
+                health=health, summary=summary))
+
+    def competition_overview(self) -> dict[str, Any]:
+        with Session(self.engine) as session:
+            slots = session.scalars(select(CompetitionObservation.slot).distinct()).all()
+            result: dict[str, Any] = {}
+            for slot in slots:
+                row = session.scalar(select(CompetitionObservation).where(CompetitionObservation.slot == slot)
+                                     .order_by(CompetitionObservation.id.desc()).limit(1))
+                assert row is not None
+                pulse = session.get(ServicePulse, "competition:"+slot)
+                result[slot] = {"request_started_at": row.started_at, "observed_at": row.observed_at,
+                    "calendar_sha256": row.calendar_hash, "calendar_raw_sha256": row.calendar_raw_hash,
+                    "health_raw_sha256": row.health_raw_hash, "calendar": row.summary,
+                    "official_rolling_24h_counters": row.health,
+                    "collector": {"checked_at": pulse.seen_at, **pulse.details} if pulse else None}
+            return {"submissions": result, "official_eligible_coverage": None,
+                    "limits": "Read-only calendar and rolling counters; this does not establish scoring eligibility."}
 
     def scoreboard(self) -> dict[str, Any]:
         """Receipt coverage is a different denominator from official calendar eligibility."""
