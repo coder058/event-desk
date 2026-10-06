@@ -1,0 +1,11 @@
+[Unit]
+Description=Event Desk operational probe once per minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+# GUESS: minute cadence is an operational alert choice, not measured detection assurance. # UNCALIBRATED GUESS
+Unit=eventdesk-monitor.service
+
+[Install]
+WantedBy=timers.target

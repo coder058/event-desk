@@ -1,0 +1,17 @@
+[Unit]
+Description=Event Desk independent local health and backup alerts
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=/etc/eventdesk/env
+UMask=0077
+ExecStart=/usr/bin/flock -n /run/eventdesk-monitor.lock /usr/bin/python3 -I /usr/local/libexec/eventdesk-monitor.py
+TimeoutStartSec=30
+# GUESS: bounded local operational watchdog, not the competition submission limit. # UNCALIBRATED GUESS
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/eventdesk/monitor /run

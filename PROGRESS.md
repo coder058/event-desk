@@ -218,3 +218,25 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
   avoiding traceback noise and invented fallback records.
 - Optional SDK setup is documented in docs/MCP.md. This is a stdio server, not a
   claim that a public HTTPS MCP service or any official scored event exists.
+
+- Commit 2e8792f passed CI 37389255947 and deployed on Dublin. Trained-model
+  replay then completed 400 ACKs/simulations in 10.625704 seconds, maximum ACK
+  1,248.454 ms. The report metadata helper failed after replay due to nested
+  escaping. Repaired it; recovered the already-written aggregate and read hashes
+  from the unchanged production worker, verifying public source and matching
+  image ID. The report states this metadata-recovery boundary explicitly.
+- Added three more valid Groq Q2 analyses (1,282 / 1,210 / 1,184 tokens). These
+  small samples do not justify a blend. Clarified that Q2 calibration needs local
+  predictions from a Q4/Q1-only model, not the in-sample deployed through-Q2 model.
+
+## 2026-10-05 — local observability, deployment still to verify
+
+- Manual OpenTelemetry spans use an allowlisted local exporter, with no network
+  endpoint, source text, signed URL, raw exception or environment-value export.
+  Actual SDK tests verify parent/child correlation and exception-message exclusion.
+- Independent host monitor logs alert transitions and a daily cumulative summary,
+  distinguishing worker, deadlines, rejected/expired work and backup transfer age.
+  An origin-side HTTPS request does not verify external inbound networking.
+- Docker log rotation is bounded. Operational cadence/retention/age thresholds are
+  uncalibrated choices, labelled in code. Telegram/Langfuse remain optional.
+- Pending: deployment, actual local spans and timer behavior, latest-schema backup.

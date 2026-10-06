@@ -8,11 +8,13 @@ import logging
 import os
 import socket
 import time
+from contextlib import AbstractContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
+from opentelemetry.trace import Span
 
 from eventdesk.blend import BlendModel
 from eventdesk.config import COMPETITION_ORIGIN, SUBMISSION_RESERVE_SECONDS, Settings
@@ -23,6 +25,7 @@ from eventdesk.model import LocalModel
 from eventdesk.quotas import Quotas
 from eventdesk.schemas import Prediction, SubmissionPayload
 from eventdesk.store import Store, Work
+from eventdesk.telemetry import Telemetry
 
 LOG = logging.getLogger("eventdesk.worker")
 
@@ -40,16 +43,20 @@ async def allowed_material_url(url: str, hosts: frozenset[str]) -> None:
 
 class Worker:
     def __init__(self, settings: Settings, store: Store, model: LocalModel,
-                 http: httpx.AsyncClient) -> None:
+                 http: httpx.AsyncClient, *, telemetry: Telemetry | None = None) -> None:
         self.settings, self.store, self.model, self.http = settings, store, model, http
         self.router: Router | None = None
         self.blend: BlendModel | None = None
         self.configuration_hash: str | None = None
+        self.telemetry = telemetry
         if os.getenv("EVENTDESK_LLM_ENABLED", "false").lower() == "true" and not settings.fixture_mode:
             self.router = Router(Quotas(store), http, providers_from_env())
             blend_path = os.getenv("EVENTDESK_BLEND_PATH")
             if blend_path:
                 self.blend = BlendModel(Path(blend_path))
+
+    def stage(self, name: str) -> AbstractContextManager[Span | None]:
+        return self.telemetry.stage(name) if self.telemetry else nullcontext(None)
 
     async def process(self, work: Work) -> None:
         payload = work.payload
@@ -77,27 +84,29 @@ class Worker:
                             fallback = "materials_skipped_deadline_reserve"
                         else:
                             # SOURCE: official starter's 15-second materials timeout; reserve bounds the whole phase.
-                            async with asyncio.timeout(min(15, budget)):
-                                await allowed_material_url(work.event.information_url, self.settings.material_hosts)
-                                async with self.http.stream("GET", work.event.information_url,
-                                                            timeout=min(15, budget)) as response:
-                                    response.raise_for_status()
-                                    raw = bytearray()
-                                    async for chunk in response.aiter_bytes():
-                                        raw.extend(chunk)
-                                        # GUESS: 16 MiB memory ceiling for official materials; not a model threshold. # UNCALIBRATED GUESS
-                                        if len(raw) > 16 * 1024 * 1024:
-                                            raise ValueError("Material body exceeds memory ceiling")
-                                    bundle = json.loads(raw)
-                                    # SOURCE: strict JSON numeric boundary; invalid material uses fitted fallback.
-                                    json.dumps(bundle, allow_nan=False)
-                                    items = select_items(bundle)
+                            with self.stage("eventdesk.materials"):
+                                async with asyncio.timeout(min(15, budget)):
+                                    await allowed_material_url(work.event.information_url, self.settings.material_hosts)
+                                    async with self.http.stream("GET", work.event.information_url,
+                                                                timeout=min(15, budget)) as response:
+                                        response.raise_for_status()
+                                        raw = bytearray()
+                                        async for chunk in response.aiter_bytes():
+                                            raw.extend(chunk)
+                                            # GUESS: 16 MiB ceiling for official materials; not a model threshold. # UNCALIBRATED GUESS
+                                            if len(raw) > 16 * 1024 * 1024:
+                                                raise ValueError("Material body exceeds memory ceiling")
+                                        bundle = json.loads(raw)
+                                        # SOURCE: strict JSON numeric boundary; invalid material uses fitted fallback.
+                                        json.dumps(bundle, allow_nan=False)
+                                        items = select_items(bundle)
                     else:
                         fallback = "materials_missing_url"
                 except (httpx.HTTPError, ValueError, OSError, TimeoutError):
                     fallback = "materials_unavailable"
                 try:
-                    value = await asyncio.to_thread(self.model.predict, items)
+                    with self.stage("eventdesk.local_inference"):
+                        value = await asyncio.to_thread(self.model.predict, items)
                 except (ValueError, TypeError, KeyError, IndexError):
                     # SOURCE: already-fitted target mean, not an invented fallback prediction.
                     value = self.model.training_mean
@@ -160,9 +169,12 @@ class Worker:
                                     {"status": "fixture_simulation_not_competition"}, "simulated", time.time())
             return
         try:
-            response = await self.http.post(COMPETITION_ORIGIN + "/predictions", json=payload,
-                                           headers={"X-API-Key": self.settings.submissions[work.slot].api_key},
-                                           timeout=min(15, remaining))
+            with self.stage("eventdesk.submit") as span:
+                response = await self.http.post(COMPETITION_ORIGIN + "/predictions", json=payload,
+                                               headers={"X-API-Key": self.settings.submissions[work.slot].api_key},
+                                               timeout=min(15, remaining))
+                if span:
+                    span.set_attribute("http.response.status_code", response.status_code)
             if response.status_code == 201:
                 body = response.json()
                 await asyncio.to_thread(self.store.finish, work.id, body, "api_accepted", time.time())
@@ -209,7 +221,11 @@ class Worker:
 
     async def process_claimed(self, work: Work) -> None:
         try:
-            await self.process(work)
+            context = (self.telemetry.stage("eventdesk.job", **{"eventdesk.job_id": work.id,
+                "eventdesk.slot": work.slot, "eventdesk.fixture": self.settings.fixture_mode,
+                "eventdesk.model_sha256": self.model.sha256}) if self.telemetry else nullcontext())
+            with context:
+                await self.process(work)
         except Exception as exc:
             # Never print exception text: SDK exceptions can include signed URLs or credentials.
             LOG.error("worker_failure event=%s exception_type=%s", work.event.event_id, type(exc).__name__)
@@ -256,7 +272,8 @@ async def run() -> None:
     if model.artifact.get("fixture_only") and not settings.fixture_mode:
         raise RuntimeError("Refusing synthetic fixture model in production")
     async with httpx.AsyncClient(follow_redirects=False) as http:
-        worker = Worker(settings, store, model, http)
+        telemetry = Telemetry()
+        worker = Worker(settings, store, model, http, telemetry=telemetry)
         if not settings.fixture_mode:
             worker.configuration_hash = verify_freeze(Path("competition-config.json"), model,
                 hybrid_enabled=worker.blend is not None,
@@ -264,7 +281,10 @@ async def run() -> None:
         await asyncio.to_thread(store.recover)
         LOG.info("worker_started model_hash=%s configuration_hash=%s fixture=%s",
                  model.sha256, worker.configuration_hash, settings.fixture_mode)
-        await asyncio.gather(worker.heartbeat(), worker.shadow_loop(), worker.dispatch())
+        try:
+            await asyncio.gather(worker.heartbeat(), worker.shadow_loop(), worker.dispatch())
+        finally:
+            telemetry.shutdown()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,10 @@
+# GUESS: bounded local log retention, not an observed optimum. # UNCALIBRATED GUESS
+x-local-logging: &local-logging
+  driver: json-file
+  options: {max-size: "10m", max-file: "3"}
 services:
   db:
+    logging: *local-logging
     image: postgres:16-alpine
     restart: unless-stopped
     env_file: /etc/eventdesk/database.env
@@ -12,12 +17,14 @@ services:
       retries: 20
     mem_limit: 256m # UNCALIBRATED GUESS: operational resource budget; verify on this VPS.
   migrate:
+    logging: *local-logging
     build: .
     env_file: /etc/eventdesk/runtime.env
     command: ["alembic", "upgrade", "head"]
     depends_on:
       db: {condition: service_healthy}
   api:
+    logging: *local-logging
     build: .
     restart: unless-stopped
     env_file: [/etc/eventdesk/env, /etc/eventdesk/runtime.env]
@@ -27,6 +34,7 @@ services:
     depends_on:
       migrate: {condition: service_completed_successfully}
   worker:
+    logging: *local-logging
     build: .
     restart: unless-stopped
     env_file: [/etc/eventdesk/env, /etc/eventdesk/runtime.env]
@@ -36,6 +44,7 @@ services:
     depends_on:
       migrate: {condition: service_completed_successfully}
   caddy:
+    logging: *local-logging
     image: caddy:2-alpine
     restart: unless-stopped
     ports: ["80:80", "443:443"]

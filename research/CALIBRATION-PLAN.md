@@ -5,6 +5,11 @@ The initial competition deployment remains facts-only. No guessed blend weight i
 1. Use the same quoted sub-score prompt/schema/router for offline and runtime.
 2. Collect deterministic archive samples from Q2 for fitting and Q3 for validation.
    Sample selection is label-blind (event datetime/id ordering); never select by return.
+   Q2's local feature must come from a model trained on Q4/Q1 only; the deployed
+   baseline trained through Q2 would supply an in-sample feature and is forbidden
+   for blend fitting. Retain that calibration artifact's hash separately. Evaluate
+   the fitted mapping with the deployed through-Q2 local model on Q3, recording
+   this training-window difference instead of treating it as identical input quality.
 3. Keep input, prompt, schema, provider/model hashes and every failed attempt. Retries
    obey persisted quotas; do not bypass free-account limits or silently replace models.
 4. Fit a regression mapping local prediction and five sub-scores plus evidence

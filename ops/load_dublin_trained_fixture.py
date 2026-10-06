@@ -1,6 +1,7 @@
 """HTTP/PG busy-day replay with the exact trained artifact and label-free archive inputs."""
 from __future__ import annotations
 
+import argparse
 import gzip
 import hashlib
 import json
@@ -32,6 +33,10 @@ try:
  subprocess.run(compose+['exec','-T','api','python','-c',write],cwd=root,input=json.dumps(data).encode(),check=True)
  subprocess.run(compose+['exec','-T','api','python','/tmp/trained-load.py','--material-file','/tmp/archive-materials.json'],cwd=root,check=True)
  subprocess.run(['sudo','docker','cp','eventdesk-trained-fixture-api-1:/tmp/eventdesk-fixture-load.json',str(root/'reports/trained-fixture-load.json')],check=True)
+ probe="import hashlib,json;from pathlib import Path;import eventdesk.model,eventdesk.worker;print(json.dumps({name:hashlib.sha256(Path(module.__file__).read_text().encode()).hexdigest() for name,module in [('engine_model_source_lf_sha256',eventdesk.model),('engine_worker_source_lf_sha256',eventdesk.worker)]}))"
+ engine=json.loads(subprocess.check_output(compose+['exec','-T','worker','python','-c',probe],cwd=root))
+ engine['engine_image_id']=subprocess.check_output(['sudo','docker','inspect','--format','{{.Image}}','eventdesk-trained-fixture-worker-1']).decode().strip()
+ report_path=root/'reports/trained-fixture-load.json';report=json.loads(report_path.read_text());report.update(engine);report_path.write_text(json.dumps(report))
 finally:
  subprocess.run(compose+['logs','--no-log-prefix','--tail','5','api','worker'],cwd=root,check=False)
  subprocess.run(compose+['down'],cwd=root,check=True)
@@ -40,6 +45,9 @@ finally:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
     archive = Path.home() / ".eventdesk/research/archive/2026Q3.jsonl.gz"
     with gzip.open(archive, "rt", encoding="utf-8") as stream:
         rows = [json.loads(line) for line in stream]
@@ -54,8 +62,8 @@ if __name__ == "__main__":
     copied = subprocess.run(["scp", "-i", str(Path.home() / ".ssh/lightsail-eu-west-1.pem"),
         "-oBatchMode=yes", "-oStrictHostKeyChecking=yes",
         "ubuntu@52.17.192.36:/srv/eventdesk/reports/trained-fixture-load.json",
-        "reports/dublin-trained-fixture-load.json"], check=True)
-    report_path = Path("reports/dublin-trained-fixture-load.json")
+        str(args.output)], check=True)
+    report_path = args.output
     report = json.loads(report_path.read_text())
     if report["worker_model_sha256"] != hashlib.sha256(Path("artifacts/local-model.joblib").read_bytes()).hexdigest():
         raise RuntimeError("Fixture worker did not use the intended trained artifact")

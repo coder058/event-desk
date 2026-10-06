@@ -10,7 +10,9 @@ requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115,<1", "uvicorn>=0.32,<1", "httpx>=0.28,<1",
   "pydantic>=2.10,<3", "sqlalchemy>=2.0,<3", "psycopg[binary]>=3.2,<4",
-  "alembic>=1.14,<2", "scikit-learn>=1.6,<2", "pandas>=2.2,<4", "joblib>=1.4,<2"
+  "alembic>=1.14,<2", "scikit-learn>=1.6,<2", "pandas>=2.2,<4", "joblib>=1.4,<2",
+  # SOURCE: official SDK 1.45.0 installed and exercised for manual local traces.
+  "opentelemetry-sdk==1.45.0"
 ]
 
 [project.optional-dependencies]

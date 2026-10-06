@@ -1,0 +1,21 @@
+{
+  "kind": "http_postgres_fixture_simulation",
+  "events": 400,
+  "ack_count": 400,
+  "completed_simulated": 400,
+  "seconds": 10.625704398029484,
+  "ack_p50_ms": 259.00606147479266,
+  "ack_p95_ms": 686.2456620670855,
+  "ack_p99_ms": 941.6524885129184,
+  "ack_max_ms": 1248.4538319986314,
+  "concurrency": 16,
+  "fixture_input_kind": "archived_official_disclosures",
+  "worker_model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "limits": "Archived official inputs and simulated fixture submission; no outcomes, official coverage or model accuracy measured",
+  "engine_model_source_lf_sha256": "eed58cd788e372873ddf36a9230ada1bca06b50e33baa71cd840505b93d4c9b4",
+  "engine_worker_source_lf_sha256": "bff62f3bf22da754c4f2fa180d1597889ee0285d09e80efa97364f49709976a7",
+  "engine_source_sha": "2e8792f994d50950ca11ad3f6303ba6ca9c0818d",
+  "engine_image_id": "sha256:e90691a4c2eb5bdb5accfb90e8ff9ccd082579c3c8ca6d878911c8180f94b17d",
+  "metadata_collection": "Read from unchanged production worker/image after fixture cleanup; replay metadata helper failed and was repaired",
+  "archive_sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c"
+}
