@@ -382,3 +382,21 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 
 Remaining: public inbound HTTPS/portal TEST, adequate chronological blend evidence,
 PostgreSQL source verification, identified live SEC reads and future scored coverage.
+
+## 2026-10-06 — bounded submission attempts
+
+- Source checkpoint/ownership commit f001afe passed CI 37446846282. Actual
+  PostgreSQL fixture verified eight duplicate attempts, four cross-feed commits
+  and one retained capture; no external SEC request occurred.
+- Submission now bounds the whole connection/header/body attempt by the inherited
+  15-second budget and original deadline. A received HTTP 201 remains an observed
+  acknowledgement even if its body stalls, is malformed/nonfinite or exceeds the
+  labelled 1 MiB operational cap; it is not reposted for a body parsing failure.
+  HTTP 201 is still not proof of eligibility. Full valid response stays private.
+- Fault tests distinguish a stalled pre-header POST (uncertain, same immutable
+  outbox on retry), a stalled acknowledged body (no retry), and rate-limit headers
+  with a stalled irrelevant body (schedule Retry-After without reading it).
+- Initial oversized pytest parameter generated a Windows path-too-long setup
+  error; explicit short test IDs fixed that fixture issue. Focused checks passed
+  18 tests, full suite 71 tests in 86.77 seconds, strict typing/lint/secret scan passed.
+- These changes await deployment and do not establish live network coverage.

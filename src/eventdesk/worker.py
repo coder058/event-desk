@@ -19,7 +19,7 @@ from opentelemetry.trace import Span
 from eventdesk.blend import BlendModel
 from eventdesk.config import COMPETITION_ORIGIN, SUBMISSION_RESERVE_SECONDS, Settings
 from eventdesk.freeze import CompetitionFreeze, verify_freeze
-from eventdesk.http_policy import retry_delay
+from eventdesk.http_policy import retry_delay, submit_bounded
 from eventdesk.llm import PROMPT_HASH, Router, prompt_materials, providers_from_env
 from eventdesk.materials import input_hash, select_items
 from eventdesk.model import LocalModel
@@ -171,26 +171,25 @@ class Worker:
             return
         try:
             with self.stage("eventdesk.submit") as span:
-                response = await self.http.post(COMPETITION_ORIGIN + "/predictions", json=payload,
-                                               headers={"X-API-Key": self.settings.submissions[work.slot].api_key},
-                                               timeout=min(15, remaining))
+                receipt = await submit_bounded(self.http, COMPETITION_ORIGIN + "/predictions", payload=payload,
+                    headers={"X-API-Key": self.settings.submissions[work.slot].api_key}, remaining=remaining)
                 if span:
-                    span.set_attribute("http.response.status_code", response.status_code)
-            if response.status_code == 201:
-                body = response.json()
+                    span.set_attribute("http.response.status_code", receipt.http_status)
+            if receipt.http_status == 201:
+                body = receipt.body
                 await asyncio.to_thread(self.store.finish, work.id, body, "api_accepted", time.time())
                 LOG.info("submission event=%s slot=%s state=api_accepted", work.event.event_id, work.slot)
-            elif response.status_code in (401, 403, 409, 422):
+            elif receipt.http_status in (401, 403, 409, 422):
                 await asyncio.to_thread(self.store.finish, work.id,
-                                        {"status": "rejected", "http_status": response.status_code},
+                                        {"status": "rejected", "http_status": receipt.http_status},
                                         "rejected", time.time())
-                LOG.error("submission event=%s rejected_http=%s", work.event.event_id, response.status_code)
+                LOG.error("submission event=%s rejected_http=%s", work.event.event_id, receipt.http_status)
             else:
                 now = time.time()
                 # SOURCE: honor server Retry-After (RFC 9110); the durable queue expires delays beyond the deadline.
-                await asyncio.to_thread(self.store.retry, work.id, "submission_http_" + str(response.status_code),
-                                        retry_delay(response.headers.get("Retry-After"), now), now)
-        except (httpx.HTTPError, ValueError):
+                await asyncio.to_thread(self.store.retry, work.id, "submission_http_" + str(receipt.http_status),
+                                        retry_delay(receipt.retry_after, now), now)
+        except (httpx.HTTPError, OSError, ValueError, TimeoutError):
             # An uncertain POST may have reached the server. Reusing the outbox prevents a revised prediction.
             now = time.time()
             await asyncio.to_thread(self.store.retry, work.id, "submission_transport_uncertain",
