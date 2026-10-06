@@ -73,7 +73,7 @@ class Quotas:
     def settle(self, usage_id: int, actual_tokens: int | None, status: str,
                cooldown_seconds: float = 0, now: float | None = None) -> None:
         current = time.time() if now is None else now
-        with Session(self.store.engine) as session, session.begin():
+        with self.store.fixture_guard(), Session(self.store.engine) as session, session.begin():
             usage = session.get(ProviderUsage, usage_id, with_for_update=True)
             if usage is None:
                 raise RuntimeError("Missing quota reservation")

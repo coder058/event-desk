@@ -365,7 +365,7 @@ class Store:
                      "configuration_hash": j.configuration_hash,
                      "provider": j.provider, "fallback": j.fallback, "latency_ms": j.latency_ms,
                      "shadow_state": j.shadow_state,
-                     "error": j.error, "submission_status": j.response.get("status") if j.response else None}
+                     "error": j.error, "submission_status": j.state if j.response is not None else None}
                     for j in jobs]
 
     def public_event(self, event_id: str, slot: str = "s1") -> dict[str, Any] | None:
@@ -383,5 +383,10 @@ class Store:
                     "shadow_state": job.shadow_state,
                     "received_at": job.received_at, "deadline": job.deadline,
                     "submitted_at": job.submitted_at, "latency_ms": job.latency_ms,
-                    "submission_response": job.response,
+                    # Public response is derived from our ledger; upstream JSON remains private.
+                    # No allowlist of field names can make an arbitrary upstream status string secret-safe.
+                    # SOURCE: api_accepted records an observed HTTP 201, not verified score eligibility.
+                    "submission_response": ({"state": job.state,
+                        **({"http_status": 201} if job.state == "api_accepted" else {})}
+                        if job.response is not None else None),
                     "state": job.state, "error": job.error}

@@ -19,6 +19,7 @@ from opentelemetry.trace import Span
 from eventdesk.blend import BlendModel
 from eventdesk.config import COMPETITION_ORIGIN, SUBMISSION_RESERVE_SECONDS, Settings
 from eventdesk.freeze import CompetitionFreeze, verify_freeze
+from eventdesk.http_policy import retry_delay
 from eventdesk.llm import PROMPT_HASH, Router, prompt_materials, providers_from_env
 from eventdesk.materials import input_hash, select_items
 from eventdesk.model import LocalModel
@@ -185,12 +186,15 @@ class Worker:
                                         "rejected", time.time())
                 LOG.error("submission event=%s rejected_http=%s", work.event.event_id, response.status_code)
             else:
-                # GUESS: two-second retry delay for transport/server errors; always identical stored payload. # UNCALIBRATED GUESS
+                now = time.time()
+                # SOURCE: honor server Retry-After (RFC 9110); the durable queue expires delays beyond the deadline.
                 await asyncio.to_thread(self.store.retry, work.id, "submission_http_" + str(response.status_code),
-                                        2, time.time())
+                                        retry_delay(response.headers.get("Retry-After"), now), now)
         except (httpx.HTTPError, ValueError):
             # An uncertain POST may have reached the server. Reusing the outbox prevents a revised prediction.
-            await asyncio.to_thread(self.store.retry, work.id, "submission_transport_uncertain", 2, time.time())
+            now = time.time()
+            await asyncio.to_thread(self.store.retry, work.id, "submission_transport_uncertain",
+                                    retry_delay(None, now), now)
 
     async def shadow_loop(self) -> None:
         """One optional evidence lane; never shares the deadline-critical worker pool."""

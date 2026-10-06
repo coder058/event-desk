@@ -335,3 +335,21 @@ quota persistence and structured archive calibration. Phase A1 remains incomplet
 - This is initial raw UTF-8 quote/storage support, not a daily EDGAR collector,
   full HTML/PDF/XML parser, event study or LLM extraction. Those limits and the
   missing identified SEC contact are explicit in docs/EVIDENCE-BOUNDARIES.md.
+
+## 2026-10-06 — submission retry and public response boundaries
+
+- Source 5580202 is deployed; CI 37406542625 passed. Read-only verification
+  found schema 008, four retained observations, running observer and a recent
+  unchanged trained-model worker heartbeat. Zero official events and TESTs.
+- The initial probe used nonexistent `/health` (404); `/healthz` and the actual
+  read-only verification succeeded. This was a probe mistake, not a service outage.
+- Added integer/date Retry-After scheduling without changing the durable outbox;
+  delays that cannot fit before the original deadline expire, rather than repost.
+- Public event/listing responses now derive acknowledgement status from our own
+  ledger instead of reflecting arbitrary server JSON. Private response evidence
+  remains retained; HTTP 201 still does not prove score eligibility.
+- SQLite calibration settlement now uses the existing write guard. Tests exercise
+  concurrent cooldown updates and prevent a shorter result overwriting the maximum.
+- Focused retry/router/shadow/scoreboard checks initially passed 14 tests. The
+  complete suite then passed 54 tests in 52.27 seconds, with strict typing in
+  17 modules and lint clean. No prediction code or trained artifact changed.

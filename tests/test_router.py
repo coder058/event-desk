@@ -1,6 +1,7 @@
 import asyncio
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
@@ -27,6 +28,20 @@ def test_quota_reservation_persists_and_cooldown_blocks_after_restart(store):
     quotas.settle(second, None, "http_429", cooldown_seconds=60, now=1000)
     assert Quotas(store).reserve("fixture", 1, limits, 1061) is not None
     assert Quotas(store).reserve("fixture", 1, limits, 1059) is None
+
+
+def test_concurrent_fixture_settlement_cannot_shorten_provider_cooldown(store):
+    # PLACEHOLDER: synthetic reservations/cooldowns test concurrent research workers, not API capacity.
+    quotas = Quotas(store)
+    limits = Limits(20, 20, 1000, 1000)
+    reservations = [quotas.reserve("fixture", 1, limits, 1000) for _ in range(8)]
+    assert all(usage is not None for usage in reservations)
+    def settle(pair):
+        index, usage = pair
+        quotas.settle(usage, 1, "http_429", cooldown_seconds=index + 1, now=1000)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(settle, enumerate(reservations)))
+    assert Quotas(store).summary()["fixture"]["cooldown_until"] == 1008
 
 
 def test_router_503_fails_over_and_quotes_validated(store):
