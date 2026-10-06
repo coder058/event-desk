@@ -1,6 +1,7 @@
 """Shared durable provider admission control. Conservative reservation before external calls."""
 from __future__ import annotations
 
+import math
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -41,6 +42,7 @@ class Quotas:
         self.store = store
 
     def reserve(self, provider: str, tokens: int, limits: Limits, now: float) -> int | None:
+        self.validate_admission(tokens, limits, now)
         with self.store.fixture_guard(), Session(self.store.engine) as session, session.begin():
             if self.store.engine.dialect.name == "postgresql":
                 session.execute(text("SELECT pg_advisory_xact_lock(hashtext(:provider))"),
@@ -70,9 +72,47 @@ class Quotas:
             session.flush()
             return usage.id
 
+    def next_admission(self, provider: str, tokens: int, limits: Limits, now: float) -> float | None:
+        """Earliest local-ledger eligibility, not a reservation or account-wide quota guarantee."""
+        self.validate_admission(tokens, limits, now)
+        if tokens > min(limits.tokens_minute, limits.tokens_day):
+            return None  # Waiting cannot admit a request larger than a configured window.
+        with self.store.fixture_guard(), Session(self.store.engine) as session:
+            state = session.get(ProviderState, provider)
+            earliest = max(now, state.cooldown_until if state else now)
+            # SOURCE: same rolling minute/day and strict > boundary as reserve().
+            rows = list(session.execute(select(ProviderUsage.created_at,
+                func.coalesce(ProviderUsage.actual_tokens, ProviderUsage.reserved_tokens)).where(
+                ProviderUsage.provider == provider, ProviderUsage.created_at > now-86400)
+                .order_by(ProviderUsage.created_at, ProviderUsage.id)).all())
+            for window, request_limit, token_limit in ((60, limits.requests_minute, limits.tokens_minute),
+                                                       (86400, limits.requests_day, limits.tokens_day)):
+                active = [(float(created), int(used)) for created, used in rows if created > now-window]
+                count, total = len(active), sum(used for _, used in active)
+                for created, used in active:
+                    if count < request_limit and total+tokens <= token_limit:
+                        break
+                    count -= 1
+                    total -= used
+                    earliest = max(earliest, created+window)
+            return earliest
+
+    @staticmethod
+    def validate_admission(tokens: int, limits: Limits, now: float) -> None:
+        # SOURCE: counts are nonnegative integers; a nonpositive window limit cannot admit requests.
+        if (not isinstance(tokens, int) or isinstance(tokens, bool) or tokens < 0 or not math.isfinite(now)
+                or any(not isinstance(limit, int) or isinstance(limit, bool) or limit <= 0
+                       for limit in (limits.requests_minute, limits.requests_day,
+                                     limits.tokens_minute, limits.tokens_day))):
+            raise ValueError("Invalid admission query")
+
     def settle(self, usage_id: int, actual_tokens: int | None, status: str,
                cooldown_seconds: float = 0, now: float | None = None) -> None:
         current = time.time() if now is None else now
+        if (not math.isfinite(current) or not math.isfinite(cooldown_seconds) or cooldown_seconds < 0
+                or (actual_tokens is not None and (not isinstance(actual_tokens, int)
+                    or isinstance(actual_tokens, bool) or actual_tokens < 0))):
+            raise ValueError("Invalid provider settlement counters/time")
         with self.store.fixture_guard(), Session(self.store.engine) as session, session.begin():
             usage = session.get(ProviderUsage, usage_id, with_for_update=True)
             if usage is None:

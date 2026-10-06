@@ -6,6 +6,7 @@ import asyncio
 import gzip
 import json
 import logging
+import math
 import os
 import time
 from dataclasses import replace
@@ -14,7 +15,7 @@ from pathlib import Path
 
 import httpx
 
-from eventdesk.llm import PROMPT_HASH, Router, providers_from_env
+from eventdesk.llm import PROMPT_HASH, Router, providers_from_env, reservation_tokens
 from eventdesk.materials import input_hash, select_items
 from eventdesk.quotas import Quotas
 from eventdesk.store import Store
@@ -28,7 +29,11 @@ async def main() -> None:
     # SOURCE: exact IDs in authenticated model inventory and official free-tier pricing on 2026-10-05.
     parser.add_argument("--model", choices=["gemini-3.1-flash-lite", "gemini-3.5-flash-lite",
                                           "gemini-3.8-flash", "openai/gpt-oss-120b"])
+    # GUESS: caller-bounded local quota waiting; zero preserves immediate-stop behavior. # UNCALIBRATED GUESS
+    parser.add_argument("--wait-local-seconds", type=float, default=0)
     args = parser.parse_args()
+    if args.count <= 0 or not math.isfinite(args.wait_local_seconds) or args.wait_local_seconds < 0:
+        raise ValueError("Collection count/wait must be finite and nonnegative (count positive)")
     for line in (Path.home() / ".eventdesk/.env").read_text(encoding="utf-8-sig").splitlines():
         if "=" in line and not line.lstrip().startswith("#"):
             name, value = line.split("=", 1)
@@ -60,6 +65,21 @@ async def main() -> None:
             if record["event_id"] in completed:
                 continue
             items = select_items(record)
+            now = time.time()
+            admission = router.quotas.next_admission(provider.name, reservation_tokens(items), provider.limits, now)
+            if admission is None:
+                print(json.dumps({"provider": provider.name, "state": "request_exceeds_local_budget"}), flush=True)
+                break
+            if admission > now:
+                state = router.quotas.summary().get(provider.name, {})
+                # A recorded provider outage/cooldown is an external stop, not a local scheduling opportunity.
+                if (state.get("cooldown_until", 0) > now or admission-now > args.wait_local_seconds):
+                    print(json.dumps({"provider": provider.name, "state": "admission_deferred",
+                                      "local_wait_seconds": admission-now}), flush=True)
+                    break
+                print(json.dumps({"provider": provider.name, "state": "waiting_local_window",
+                                  "local_wait_seconds": admission-now}), flush=True)
+                await asyncio.sleep(admission-now)
             result = await router.analyze(items, time.time() + 300)
             saved = {"date": datetime.now(UTC).isoformat(), "event_id": record["event_id"],
                      "quarter": args.quarter, "provider": provider.name, "model": provider.model,

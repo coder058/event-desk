@@ -1,0 +1,37 @@
+{
+  "kind": "isolated_pg_worker_mock_transport_fault_drill",
+  "mode": "source_outage",
+  "events": 535,
+  "elapsed_seconds": 275.6006369590759,
+  "seed_seconds": 3.3542087078094482,
+  "deadline_from_seed_seconds": 300.0,
+  "completed_mock_responses": 535,
+  "transport_calls": {
+    "stalled_material_gets": 144,
+    "simulated_submission_responses": 535
+  },
+  "fallbacks": {
+    "materials_skipped_deadline_reserve": 391,
+    "materials_unavailable": 144
+  },
+  "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "external_network_requests": 0,
+  "limits": "Actual PG/worker with synthetic events and stalled mock GETs; POSTs are simulated, not official submissions. No live network/ACK latency or model accuracy is established.",
+  "workload_provenance": {
+    "source": "retained official calendar, mutable schedule not simultaneous broadcasts",
+    "report_sha256": "c1b0c1b5c6932b91505b2eac09745c9ca9d86df73a2c5f4fc7048147a4ecf1d7",
+    "slot": "s1",
+    "observed_at": 1791281248.4385417,
+    "calendar_sha256": "f9349ddc651334f5a00b683ef8dbeb820d528cc7c002f7bb470cb647d4370083",
+    "day_central": "2026-11-05",
+    "events": 535,
+    "retained_official_observation_verification": {
+      "verified_retained_official_observation": true,
+      "calendar_sha256": "f9349ddc651334f5a00b683ef8dbeb820d528cc7c002f7bb470cb647d4370083",
+      "observed_at": 1791281248.4385417,
+      "day_central": "2026-11-05",
+      "events": 535
+    },
+    "report_snapshot_limits": "Launch report digest retained; the full report file was replaced by a later health probe. Original official calendar observation verified in the append-only database."
+  }
+}

@@ -168,6 +168,14 @@ def prompt_materials(items: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def reservation_tokens(items: dict[str, Any]) -> int:
+    material = prompt_materials(items)
+    prompt = PROMPT + "\nOFFICIAL MATERIALS:\n" + json.dumps(material, ensure_ascii=False)
+    schema = LLMAnalysis.model_json_schema()
+    # GUESS: conservative UTF-8 bytes plus schema/output cap, replaced by actual usage on success. # UNCALIBRATED GUESS
+    return len(prompt.encode()) + len(json.dumps(schema).encode()) + MAX_OUTPUT_TOKENS
+
+
 class Router:
     def __init__(self, quotas: Quotas, http: httpx.AsyncClient,
                  providers: tuple[Provider, ...]) -> None:
@@ -179,9 +187,7 @@ class Router:
         material = prompt_materials(items)
         prompt = PROMPT + "\nOFFICIAL MATERIALS:\n" + json.dumps(material, ensure_ascii=False)
         schema = LLMAnalysis.model_json_schema()
-        # GUESS: UTF-8 byte count is a deliberately conservative input-token reservation plus output cap # UNCALIBRATED GUESS
-        # and schema overhead. This is not measured tokenization; provider usage replaces it on success.
-        tokens = len(prompt.encode()) + len(json.dumps(schema).encode()) + MAX_OUTPUT_TOKENS
+        tokens = reservation_tokens(items)
         if not facts_text(items):
             return AnalysisResult(None, None, None, 0, ({"status": "facts_missing"},))
         for provider in self.providers:
@@ -194,6 +200,12 @@ class Router:
             if reservation is None:
                 attempts.append({"provider": provider.name, "status": "quota_or_cooldown"})
                 continue
+            # Admission may wait for the shared database. Recompute rather than spending an old budget.
+            remaining = deadline - time.time() - SUBMISSION_RESERVE_SECONDS
+            if remaining <= 0:
+                await asyncio.to_thread(self.quotas.settle, reservation, 0, "not_requested_deadline")
+                attempts.append({"provider": provider.name, "status": "deadline_reserve"})
+                break
             timeout = min(CALL_TIMEOUT_SECONDS, remaining)
             body: dict[str, Any]
             if provider.name == "gemini":
@@ -214,7 +226,22 @@ class Router:
             actual: int | None = None
             quota: dict[str, float] = {}
             try:
-                response = await self.http.post(url, headers=headers, json=body, timeout=timeout)
+                # Total budget includes headers and body; inactivity timeouts alone allow a slow trickle.
+                async with asyncio.timeout(timeout):
+                    async with self.http.stream("POST", url, headers=headers, json=body, timeout=timeout) as streamed:
+                        quota = safe_quota_headers(streamed.headers)
+                        raw_body = bytearray()
+                        async for chunk in streamed.aiter_bytes():
+                            # GUESS: 1 MiB provider body cap, not a model-quality threshold. # UNCALIBRATED GUESS
+                            if len(raw_body)+len(chunk) > 1024*1024:
+                                raise ValueError("Provider body exceeds memory ceiling")
+                            raw_body.extend(chunk)
+                        # SOURCE: aiter_bytes() has decoded Content-Encoding already. Reconstructing a
+                        # response with that header would decompress decoded JSON a second time.
+                        decoded_headers = {name: value for name, value in streamed.headers.items()
+                                           if name.lower() not in ("content-encoding", "content-length")}
+                        response = httpx.Response(streamed.status_code, headers=decoded_headers,
+                                                  content=bytes(raw_body), request=streamed.request)
                 quota = safe_quota_headers(response.headers)
                 if response.status_code != 200:
                     status = "http_" + str(response.status_code)
@@ -233,7 +260,8 @@ class Router:
                 else:
                     raw = result["choices"][0]["message"]["content"]
                     usage = result.get("usage", {}).get("total_tokens")
-                actual = int(usage) if isinstance(usage, (int, float)) else None
+                # SOURCE: provider total-token counts are nonnegative integers; malformed usage keeps the reservation.
+                actual = usage if isinstance(usage, int) and not isinstance(usage, bool) and usage >= 0 else None
                 analysis = LLMAnalysis.model_validate_json(raw)
                 try:
                     analysis.validate_quotes(material)
@@ -250,9 +278,12 @@ class Router:
                                  "status": "validated", "actual_tokens": actual, "quota_headers": quota})
                 return AnalysisResult(analysis, provider.name, provider.model,
                                       (time.perf_counter() - started) * 1000, tuple(attempts))
-            except (httpx.HTTPError, ValidationError, ValueError, KeyError, IndexError, TypeError) as error:
+            except (httpx.HTTPError, OSError, TimeoutError, ValidationError, ValueError,
+                    KeyError, IndexError, TypeError, RecursionError, OverflowError) as error:
                 status = "invalid_or_unavailable_" + type(error).__name__
-                await asyncio.to_thread(self.quotas.settle, reservation, actual, status, DEFAULT_COOLDOWN_SECONDS)
+                # A header already received still applies if its body fails to arrive/parse.
+                cooldown = max(DEFAULT_COOLDOWN_SECONDS, quota.get("retry-after", 0))
+                await asyncio.to_thread(self.quotas.settle, reservation, actual, status, cooldown)
                 attempts.append({"provider": provider.name, "model": provider.model, "status": status,
                                  "actual_tokens": actual, "quota_headers": quota})
         return AnalysisResult(None, None, None, (time.perf_counter() - started) * 1000, tuple(attempts))

@@ -34,3 +34,25 @@ Hashes/configuration are in reports/calibration-local.json; artifact and per-ass
 predictions stay private. The deployed through-Q2 artifact's hash was verified
 unchanged. This is an input for future blend fitting, not an approved hybrid or a
 model-selection result. Q2 is now inspected development evidence.
+
+## Bounded collection / exploratory fit implementation
+
+`collect_llm.py --wait-local-seconds` allows waiting only for the local ledger's
+recorded window release, within the caller's explicit bound. External cooldowns
+remain stops. Admission is checked again transactionally; this cannot establish
+account-wide available quota. Research SQLite and production PostgreSQL budgets
+are still separate; they must share/synchronize usage before concurrent live LLM
+collection is enabled. Production remains local-only.
+
+`probe_blend.py` fits the inherited fixed ridge alpha with training-only standard
+scaling, once on the retained Q2 successful-output cohort. It verifies exact
+archive/input hashes and source quotes, rejects conflicting favorable retries,
+and retains immutable input snapshots. It evaluates Q3 local-only, LLM-only and
+hybrid on the same available cohort and full official imputation sample. Missing
+LLM-only outputs use the official mean; missing hybrid outputs use local.
+Leave-one-event-out is sensitivity, not a confidence interval.
+
+The exploratory artifact is always unapproved. Small chronological cohorts can
+cover only a few days and cannot establish deployment readiness or representative
+quarter-wide skill. Further collection is evidence gathering, not a parameter
+sweep on Q3. No fit/evaluation result is asserted before running it.

@@ -24,9 +24,12 @@ from eventdesk.worker import Worker
 EVENTS = 400
 
 
-async def main(database: str, mode: str) -> None:
+async def main(database: str, mode: str, events: int = EVENTS) -> None:
     if not re.fullmatch(r"eventdesk_fault_\d+", database) or mode not in ("reserve", "source_outage"):
         raise ValueError("Only a separately created fault-drill database is allowed")
+    # GUESS: cap operator fault workloads at 1,000 to bound existing VPS resource use. # UNCALIBRATED GUESS
+    if not 1 <= events <= 1000:
+        raise ValueError("Fault workload outside operational ceiling")
     url = make_url(os.environ["DATABASE_URL"])
     if url.get_backend_name() != "postgresql" or url.database == database:
         raise ValueError("Source must be production PG URL; drill target must be different")
@@ -58,7 +61,7 @@ async def main(database: str, mode: str) -> None:
     received_at = (seeded_at-(PREDICTION_BUDGET_SECONDS-SUBMISSION_RESERVE_SECONDS)
                    if mode == "reserve" else seeded_at)
     try:
-        for index in range(EVENTS):
+        for index in range(events):
             event = Event(id=f"fault-{index}", event_id=f"fault-{index}", event_type="EARNINGS_RELEASE",
                 knowledge_cutoff="2026-01-01T00:00:00Z", information_url=f"https://fixture.invalid/{index}",
                 focal_assets=[{"identifier_type": "TICKER", "identifier_value": "FIXTURE"}])
@@ -70,7 +73,7 @@ async def main(database: str, mode: str) -> None:
             try:
                 # SOURCE: official five-minute budget, less the deliberately elapsed seed age.
                 async with asyncio.timeout(received_at+PREDICTION_BUDGET_SECONDS-time.time()):
-                    while store.health()["states"] != {"api_accepted": EVENTS}:
+                    while store.health()["states"] != {"api_accepted": events}:
                         # GUESS: bounded fault-drill completion polling only.
                         # UNCALIBRATED GUESS
                         await asyncio.sleep(.05)
@@ -80,7 +83,7 @@ async def main(database: str, mode: str) -> None:
                     await task
                 except asyncio.CancelledError:
                     pass
-        assert len(replies) == EVENTS
+        assert len(replies) == events
         assert all(payload["predictions"][0]["predicted_percentile"] == model.training_mean for payload in replies)
         from sqlalchemy import func, select
         from sqlalchemy.orm import Session
@@ -89,7 +92,7 @@ async def main(database: str, mode: str) -> None:
         with Session(store.engine) as session:
             fallbacks = dict(session.execute(select(Job.fallback, func.count()).group_by(Job.fallback)).all())
         print(json.dumps({"kind": "isolated_pg_worker_mock_transport_fault_drill", "mode": mode,
-            "events": EVENTS, "elapsed_seconds": time.time()-seeded_at, "seed_seconds": seeded_seconds,
+            "events": events, "elapsed_seconds": time.time()-seeded_at, "seed_seconds": seeded_seconds,
             "deadline_from_seed_seconds": received_at+PREDICTION_BUDGET_SECONDS-seeded_at,
             "completed_mock_responses": len(replies), "transport_calls": dict(calls), "fallbacks": fallbacks,
             "model_sha256": model.sha256, "external_network_requests": 0,
@@ -97,7 +100,7 @@ async def main(database: str, mode: str) -> None:
                       "not official submissions. No live network/ACK latency or model accuracy is established."}))
     except Exception as exc:
         print(json.dumps({"kind": "isolated_pg_worker_mock_transport_fault_drill", "mode": mode,
-            "events": EVENTS, "failure_type": type(exc).__name__, "states": store.health()["states"],
+            "events": events, "failure_type": type(exc).__name__, "states": store.health()["states"],
             "transport_calls": dict(calls), "elapsed_seconds": time.time()-seeded_at,
             "external_network_requests": 0, "limits": "Failed isolated mock-transport drill; not official submissions"}))
         raise
@@ -107,4 +110,4 @@ async def main(database: str, mode: str) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main(sys.argv[1], sys.argv[2]))
+    asyncio.run(main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else EVENTS))

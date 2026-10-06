@@ -1,9 +1,11 @@
 import asyncio
+import gzip
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 import httpx
+import pytest
 
 from eventdesk.llm import Provider, Router, safe_limit_error, safe_quota_headers
 from eventdesk.quotas import Limits, Quotas
@@ -134,3 +136,127 @@ def test_google_structured_quota_retry_has_no_project_subject_or_free_text(store
     result = asyncio.run(run())
     assert "never-emit" not in json.dumps(result.attempts)
     assert Quotas(store).summary()["gemini"]["cooldown_until"] >= time.time()+120
+
+
+def test_next_local_admission_survives_restart_and_actual_settlement(store):
+    # PLACEHOLDER: overlapping minute/day limits expose the observed reservation lifecycle.
+    limits = Limits(2, 3, 100, 120)
+    q = Quotas(store)
+    assert q.next_admission("fixture", 60, limits, 1000) == 1000
+    first = q.reserve("fixture", 60, limits, 1000)
+    assert q.next_admission("fixture", 60, limits, 1001) == 1060
+    q.settle(first, 10, "validated", now=1001)
+    second = q.reserve("fixture", 60, limits, 1001)
+    q.settle(second, 60, "validated", now=1001)
+    assert Quotas(store).next_admission("fixture", 60, limits, 1002) == 87400
+    assert q.reserve("fixture", 60, limits, 87399) is None
+    third = q.reserve("fixture", 60, limits, 87401)
+    assert third is not None
+    q.settle(third, 1, "http_429", cooldown_seconds=123, now=87401)
+    assert Quotas(store).next_admission("fixture", 1, limits, 87402) == 87524
+    assert q.next_admission("fixture", 121, limits, 87402) is None
+
+
+def test_next_admission_is_read_only_not_a_reservation(store):
+    # PLACEHOLDER: no external provider is involved; race winner must still reserve.
+    q = Quotas(store)
+    limits = Limits(1, 1, 10, 10)
+    assert q.next_admission("fixture", 1, limits, 1000) == 1000
+    assert q.next_admission("fixture", 1, limits, 1000) == 1000
+    assert q.reserve("fixture", 1, limits, 1000) is not None
+    assert q.reserve("fixture", 1, limits, 1000) is None
+    assert q.next_admission("fixture", 1, limits, 1001) == 87400
+
+
+@pytest.mark.parametrize("stall", ["headers", "body", "oversized"])
+def test_provider_attempt_has_total_time_and_body_bounds(store, monkeypatch, stall):
+    import eventdesk.llm as module
+    # PLACEHOLDER: short injected timeout keeps an indefinitely stalled transport test bounded.
+    monkeypatch.setattr(module, "CALL_TIMEOUT_SECONDS", .05)
+    calls = []
+    class StalledBody(httpx.AsyncByteStream):
+        async def __aiter__(self):
+            await asyncio.Event().wait()
+            yield b"never"
+    async def handler(request):
+        calls.append(request.method)
+        if stall == "headers":
+            await asyncio.Event().wait()
+        if stall == "body":
+            return httpx.Response(429, headers={"Retry-After": "123"}, stream=StalledBody())
+        return httpx.Response(200, content=b"x"*(1024*1024+1))
+    async def run():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
+            provider = Provider("groq", "fixture-model", "fixture-key", Limits(10, 100, 100000, 100000))
+            # GUESS: watchdog only; not a production latency measurement. # UNCALIBRATED GUESS
+            async with asyncio.timeout(2):
+                return await Router(Quotas(store), http, (provider,)).analyze(
+                    {"earnings-call-facts": ["Revenue increased."]}, time.time()+300)
+    result = asyncio.run(run())
+    assert calls == ["POST"] and result.analysis is None
+    assert result.attempts[-1]["status"] == (
+        "invalid_or_unavailable_ValueError" if stall == "oversized" else "invalid_or_unavailable_TimeoutError")
+    assert Quotas(store).summary()["groq"]["cooldown_until"] > time.time()
+    if stall == "body":
+        # PLACEHOLDER: exact server-provided duration remains binding even when the body stalls.
+        assert Quotas(store).summary()["groq"]["cooldown_until"] >= time.time()+120
+
+
+def test_delayed_admission_cannot_spend_submission_reserve(store):
+    calls = []
+    class DelayedQuota(Quotas):
+        def reserve(self, *args):
+            result = super().reserve(*args)
+            # PLACEHOLDER: synthetic database delay, not intentional provider waiting.
+            time.sleep(.1)
+            return result
+    async def run():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(lambda request: calls.append(request))) as http:
+            provider = Provider("groq", "fixture-model", "fixture-key", Limits(10, 100, 100000, 100000))
+            return await Router(DelayedQuota(store), http, (provider,)).analyze(
+                {"earnings-call-facts": ["Revenue increased."]}, time.time()+30.05)
+    result = asyncio.run(run())
+    assert not calls and result.attempts[-1]["status"] == "deadline_reserve"
+
+
+@pytest.mark.parametrize("usage", [-1, True, 3.5, float("nan")])
+def test_malformed_usage_cannot_credit_the_provider_budget(store, usage):
+    from sqlalchemy import select
+    from sqlalchemy.orm import Session
+
+    from eventdesk.quotas import ProviderUsage
+    def handler(request):
+        return httpx.Response(200, json={"choices": [{"message": {"content": json.dumps(valid_analysis())}}],
+            "usage": {"total_tokens": usage}}) if usage == usage else httpx.Response(200, content=(
+                '{"choices":[{"message":{"content":'+json.dumps(json.dumps(valid_analysis()))+
+                '}}],"usage":{"total_tokens":NaN}}').encode())
+    async def run():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
+            provider = Provider("groq", "fixture-model", "fixture-key", Limits(10, 100, 100000, 100000))
+            return await Router(Quotas(store), http, (provider,)).analyze(
+                {"earnings-call-facts": ["Revenue increased."]}, time.time()+300)
+    result = asyncio.run(run())
+    assert result.analysis is not None and result.attempts[-1]["actual_tokens"] is None
+    with Session(store.engine) as session:
+        row = session.scalar(select(ProviderUsage))
+        assert row.actual_tokens is None and row.reserved_tokens > 0
+
+
+def test_compressed_provider_json_is_decoded_once(store):
+    # PLACEHOLDER: actual HTTP gzip framing around synthetic valid structured evidence.
+    raw = json.dumps({"choices": [{"message": {"content": json.dumps(valid_analysis())}}],
+                      "usage": {"total_tokens": 400}}).encode()
+    compressed = gzip.compress(raw)
+    class CompressedStream(httpx.AsyncByteStream):
+        async def __aiter__(self):
+            yield compressed
+    async def run():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(200,
+                headers={"Content-Encoding": "gzip", "Content-Length": str(len(compressed))},
+                stream=CompressedStream()))) as http:
+            provider = Provider("groq", "fixture-model", "fixture-key", Limits(10, 100, 100000, 100000))
+            return await Router(Quotas(store), http, (provider,)).analyze(
+                {"earnings-call-facts": ["Revenue increased."]}, time.time()+300)
+    result = asyncio.run(run())
+    assert result.analysis is not None
+    assert result.attempts[-1]["actual_tokens"] == 400

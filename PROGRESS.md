@@ -400,3 +400,53 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   error; explicit short test IDs fixed that fixture issue. Focused checks passed
   18 tests, full suite 71 tests in 86.77 seconds, strict typing/lint/secret scan passed.
 - These changes await deployment and do not establish live network coverage.
+
+## 2026-10-06 — PostgreSQL verification and observed-peak outage replay
+
+- Source 5842a4f passed CI 37447596380 and deployed on Dublin. Actual schema 009,
+  unchanged model/configuration and recent prediction-worker heartbeat verified.
+- A newly created disposable Dublin database ran all Alembic migrations and the
+  source concurrency fixture: eight duplicates, four feeds, one capture. It was
+  dropped afterward; production was not a test target.
+- Replayed the retained calendar's observed 535-entry peak with complete mock
+  material outage: 535 simulated POST acknowledgements in 275.600637 seconds.
+  144 reads stalled and 391 skipped as the reserve approached; every prediction
+  used the fitted training mean. No public request, actual ACK benchmark or live
+  accuracy/eligibility claim follows. Workload provenance is in the new report;
+  the earlier 400-event evidence was preserved.
+- The old local preview tunnel had stopped. Restored SSH forwarding; Edge loaded
+  the actual deployed dashboard with recent worker heartbeat. The in-app browser
+  continued to reject loopback access, so verification used Edge.
+
+## 2026-10-06 — quota-aware archive collection and provider body boundaries
+
+- Added read-only next-admission computation from persistent rolling windows and
+  cooldowns; it is not an account-wide quota guarantee or a reservation. The
+  actual router still reserves transactionally before every request. Research
+  can wait within an explicit caller budget for local windows; provider outages
+  and server cooldowns remain stops. Gemini was not retried during its cooldown.
+- Actual bounded Groq run appended 30 valid Q2 analyses; current-prompt Q2 cohort
+  reached 42 unique events. Q3 collection is in progress, not a completed result.
+- Provider calls now have total time/body bounds and recheck remaining time after
+  admission. Invalid token-usage counters cannot create quota credits.
+- Initial real Q3 call exposed a new double-decompression error in the streaming
+  implementation. A gzip regression reproduced it, then passed after removing
+  encoding/length headers from the already decoded response reconstruction.
+  The same archived Q3 event subsequently produced valid evidence; the failed
+  attempt stays retained. No production prediction or prompt changed.
+- Prepared fixed chronological exploratory blend fitting with exact archive/quote
+  joins, Q4/Q1-only Q2 local features, private immutable evidence snapshots and
+  leave-one-event-out sensitivity. It writes deployment_approved=false only.
+  No hybrid evaluation result or deployment approval is claimed yet.
+
+- Final local verification for the bounded collection/provider changes: 84 tests
+  passed in 86.04 seconds, strict typing in 19 modules, lint/owner-secret scan clean.
+  Gzip reproduction failed before the fix and passed afterward; real Groq Q3
+  analyses subsequently validated. No prospective LLM advantage is asserted.
+- Workload provenance review found the health-report file was replaced by a later
+  probe. Verified the original 535-entry calendar observation directly in the
+  append-only production database and recorded that proof; original full report
+  bytes were not retained. Future workloads now snapshot report bytes before a run.
+- Existing local AWS CLI/SDK, credential files and AWS credential environment names
+  were absent. No credential contents were read or additional account created.
+  The already documented owner AWS login remains needed for inbound HTTPS review.
