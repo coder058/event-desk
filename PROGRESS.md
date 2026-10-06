@@ -472,3 +472,15 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   strict typing/lint and owner-secret scan passed. Actual PostgreSQL verification
   remains to run for this change. An initial full-test shell call used a mistyped
   working directory and never launched; the corrected command produced that result.
+
+- Source bba95e6 passed CI 37512196177 and deployed on Dublin. Actual worker/
+  observer heartbeat and schema 009 verified, unchanged local-only model/config.
+  A fresh disposable PostgreSQL database passed eight duplicate/four cross-feed
+  attempts and one retained capture; cleanup completed, zero external requests.
+- The app goal state subsequently returned `paused`, with 16,548 seconds of active
+  recorded work (4h35m48s). This is below the requested eight active hours, regardless
+  of wall-clock elapsed time. Asked the owner whether to resume; completed only
+  the already initiated deployment verification while that reply is pending.
+  No completion declaration or additional SEC implementation follows from this pause.
+  Next feasible work is the identified/bounded SEC transport and typed ingestion;
+  public HTTPS/portal test and SEC contact still need the documented external inputs.

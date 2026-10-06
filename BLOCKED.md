@@ -41,8 +41,9 @@ can continue without claiming live EDGAR ingestion; Phase A is independent.
   On October 6 Gemini returned a daily-request 429 and a 77,956-second RetryInfo;
   the collector respects that cooldown. This is not a reason to interrupt the
   always-on local model, or evidence of capacity for another Gemini model.
-- Hybrid calibration remains insufficient: collect current-prompt Q2/Q3 samples
-  under those limits, then evaluate the fitted mapping before approving deployment.
+- The first fixed hybrid was evaluated on 42 Q2 and 28 Q3 valid AI events. It
+  underperformed local-only on both the full imputed view and paired scorer cohort.
+  It remains unapproved; more label-blind evidence is needed, not a guessed blend.
 - Full trained-model HTTP/PostgreSQL fixture replay passed at source 2e8792f:
   400 durable ACKs and 400 simulated results in 10.626 seconds; maximum ACK
   1.249 seconds. This is
