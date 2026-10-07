@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-10-07T22:15:47.339444+00:00",
+  "external_443": {"error_type": "TimeoutError"},
+  "external_80": {"tls": "TLSv1.3", "certificate_verified": true},
+  "loopback_443": {"tls": "TLSv1.3", "certificate_verified": true, "http_status_line": "HTTP/1.1 200 OK"},
+  "host_listens_on_443": true,
+  "ufw_active": false,
+  "iptables_input_policy": "ACCEPT",
+  "docker_user_chain_empty": true,
+  "docker_443_accept_and_dnat_observed": true,
+  "cloud_firewall_verified": false,
+  "rules_changed": false,
+  "limits": "External timeout and healthy local TLS suggest an upstream restriction; no verified Lightsail rule or proven cloud-firewall cause. Browser-control attempts timed out; local AWS CLI unavailable. Standard HTTPS must be externally verified before changing the working webhook URL."
+}

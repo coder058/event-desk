@@ -16,6 +16,9 @@ with hybrid disabled and unchanged model/configuration hashes. An actual accepte
 competition event is still required to claim live event evidence. An isolated
 fictional-input smoke produced validated Groq evidence after Gemini returned 503;
 its competition API was mocked, not a real delivery or submission.
+One genuine official TEST was accepted on October 7 at 22:03 UTC. It uses the
+neutral 0.5 rule and does not exercise trained inference or generative evidence;
+no non-TEST production event or live generative evidence is claimed.
 Those quotations and sub-scores cannot change the predicted percentile or serve as
 retrospective reasoning for the local regression. A fixed Groq blend was
 actually fitted on 42 Q2 events and validated on 28 Q3 events (25 surprise-complete

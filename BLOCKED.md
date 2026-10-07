@@ -1,18 +1,33 @@
 # External actions and unresolved dependencies
 
-## Owner action — connect the existing submission and send the portal test
+## Resolved — genuine portal TEST
 
-External HTTPS was verified on October 7 at 11:25 UTC using the already reachable
-TCP 80 listener. Paste `https://52.17.192.36.sslip.io:80/competition/webhook` into
-the Webhook URL field of the existing LLMSITO submission, click Save webhook URL,
-then Send test event. No new account or paid provider is required. Do not replace
-credentials or paste them in chat. The portal currently shows Setup 1/3 and an
-empty URL; actual portal delivery/prediction remain unverified.
+October 7, 22:03 UTC: the configured TLS 80 webhook received one genuine portal
+TEST. Fresh official health reported a 2xx delivery and the accepted TEST prediction
+timestamp; PostgreSQL retained one delivery, the neutral 0.5 payload and HTTP 201/
+api_accepted. [Exact evidence](reports/official-test-20261007.json).
+Non-TEST events and official submission_n_total were still zero. TEST is not scored.
+Opening this POST-only webhook in a browser returns expected GET 405, not a portal
+rejection. No synthetic event was inserted to manufacture a success.
 
-The nonstandard port is explicit and uses verified TLS, not plaintext HTTP.
-Standard HTTPS 443 still times out; the signed-out AWS session is no longer a
-dependency for this tested route. Acceptance of this URL by the portal is still
-an external check. No certificate-warning bypass or firewall weakening was used.
+## Owner action — inspect standard HTTPS 443
+
+External 443 still timed out at 22:15 UTC, while verified loopback TLS 443 returned
+200. Examined Docker rules allow that listener. Cloud rules remain unverified:
+the AWS tab could not be read and local AWS CLI is unavailable.
+
+Existing Lightsail console → Instances → Dublin instance **52.17.192.36** →
+Networking → IPv4 Firewall. If missing, add **HTTPS / TCP / 443**, public IPv4
+sources, then Create. [Detailed instructions and evidence](docs/HTTPS-443.md).
+The currently verified portal URL remains
+`https://52.17.192.36.sslip.io:80/competition/webhook` until 443 is externally
+verified. No certificate bypass or firewall change was performed by Codex.
+
+## Approval before publication
+
+The scoped brief requires Jordi's contemporaneous yes before any push. The
+HTTP/cache fixes are local; the deployed code remains 539718e pending publication,
+matching CI and deployment verification. No new free-provider probes or blends.
 
 ## Optional integrations
 
@@ -32,7 +47,7 @@ can continue without claiming live EDGAR ingestion; Phase A is independent.
 
 ## Verification still to perform
 
-- Official portal delivery and prediction after the owner saves the verified URL.
+- Official scored observations and coverage after the scoring window actually starts.
 - Archive baseline reproduction completed; measured results are in reports/archive-eval.md.
 - Gemini is intermittently unavailable (503); Groq has returned 429 even when
   its minute-token header showed capacity. Numeric quota diagnostics are retained;

@@ -75,8 +75,21 @@ intervals. A fast model calculation does not establish live end-to-end latency.
 
 ## Operation and recovery
 
+### Genuine portal connectivity test — October 7, 22:03 UTC
+
+One official TEST delivery received a 2xx ACK. Production PostgreSQL retained its
+delivery and neutral **0.5** prediction; the official prediction API returned 201.
+A fresh authenticated health GET confirmed `last_test_prediction_at` and one
+webhook 2xx. Non-TEST events and official `submission_n_total` remained **zero**.
+The local receipt-to-acceptance interval was **539.119 ms** for this single TEST.
+TEST does not read earnings materials, run the trained predictor or receive a score;
+this verifies connectivity rather than predictive quality or market-event latency.
+[Exact production and official evidence](../reports/official-test-20261007.json).
+
 The existing Dublin VPS hosts the API, worker, observer and PostgreSQL. HTTPS was
 externally verified on explicit TLS port 80; standard 443 remains unreachable.
+[Owner check and bounded diagnosis](HTTPS-443.md): local TLS 443 works, but the
+Lightsail rule remains unverified. No firewall change was made by Codex.
 An independent monitor observes service/deadline health. Encrypted backups go to
 the existing Frankfurt host; an isolated restore verifies exact archive hashes
 without overwriting production. [Restore receipt](../reports/backup-restore.json).
@@ -94,7 +107,10 @@ CI also exercises actual PostgreSQL concurrency. [CI](https://github.com/coder05
 
 ## What remains unproven
 
-As of the October 7 verification: no official portal test, live scored observation
-or ten-day eligible coverage record. Daily SEC ingestion, prospective event studies
-and an event-driven paper portfolio are unfinished. No generative improvement,
-durable trading edge, profitability or recruitment outcome is established.
+As of the October 7 post-TEST verification: one genuine TEST was accepted, but
+there are zero received non-TEST events, zero scored observations and no ten-day
+eligible coverage record. SEC reads were skipped without the owner's written
+admin contact; daily ingestion and prospective event studies remain unfinished.
+The paper portfolio is deferred until real outcomes. The AI blend stays disabled.
+No generative improvement, durable trading edge, profitability or recruitment
+outcome is established.

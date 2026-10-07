@@ -4,10 +4,10 @@
 predict how the market will react, and are scored live — in the Optiver × Chicago
 Booth "Explaining Markets" competition and on our own public scoreboard.**
 
-This is the product objective. Competition infrastructure is under construction;
-SEC ingestion and live scoring are not yet operational.
+This is the product objective. The signed production pipeline passed one genuine
+portal TEST; SEC daily ingestion and live scoring are not yet operational.
 
-![Deployed dashboard: zero received events; portal verification pending](docs/dashboard.png)
+![Production dashboard after the genuine portal TEST; non-TEST counters remain zero](docs/official-test.png)
 
 ## Pipeline
 
@@ -60,9 +60,12 @@ explains decisions, failed experiments, measurements and remaining limits.
 | Slowest trained-model fixture ACK | 1.249 s | One measured replay, below 20 s |
 
 Reports retain dataset, scorer and model hashes. The current live service has no
-official scored observations. Public HTTPS was externally verified on October 7;
-the owner still needs to save the webhook URL and send the official portal test.
+official scored observations. On October 7 at 22:03 UTC, one genuine portal TEST
+was durably received and its neutral prediction accepted (201); fresh official
+health confirmed it. [Exact evidence](reports/official-test-20261007.json).
 The explicit port 80 carries verified TLS; standard port 443 remains unreachable.
+[Owner's Lightsail 443 check](docs/HTTPS-443.md). Non-TEST events/submissions: zero
+at that observation. TEST is not scored; paper portfolio and blend remain disabled.
 
 ## Run locally
 

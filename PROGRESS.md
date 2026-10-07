@@ -734,3 +734,23 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   3/3 Q3). Archived input/evidence hashes and limits are retained in
   reports/research-cache-audit-20261007.json. No labels were fitted/scored,
   no free quota spent and no new predictive or deployment claim was made.
+- Standard 443 read-only diagnosis: external timeout, but local CA-verified TLS
+  and HTTP 200; IPv4/IPv6 listeners and examined Docker ACCEPT/DNAT are present.
+  UFW inactive, INPUT accepts, DOCKER-USER empty. No rule was changed. AWS browser
+  inspection failed twice and AWS CLI is unavailable locally; cloud rule/cause
+  remains unverified. Exact owner Networking/HTTPS 443 instructions are retained
+  in docs/HTTPS-443.md. The working TLS 80 route already passed the portal TEST.
+- SEC step skipped: Jordi supplied no written admin contact in this brief.
+  No external SEC read, collector launch or populated backup is claimed.
+- Updated the case study, model card, README and dashboard copy to the actual
+  official TEST outcome, zero non-TEST events/submissions, unchanged local model,
+  disabled blend and deferred paper portfolio. Production was reviewed after
+  reloading an old suspended browser tab; docs/official-test.png records the
+  real accepted TEST. Local preview was separately reviewed in fixture mode;
+  the dated production notice is hidden there. This is copy/status correction,
+  not another prediction method or new product feature.
+- Full local regression: 173 passed, one Windows symlink skip in 104.64 seconds.
+  Lint, strict types, exact owner-value secret scan and dashboard JavaScript
+  syntax passed. README is 96 lines. No CI/new deployment is claimed for these
+  unpublished commits. The production source is still 539718e; publication
+  requires Jordi's yes at action time, then matching CI and deployment checks.

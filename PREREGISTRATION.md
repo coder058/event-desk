@@ -68,3 +68,13 @@ and artifact are unchanged. Material download now preserves the declared thirty-
 reserve, with an explicit fitted-mean degradation reason for queued events that reach
 it. Expired queues drain before claiming valid work. These changes improve operational
 failure handling; they do not declare a new prediction model or a successful live test.
+
+## Dated operational observation — 2026-10-07 22:04 UTC
+
+The earlier opening status describes the original declaration, not current
+connectivity. One genuine official portal TEST has now received a 2xx ACK and
+its persisted neutral prediction was accepted with HTTP 201. Fresh official
+health confirms the TEST prediction timestamp. Non-TEST events/submissions
+remain zero; TEST is not scored. Model/configuration hashes and prediction
+method are unchanged; no blend or paper portfolio was enabled.
+[Exact evidence](reports/official-test-20261007.json).
