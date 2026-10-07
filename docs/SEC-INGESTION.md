@@ -24,12 +24,33 @@ is still required before external automated reads; see BLOCKED.md.
   contenders admitted one reader, a fresh connection respected the persisted
   cooldown, and admission resumed after a synthetic clock advance. No SEC calls.
   The entity size limit bounds retained bytes, not peak decompressor memory.
+- A bounded explicit-company collector commits discovery before body requests and
+  each captured body separately. Restart keeps unfinished references even if a
+  later recent snapshot no longer lists them. An exhausted run budget, cooldown or
+  failed body is reported with its remaining count; it cannot become completeness.
+  Source hashes, filing identity and original discovery/body times are checked
+  again before continuation. Conflicting accession identities require review.
 
 Discovery retains a source hash and first-seen time. It does not prove when the
 exact filing-body bytes were available; the body must be captured separately.
 Additional history is listed, not claimed downloaded. Recent-company metadata is
 not all-market coverage. Primary XML stylesheet paths are preserved exactly;
 no guessed rewrite is presented as a verified raw document.
+
+The collector's first successful body is immutable local evidence. It does not
+refetch known accessions to claim that unchanged URLs still serve identical bytes.
+No daily scheduler or all-market universe is claimed by the current collector.
+
+## Operator command (after contact and shared database are configured)
+
+`python -m eventdesk.sec_collection --cik CIK... --objects-root /var/lib/eventdesk/evidence/objects --max-new-filings N`
+
+CIK entries and N must be explicit. N bounds work in one run, not expected returns
+or SEC-wide coverage. The command uses DATABASE_URL/SEC_USER_AGENT from the private
+environment; never pass their values in command arguments. It requires PostgreSQL
+and the current migrations. A partial run exits nonzero with safe structured
+counts. It does not send predictions or place orders. Raw-object backup coverage
+must be verified before enabling persistent external collection.
 
 ## Next engineering steps
 

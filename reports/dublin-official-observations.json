@@ -2,8 +2,8 @@
   "official_observations": {
     "submissions": {
       "s1": {
-        "request_started_at": 1791389698.5299735,
-        "observed_at": 1791389700.4766116,
+        "request_started_at": 1791390669.3562343,
+        "observed_at": 1791390671.4028842,
         "calendar_sha256": "611e0435d9b5a6fb6eff5ee5bd6e8adc99e95c55889ab53ea5a10430ab6d31da",
         "calendar_raw_sha256": "a6cf990535fb6bff842d3f27628a9b5ecd0c3f49d332cbc6f58321428d8bafde",
         "health_raw_sha256": "baceadc2a7f38b13fe990804577527dcaae6901ef5b8085a37877c80e6311df6",
@@ -64,7 +64,7 @@
           "last_test_prediction_at": null
         },
         "collector": {
-          "checked_at": 1791389700.4766116,
+          "checked_at": 1791390671.4028842,
           "state": "observed",
           "scheduled_entries": 3022
         }
@@ -79,7 +79,7 @@
   "schema_counts": {
     "schema": "011_sec_http_gate",
     "calendar_versions": 49,
-    "health_observations": 230,
+    "health_observations": 232,
     "observer_source_lf_sha256": "3dc0afc30bdda4de0d8bd8a6d13da5008a7b82863f91fc097ed9fdaf2cc93bc4"
   },
   "observer_running": true,
@@ -90,7 +90,7 @@
     "database": "reachable",
     "worker": {
       "state": "recent_heartbeat",
-      "seen_at": 1791389743.8490708,
+      "seen_at": 1791390712.6228158,
       "details": {
         "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
         "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",

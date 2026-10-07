@@ -76,3 +76,13 @@ Enforce the manifest's evidence permission on startup. Evidence completion is
 first-write immutable with identical retries allowed; no later favorable replacement.
 No pending official event is fabricated to test this. Cloud evidence availability
 still depends on account limits and a genuine accepted event.
+
+## 2026-10-07 — SEC discovery is progress, not completion
+
+Use an explicit company universe and bounded runs. Persist supported references
+before fetching bodies, then commit every successful body with original capture
+time. Restart retains pending references even when a recent snapshot loses them;
+known bodies are not fetched again to claim up-to-date bytes. Unknown acceptance
+never becomes a guessed pre-cutoff time. Recent-company completeness excludes
+additional history and market-wide coverage. No scheduler or external collection
+is enabled before the contact and raw-object recovery gates are verified.

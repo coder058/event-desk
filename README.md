@@ -21,6 +21,21 @@ The local model provides coverage when free APIs are unavailable. Structured
 sub-scores make LLM outputs auditable. Evaluation is chronological, and configuration
 changes are recorded before the competition begins.
 
+```mermaid
+flowchart LR
+    A[Signed event] --> B[Verify and commit inbox]
+    B --> C[Fetch official inputs]
+    C --> D[Trained local model]
+    D --> E[Persist immutable prediction]
+    E --> F[Official API acknowledgement]
+    F --> G[Separate Gemini / Groq evidence]
+    E --> H[Read-only page and MCP]
+    G --> H
+```
+
+The receiver acknowledges after the inbox commit. The AI evidence branch runs
+after submission; the unapproved blend cannot change the current prediction.
+
 ## Status
 
 See [verified progress](PROGRESS.md), [plan](PLAN.md), [decisions](DECISIONS.md)

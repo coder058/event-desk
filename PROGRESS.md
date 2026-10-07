@@ -658,4 +658,26 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   hides the optional report without replacing the base demo or seeding live rows.
   The first new test run failed because a cleanup statement was inserted into the
   wrong test; corrected before publication. Thirteen walkthrough/provider-smoke
-  tests, lint and strict typing passed. This new display awaits CI/deployment.
+  tests, lint and strict typing passed. This new display awaited CI/deployment.
+- Source 0d03b70 passed CI 37652075419: 138 tests plus the PostgreSQL/TLS fixtures.
+  Deployed that exact clean commit to Dublin. Browser verification showed the
+  matching real provider smoke, Gemini 503, Groq validation, two actual requests,
+  five sub-scores and the exact quote. It labels fictional inputs, unchanged local
+  forecast and uncalibrated confidence. Screenshot: docs/walkthrough-ai.png.
+- A new encrypted backup was restored into a disposable database: schema 011,
+  17 files, 49 calendar versions and 231 health observations, zero jobs/deliveries.
+  Cleanup completed before the dated receipt was published. The independent
+  monitor reports no active alerts and verified latest restore. Production
+  heartbeat/observer were rechecked after deployment; no official event was added.
+- Implemented bounded explicit-company SEC collection with discovery committed
+  before body fetches and each body checkpointed separately. Pending references
+  survive disappearance from later recent metadata; known captured bodies retain
+  their original first-seen time. Blocks/failed bodies/budgets remain partial, and
+  changed accession identities require review. CLI requires the real admin contact,
+  PostgreSQL, explicit company universe/object root and explicit work budget.
+- Forty-three capture/source/discovery/transport tests passed; strict typing in
+  23 modules, lint and secret scan passed. The first type check caught reuse of a
+  loop variable with optional type; renamed it before publication. Added a real
+  PostgreSQL collector-resume fixture to CI; it is not yet asserted passed.
+  Actual SEC reads, daily scheduling, raw-object backup coverage and prospective
+  outcomes remain unfinished. No SEC access or all-market completeness is claimed.
