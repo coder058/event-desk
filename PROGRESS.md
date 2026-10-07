@@ -631,3 +631,16 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   The first regression assumed LF in a new Windows fixture repository and failed;
   corrected it to compare against the actual committed Git blob, independent of
   platform newline defaults. No production deployment occurred on that failure.
+- The corrected comparison still failed: Git archive itself applies the observed
+  `core.autocrlf=true` conversion. A combined shell sequence then committed/pushed
+  4d55f27 despite that failed local test. This was an execution mistake; no Dublin
+  deployment occurred. Subsequent tests and mutations are separate tool calls.
+  A direct three-configuration probe verified that per-command autocrlf=false
+  preserves the fixture blob. The helper now also compares every archive member
+  against committed Git object hashes and rejects omitted/duplicate/link members.
+- The final archive regression passed locally with autocrlf=true explicitly set
+  in its isolated repository. It verifies exact committed bytes, ignored-private
+  exclusion, dirty/untracked rejection, hidden export-ignore omission and forced
+  CRLF transformation rejection. A newly added cleanup case was initially placed
+  before file creation and failed locally; reordered before publication. Lint and
+  secret scan passed. The earlier Linux CI does not verify this corrected version.

@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import shlex
 import subprocess
+import tarfile
 from pathlib import Path
 
 from bootstrap import SSH
@@ -25,7 +27,38 @@ def source_bundle(root: Path) -> tuple[bytes, str]:
     if subprocess.check_output(git+["status", "--porcelain"]).strip():
         raise RuntimeError("Commit and verify all source changes before deployment")
     revision = subprocess.check_output(git+["rev-parse", "HEAD"]).decode().strip()
-    return subprocess.check_output(git+["archive", "--format=tar.gz", revision]), revision
+    # SOURCE: gitattributes/core.autocrlf can transform Git archive text on Windows.
+    # Per-command overrides leave the user's Git configuration unchanged.
+    raw = subprocess.check_output(git+["-c", "core.autocrlf=false", "-c", "core.eol=lf",
+                                      "archive", "--format=tar.gz", revision])
+    entries = subprocess.check_output(git+["ls-tree", "-r", "-z", revision]).split(b"\0")
+    expected = {}
+    for entry in filter(None, entries):
+        metadata, name = entry.split(b"\t", 1)
+        mode, kind, object_id = metadata.split()
+        if kind != b"blob" or mode not in (b"100644", b"100755"):
+            raise RuntimeError("Deployment source must contain regular committed files only")
+        expected[name.decode("utf-8")] = object_id.decode("ascii")
+    object_format = subprocess.check_output(git+["rev-parse", "--show-object-format"]).decode().strip()
+    seen = set()
+    with tarfile.open(fileobj=io.BytesIO(raw), mode="r:gz") as archive:
+        for member in archive.getmembers():
+            if member.isdir():
+                continue
+            if not member.isfile() or member.name not in expected or member.name in seen:
+                raise RuntimeError("Archive contains unexpected or duplicate source members")
+            stream = archive.extractfile(member)
+            if stream is None:
+                raise RuntimeError("Archive source member unavailable")
+            content = stream.read()
+            # SOURCE: Git hashes blob objects as `blob <byte length> NUL <content>` with the repository's format.
+            digest = hashlib.new(object_format, b"blob "+str(len(content)).encode()+b"\0"+content).hexdigest()
+            if digest != expected[member.name]:
+                raise RuntimeError("Archive bytes differ from the committed source blob")
+            seen.add(member.name)
+    if seen != set(expected):
+        raise RuntimeError("Archive omitted committed source files")
+    return raw, revision
 
 
 def main() -> None:
