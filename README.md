@@ -83,6 +83,10 @@ at that observation. TEST is not scored; paper portfolio and blend remain disabl
 
 ## Run locally
 
+Prerequisites: Git and Docker Engine/Desktop with a running daemon and Compose v2.
+Run from the repository root; no owner keys are needed. See
+[reproduction steps and actual checks](docs/REPRODUCE.md).
+
 ```sh
 docker compose up --build
 ```
