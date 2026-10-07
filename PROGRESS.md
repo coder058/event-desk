@@ -624,3 +624,10 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   Its synthetic-provider test passed and verifies unchanged prediction/one mock
   POST/post-submission evidence. No real-provider smoke has run yet. Production
   event rows will not be seeded to create an apparent official success.
+- Source a8b0e17 passed CI 37648018494. Before deployment, review found that the
+  helper bundled working-tree/untracked bytes, weakening attribution to a green
+  commit. It now requires a clean tree, archives the exact Git revision, and checks
+  model bytes against the declaration before any source/model transfer.
+  The first regression assumed LF in a new Windows fixture repository and failed;
+  corrected it to compare against the actual committed Git blob, independent of
+  platform newline defaults. No production deployment occurred on that failure.

@@ -1,10 +1,10 @@
 """Deploy this reviewed source and trusted trained artifact to the existing VPS."""
 from __future__ import annotations
 
-import io
+import hashlib
+import json
 import shlex
 import subprocess
-import tarfile
 from pathlib import Path
 
 from bootstrap import SSH
@@ -19,6 +19,15 @@ def remote_python(code: str, data: bytes = b"") -> None:
     print(result.stdout.decode().strip())
 
 
+def source_bundle(root: Path) -> tuple[bytes, str]:
+    """Deploy committed bytes only; a dirty/untracked source cannot inherit a green CI claim."""
+    git = ["git", "-C", str(root)]
+    if subprocess.check_output(git+["status", "--porcelain"]).strip():
+        raise RuntimeError("Commit and verify all source changes before deployment")
+    revision = subprocess.check_output(git+["rev-parse", "HEAD"]).decode().strip()
+    return subprocess.check_output(git+["archive", "--format=tar.gz", revision]), revision
+
+
 def main() -> None:
     root = Path.cwd()
     if scan(root, Path.home() / ".eventdesk/.env"):
@@ -26,14 +35,14 @@ def main() -> None:
     model = root / "artifacts/local-model.joblib"
     if not model.is_file():
         raise RuntimeError("Train and evaluate the artifact first")
-    files = subprocess.check_output(["git", "ls-files", "--cached", "--others", "--exclude-standard"]).decode().splitlines()
-    blob = io.BytesIO()
-    with tarfile.open(fileobj=blob, mode="w:gz") as archive:
-        for name in files:
-            if (root / name).is_file():
-                archive.add(root / name, arcname=name)
+    blob, revision = source_bundle(root)
+    raw_model = model.read_bytes()
+    declaration = json.loads((root/"competition-config.json").read_text(encoding="utf-8"))
+    if hashlib.sha256(raw_model).hexdigest() != declaration["model_sha256"]:
+        raise RuntimeError("Refusing to replace the deployed model with undeclared bytes")
+    print("committed_source="+revision)
     remote_python("from pathlib import Path; Path('/srv/eventdesk').mkdir(exist_ok=True)")
-    result = subprocess.run(SSH + ["sudo tar -xzf - -C /srv/eventdesk --no-same-owner"], input=blob.getvalue())
+    result = subprocess.run(SSH + ["sudo tar -xzf - -C /srv/eventdesk --no-same-owner"], input=blob)
     if result.returncode:
         raise RuntimeError("Source transfer failed")
     remote_python("""from pathlib import Path
@@ -42,7 +51,7 @@ directory=Path('/var/lib/eventdesk/models');directory.mkdir(parents=True,exist_o
 raw=sys.stdin.buffer.read();temporary=directory/'model.upload'
 temporary.write_bytes(raw);os.chmod(temporary,0o644);os.replace(temporary,directory/'local-model.joblib')
 print('model_sha256='+hashlib.sha256(raw).hexdigest())
-""", model.read_bytes())
+""", raw_model)
     remote_python("""from pathlib import Path
 import os,secrets,json
 directory=Path('/etc/eventdesk')
