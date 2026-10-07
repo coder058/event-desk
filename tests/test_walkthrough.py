@@ -1,5 +1,6 @@
 import asyncio
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -56,3 +57,58 @@ def test_public_demo_is_separate_from_live_ledger_and_rejects_mislabeled_results
     assert client.get("/api/walkthrough").status_code == 503
     report.unlink()
     assert client.get("/api/walkthrough").status_code == 503
+
+
+@pytest.mark.parametrize("damage", [None, "inputs", "model", "prompt", "prediction", "quote", "affects", "state", "json"])
+def test_optional_ai_proof_requires_same_inputs_model_forecast_and_actual_quotes(
+        settings, store, model, tmp_path, monkeypatch, damage):
+    from fastapi.testclient import TestClient
+
+    from eventdesk.api import create_app
+    from eventdesk.llm import PROMPT_HASH, prompt_materials
+    from eventdesk.materials import input_hash
+
+    base = asyncio.run(generator()(model, tmp_path/"demo.sqlite"))
+    items = prompt_materials(base["record"]["official_items"])
+    # PLACEHOLDER: this constructed report tests attribution guards; it is not a real provider call.
+    proof = {
+        "schema_version": "eventdesk-shadow-smoke-v1", "fixture_only": True,
+        "external_official_requests": 0, "prediction_unchanged": True,
+        "inputs_sha256": base["record"]["inputs_hash"], "model_sha256": base["record"]["model_hash"],
+        "shadow_state": "validated", "analysis_trace": {
+            "llm_inputs_hash": input_hash(items), "prompt_hash": PROMPT_HASH,
+            "local_prediction": base["record"]["prediction"]["predictions"][0]["predicted_percentile"],
+            "affects_prediction": False, "timing": "after_local_submission",
+            "analysis": {"beat_vs_buyside_bar": 0, "guidance_change": 0, "tone": 0, "new_risks": 0,
+                "surprise_vs_preview": 0, "confidence": 0,
+                "evidence": [{"item_id": "earnings-call-facts", "quote": items["earnings-call-facts"][0]}]},
+        },
+    }
+    trace = proof["analysis_trace"]
+    if damage in {"inputs", "model"}:
+        proof[damage+"_sha256"] = "different"
+    elif damage == "prompt":
+        trace["prompt_hash"] = "different"
+    elif damage == "prediction":
+        trace["local_prediction"] = "different"
+    elif damage == "quote":
+        trace["analysis"]["evidence"][0]["quote"] = "Fabricated quotation absent from the supplied source."
+    elif damage == "affects":
+        trace["affects_prediction"] = True
+    elif damage == "state":
+        proof["shadow_state"] = "invented"
+    monkeypatch.chdir(tmp_path)
+    reports = tmp_path/"reports"
+    reports.mkdir()
+    (reports/"walkthrough.json").write_text(json.dumps(base), encoding="utf-8")
+    (reports/"shadow-provider-smoke.json").write_text("{" if damage == "json" else json.dumps(proof), encoding="utf-8")
+    client = TestClient(create_app(settings, store))
+    response = client.get("/api/walkthrough")
+    assert response.status_code == 200
+    result = response.json()
+    assert result["record"] == base["record"]
+    assert result["ai_review"] == (proof if damage is None else None)
+    assert result["ai_review_status"] == (
+        "retained_separate_provider_smoke" if damage is None else "invalid_or_mismatched_provenance")
+    assert client.get("/api/predictions").json() == []
+    assert store.health()["states"] == {}

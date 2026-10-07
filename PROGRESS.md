@@ -644,3 +644,18 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   CRLF transformation rejection. A newly added cleanup case was initially placed
   before file creation and failed locally; reordered before publication. Lint and
   secret scan passed. The earlier Linux CI does not verify this corrected version.
+- Corrected source 7c9d281 passed CI 37649334561 with 129 tests and actual
+  PostgreSQL fixtures, then deployed to Dublin. Schema 011, healthy worker,
+  LLM evidence enabled and hybrid disabled were verified; model and configuration
+  hashes stayed unchanged. External TLS verification passed at 16:15 UTC.
+- The isolated real-provider smoke completed at 16:16 UTC: Gemini returned 503;
+  Groq returned validated sub-scores and an exact fictional-source quote. Two
+  actual requests, 863 reported Groq tokens and 2321.295 ms router elapsed were
+  measured. The local prediction stayed unchanged. Official API acceptance was
+  mocked and the event book disposable; production still has zero official events.
+- Added optional walkthrough evidence joined by input, model, prompt and unchanged
+  forecast. A mismatched hash, invented quote, altered forecast or claimed effect
+  hides the optional report without replacing the base demo or seeding live rows.
+  The first new test run failed because a cleanup statement was inserted into the
+  wrong test; corrected before publication. Thirteen walkthrough/provider-smoke
+  tests, lint and strict typing passed. This new display awaits CI/deployment.

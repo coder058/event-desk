@@ -1,0 +1,60 @@
+{
+  "schema_version": "eventdesk-shadow-smoke-v1",
+  "fixture_only": true,
+  "checked_at": "2026-10-07T16:16:11.545294+00:00",
+  "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+  "inputs_sha256": "acf63720c82fd98cbcc5982b8c298b55d4f532c33d43f4a5b2515d0c3c334e08",
+  "external_official_requests": 0,
+  "mock_official_posts": 1,
+  "prediction_unchanged": true,
+  "shadow_state": "validated",
+  "analysis_trace": {
+    "prompt_hash": "79d28bfb5f92ff28b0e9f376b100074ab25641e5646c75bdceeff8c240547c81",
+    "llm_inputs_hash": "acf63720c82fd98cbcc5982b8c298b55d4f532c33d43f4a5b2515d0c3c334e08",
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b",
+    "latency_ms": 2321.2952859466895,
+    "attempts": [
+      {
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "status": "http_503",
+        "quota_headers": {},
+        "quota_error": {}
+      },
+      {
+        "provider": "groq",
+        "model": "openai/gpt-oss-120b",
+        "status": "validated",
+        "actual_tokens": 863,
+        "quota_headers": {
+          "x-ratelimit-limit-requests": 1000.0,
+          "x-ratelimit-limit-tokens": 8000.0,
+          "x-ratelimit-remaining-requests": 999.0,
+          "x-ratelimit-remaining-tokens": 6868.0,
+          "x-ratelimit-reset-requests-seconds": 86.4,
+          "x-ratelimit-reset-tokens-seconds": 8.489
+        }
+      }
+    ],
+    "analysis": {
+      "beat_vs_buyside_bar": 0,
+      "guidance_change": 1,
+      "tone": 0,
+      "new_risks": -1,
+      "surprise_vs_preview": 0,
+      "confidence": 0.8,
+      "evidence": [
+        {
+          "item_id": "earnings-call-facts",
+          "quote": "Management raised full-year revenue guidance."
+        }
+      ]
+    },
+    "local_prediction": 0.5362418819046104,
+    "affects_prediction": false,
+    "timing": "after_local_submission"
+  },
+  "limits": "Fictional inputs, disposable SQLite event book, mock competition acceptance. Real provider calls use shared PostgreSQL quotas. No live event, score or profitability.",
+  "actual_provider_requests": 2
+}

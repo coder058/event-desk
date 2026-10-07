@@ -12,7 +12,9 @@ from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
 from eventdesk.config import Settings
-from eventdesk.schemas import Event
+from eventdesk.llm import PROMPT_HASH, prompt_materials
+from eventdesk.materials import input_hash
+from eventdesk.schemas import Event, LLMAnalysis
 from eventdesk.store import ConflictError, Store
 from eventdesk.vendor.webhook_verification import WebhookVerificationError, verify_webhook
 
@@ -135,6 +137,32 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
                 or result.get("fixture_only") is not True or result.get("external_requests") != 0
                 or not isinstance(result.get("record"), dict) or result["record"].get("state") != "simulated"):
             raise HTTPException(503, "Walkthrough provenance unavailable")
+        result["ai_review"] = None
+        result["ai_review_status"] = "not_run"
+        proof_path = Path("reports/shadow-provider-smoke.json")
+        if proof_path.is_file():
+            try:
+                proof = json.loads(proof_path.read_text(encoding="utf-8"))
+                trace = proof["analysis_trace"]
+                items = prompt_materials(result["record"]["official_items"])
+                if (proof["schema_version"] != "eventdesk-shadow-smoke-v1" or proof["fixture_only"] is not True
+                        or proof["external_official_requests"] != 0 or proof["prediction_unchanged"] is not True
+                        or proof["inputs_sha256"] != result["record"]["inputs_hash"]
+                        or proof["model_sha256"] != result["record"]["model_hash"]
+                        or trace["llm_inputs_hash"] != input_hash(items) or trace["prompt_hash"] != PROMPT_HASH
+                        or trace["local_prediction"] != result["record"]["prediction"]["predictions"][0]["predicted_percentile"]
+                        or proof["shadow_state"] not in {"validated", "unavailable", "failed"}
+                        or trace["affects_prediction"] is not False or trace["timing"] != "after_local_submission"):
+                    raise ValueError("Different evidence provenance")
+                if proof["shadow_state"] == "validated":
+                    LLMAnalysis.model_validate(trace["analysis"]).validate_quotes(items)
+                elif trace.get("analysis") is not None:
+                    raise ValueError("Unvalidated evidence")
+                result["ai_review"] = proof
+                result["ai_review_status"] = "retained_separate_provider_smoke"
+            except (KeyError, TypeError, ValueError):
+                # A broken optional report cannot replace the actual local demo or manufacture evidence.
+                result["ai_review_status"] = "invalid_or_mismatched_provenance"
         return result
 
     return app

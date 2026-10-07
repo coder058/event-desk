@@ -54,11 +54,14 @@ the full-quarter score also reflects missing-output policy. That small, selected
 cohort does not establish general superiority. The blend remains unapproved.
 [Exact failed experiment and limits](../reports/blend-probe-20261006T103757.json).
 
-Production has initially kept LLMs disabled. An optional post-submission evidence
-lane is implemented separately from deadline-critical processing. When enabled,
-it cannot revise the local prediction. A slow-AI dispatcher test verifies that
-predictions can complete while that lane is blocked. Live enablement and actual
-generative evidence must be separately verified, not inferred from this design.
+The post-submission evidence lane was enabled and its production heartbeat
+verified on October 7; hybrid remains disabled. It cannot revise the local
+prediction. A slow-AI dispatcher test verifies that predictions can complete
+while that lane is blocked. A separate fictional-input smoke made two actual
+free-provider requests: Gemini returned 503, Groq produced validated sub-scores
+and a matching quote. The local forecast was unchanged. Its competition API was
+mocked and its event book disposable; no official delivery is claimed.
+[Exact provider smoke](../reports/shadow-provider-smoke.json).
 
 ### Define latency before reporting it
 

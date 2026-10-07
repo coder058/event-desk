@@ -11,8 +11,11 @@ training-target mean. TEST events use the official neutral test prediction.
 
 The prediction itself does not use a generative model or LLM blend. The production
 configuration now enables Gemini/Groq only in a separate post-submission evidence
-lane, under shared quotas. This flag still requires deployment/heartbeat verification;
-an actual event and validated provider response are required to claim live evidence.
+lane, under shared quotas. Deployment/heartbeat verified this flag on October 7,
+with hybrid disabled and unchanged model/configuration hashes. An actual accepted
+competition event is still required to claim live event evidence. An isolated
+fictional-input smoke produced validated Groq evidence after Gemini returned 503;
+its competition API was mocked, not a real delivery or submission.
 Those quotations and sub-scores cannot change the predicted percentile or serve as
 retrospective reasoning for the local regression. A fixed Groq blend was
 actually fitted on 42 Q2 events and validated on 28 Q3 events (25 surprise-complete
