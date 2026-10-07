@@ -10,24 +10,30 @@ Non-TEST events and official submission_n_total were still zero. TEST is not sco
 Opening this POST-only webhook in a browser returns expected GET 405, not a portal
 rejection. No synthetic event was inserted to manufacture a success.
 
-## Owner action — inspect standard HTTPS 443
+## Resolved — standard HTTPS 443; portal migration pending
 
-External 443 still timed out at 22:15 UTC, while verified loopback TLS 443 returned
-200. Examined Docker rules allow that listener. Cloud rules remain unverified:
-the AWS tab could not be read and local AWS CLI is unavailable.
+At October 7, 22:45 UTC the owner-confirmed HTTPS/TCP/443 IPv4 rule was saved
+in Lightsail Dublin. External CA/hostname validation, dashboard/health 200 and
+unsigned webhook 401 passed. [Evidence](reports/https443-20261008.json).
 
-Existing Lightsail console → Instances → Dublin instance **52.17.192.36** →
-Networking → IPv4 Firewall. If missing, add **HTTPS / TCP / 443**, public IPv4
-sources, then Create. [Detailed instructions and evidence](docs/HTTPS-443.md).
-The currently verified portal URL remains
-`https://52.17.192.36.sslip.io:80/competition/webhook` until 443 is externally
-verified. No certificate bypass or firewall change was performed by Codex.
+The owner must save `https://52.17.192.36.sslip.io/competition/webhook` in the
+existing competition portal and press Send test event to verify official delivery
+through 443. The prior accepted official TEST used the working TLS 80 URL.
+Opening the webhook URL as a browser GET correctly returns 405.
 
-## Approval before publication
+## Publication frozen by the latest instruction
 
-The scoped brief requires Jordi's contemporaneous yes before any push. The
-HTTP/cache fixes are local; the deployed code remains 539718e pending publication,
-matching CI and deployment verification. No new free-provider probes or blends.
+Five approved commits through cee53c0 were pushed and deployed before the latest
+freeze. Exact CI 37696439274 passed 174 Linux tests, Compose fixtures and TLS mux.
+Post-deploy host/container byte comparisons matched that source. New reports and
+documentation remain local. No further push, deployment or spending is authorized.
+
+## Repository clarification resolved
+
+Jordi confirmed Event Desk is the only repository and INBOX_CODEX.md the only
+inbox. Stockline belongs to Cursor; no Stockline file or test was modified/run.
+The foreign untracked scoring draft was preserved privately with its SHA and
+replaced by a Codex-authored checklist from fresh read-only operational evidence.
 
 ## Optional integrations
 

@@ -754,3 +754,34 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   syntax passed. README is 96 lines. No CI/new deployment is claimed for these
   unpublished commits. The production source is still 539718e; publication
   requires Jordi's yes at action time, then matching CI and deployment checks.
+
+### October 7, 22:46 UTC — approved HTTPS 443 cloud rule
+
+- Jordi explicitly approved saving HTTPS/TCP/443 from any IPv4 in Dublin.
+  Lightsail showed the new rule and success notification. No restart/resize.
+- External CA/hostname validation passed TLS 1.3, page/health 200 and unsigned
+  webhook 401; GET webhook 405 is expected. No signed TEST manufactured.
+- Standard HTTPS browser verified the actual production dashboard; one neutral
+  TEST remains accepted, no scored/non-TEST observations. Portal URL migration
+  and a signed TEST via 443 remain owner actions.
+- Dated report reports/https443-20261008.json and local documentation updated.
+  The current code deployed remains cee53c0; no push/deploy under the new freeze.
+- Read Stockline inbox at the updated goal's request. Its existing STATUS already
+  acknowledges #1/#2; later warehouse features conflict with the Event Desk scope
+  and no-new-functions constraint. Clarification requested, no Stockline edits.
+
+### October 7, 22:53 UTC — INBOX_CODEX #3 / #2, read-only readiness
+
+- Jordi corrected the accidental Stockline inbox instruction. Event Desk only;
+  no Stockline edits or tests. Existing tracked diffs matched this session's writes.
+- The untracked scoring draft was foreign. Its exact original bytes and SHA were
+  preserved privately; a new checklist was authored from fresh observations.
+- Dublin monitor/backup timers enabled and active; latest monitor exit 0 and no
+  active alerts. Real journal transitions confirm local-only notifications; no
+  Telegram/Langfuse credentials configured. Installed monitor matches cee53c0.
+- Fresh read-only hashes verified the same latest encrypted backup in Dublin and
+  Frankfurt. Existing matching restore proof re-read; no new restore, dump, backup,
+  service change or remote write. The archive predates the official TEST.
+- Checklist documents daily reads, signature/schema/conflict errors and uncertain
+  503 acceptance. HTTPS 443 external proof is separate from the monitor's TLS 80
+  probe. No new code, model, quota requests, notifications or publication.

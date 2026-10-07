@@ -1,0 +1,173 @@
+{
+  "checked_at_unix": 1791413366.8712018,
+  "units": {
+    "eventdesk-monitor.timer": {
+      "NextElapseUSecRealtime": "",
+      "LastTriggerUSec": "Wed 2026-10-07 22:49:25 UTC",
+      "Result": "success",
+      "ActiveState": "active",
+      "SubState": "waiting"
+    },
+    "eventdesk-monitor.service": {
+      "Result": "success",
+      "ExecMainStartTimestamp": "Wed 2026-10-07 22:49:25 UTC",
+      "ExecMainExitTimestamp": "Wed 2026-10-07 22:49:25 UTC",
+      "ExecMainStatus": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead"
+    },
+    "eventdesk-backup.timer": {
+      "NextElapseUSecRealtime": "Thu 2026-10-08 04:10:00 UTC",
+      "LastTriggerUSec": "Wed 2026-10-07 04:10:05 UTC",
+      "Result": "success",
+      "ActiveState": "active",
+      "SubState": "waiting"
+    },
+    "eventdesk-backup.service": {
+      "Result": "success",
+      "ExecMainStartTimestamp": "Wed 2026-10-07 16:56:11 UTC",
+      "ExecMainExitTimestamp": "Wed 2026-10-07 16:56:14 UTC",
+      "ExecMainStatus": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead"
+    }
+  },
+  "records": {
+    "monitor": {
+      "active_alerts": [],
+      "backup_restore_verified": true,
+      "backup_transfer_at": "2026-10-07T16:56:12.195683+00:00",
+      "checked_at": 1791413365.9311059,
+      "https_external_probe_verified": true,
+      "https_origin_probe_verified": true,
+      "limits": "An origin-side HTTPS probe cannot verify the Lightsail external inbound rule",
+      "summary_day": "2026-10-07"
+    },
+    "backup": {
+      "created_at": "2026-10-07T16:56:12.195683+00:00",
+      "file": "eventdesk-20261007T165611Z.tar.gz.age",
+      "encrypted_bytes": 10836145,
+      "ciphertext_sha256": "18bb82e983a660f8c929cc24bd15dbf1c6f0ca5262bc8ae05c308a6b12af00ad",
+      "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+      "remote_receipt_verified": true,
+      "restore_verified": false
+    },
+    "restore": {
+      "created_at": "2026-10-07T16:56:12.195683+00:00",
+      "file": "eventdesk-20261007T165611Z.tar.gz.age",
+      "encrypted_bytes": 10836145,
+      "ciphertext_sha256": "18bb82e983a660f8c929cc24bd15dbf1c6f0ca5262bc8ae05c308a6b12af00ad",
+      "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+      "remote_receipt_verified": true,
+      "restore_verified": true,
+      "archive_files_verified": 17,
+      "restored_schema": "011_sec_http_gate",
+      "restored_jobs": 0,
+      "restored_deliveries": 0,
+      "restored_competition_calendars": 49,
+      "restored_competition_observations": 235,
+      "archive_raw_objects": 0,
+      "restored_source_content_hashes": 0,
+      "source_object_references_verified": true,
+      "limits": "One encrypted backup hash-check and isolated DB restore; production was not overwritten",
+      "verified_at": "2026-10-07T16:56:21.721359+00:00"
+    },
+    "external_tls80": {
+      "origin": "https://52.17.192.36.sslip.io:80",
+      "checked_at": "2026-10-07T22:35:24.966026+00:00",
+      "verified": true,
+      "limits": "One external network observation; not portal delivery, continuous uptime or score eligibility",
+      "tls_version": "TLSv1.3",
+      "certificate_not_after": "Jan  3 20:26:29 2027 GMT",
+      "health_status": 200,
+      "unsigned_webhook_status": 401,
+      "plaintext_redirect_status": 308,
+      "worker_state": "recent_heartbeat",
+      "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1"
+    }
+  },
+  "local_ciphertext": {
+    "file_exists": true,
+    "sha256": "18bb82e983a660f8c929cc24bd15dbf1c6f0ca5262bc8ae05c308a6b12af00ad",
+    "bytes": 10836145
+  },
+  "optional_credentials_present": {
+    "TELEGRAM_BOT_TOKEN": false,
+    "TELEGRAM_CHAT_ID": false,
+    "LANGFUSE_PUBLIC_KEY": false,
+    "LANGFUSE_SECRET_KEY": false
+  },
+  "checked_at": "2026-10-07T22:50:13.232614+00:00",
+  "remote_ciphertext": {
+    "file": "eventdesk-20261007T165611Z.tar.gz.age",
+    "sha256": "18bb82e983a660f8c929cc24bd15dbf1c6f0ca5262bc8ae05c308a6b12af00ad",
+    "bytes": 10836145
+  },
+  "ciphertext_copies_match": true,
+  "limits": "Read-only operational and ciphertext checks; existing matching isolated restore receipt re-read, no new restore or database created. TLS host monitor still probes explicit TLS 80; independent 443 evidence retained separately. No notifications sent or service changes.",
+  "unit_enablement": {
+    "eventdesk-monitor.timer": {
+      "LoadState": "loaded",
+      "UnitFileState": "enabled"
+    },
+    "eventdesk-backup.timer": {
+      "LoadState": "loaded",
+      "UnitFileState": "enabled"
+    }
+  },
+  "safe_monitor_journal": [
+    {
+      "kind": "daily_operational_summary",
+      "day_utc": "2026-10-07",
+      "received_submission_events": 0,
+      "api_accepted": 0,
+      "official_calendar_coverage": null,
+      "active_alerts": [
+        "https_path_unverified"
+      ]
+    },
+    {
+      "kind": "ops_alert_transition",
+      "at": 1791372386.1353364,
+      "new": [],
+      "resolved": [
+        "https_path_unverified"
+      ],
+      "notification": "local_only_optional_credentials_absent"
+    },
+    {
+      "kind": "ops_alert_transition",
+      "at": 1791389679.8629835,
+      "new": [
+        "https_path_unverified",
+        "official_observations_unverified",
+        "origin_unreachable"
+      ],
+      "resolved": [],
+      "notification": "local_only_optional_credentials_absent"
+    },
+    {
+      "kind": "ops_alert_transition",
+      "at": 1791389741.438417,
+      "new": [],
+      "resolved": [
+        "https_path_unverified",
+        "official_observations_unverified",
+        "origin_unreachable"
+      ],
+      "notification": "local_only_optional_credentials_absent"
+    }
+  ],
+  "non_json_journal_lines": 3729,
+  "installed_monitor_sha256": "37bd682e7d4a83f93870718d5f650a2b3c5589b6aa0e141c749e5aad37599d38",
+  "installed_monitor_matches_deployed_source": true,
+  "external_draft": {
+    "path": "docs/SCORING-READINESS.md",
+    "sha256": "dfab84292fbafee12b105150db1199c82991491cab3a099076adc33b83b0f72d",
+    "preserved_privately": true,
+    "replacement_authored_by_codex_from_readonly_evidence": true,
+    "original_draft_not_staged_by_codex": true,
+    "unexpected_index_change_detected": true,
+    "original_index_bytes_match_preserved_copy": true
+  }
+}
