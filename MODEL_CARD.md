@@ -9,8 +9,12 @@ quarters 2025Q4–2026Q2. Predictions are clipped to the API's [0,1] interval.
 No future live-event batch ranks are used. Missing materials use the fitted
 training-target mean. TEST events use the official neutral test prediction.
 
-The current deployed version does not use a generative model or LLM blend.
-Gemini/Groq structured evidence is under development. A fixed Groq blend was
+The prediction itself does not use a generative model or LLM blend. The production
+configuration now enables Gemini/Groq only in a separate post-submission evidence
+lane, under shared quotas. This flag still requires deployment/heartbeat verification;
+an actual event and validated provider response are required to claim live evidence.
+Those quotations and sub-scores cannot change the predicted percentile or serve as
+retrospective reasoning for the local regression. A fixed Groq blend was
 actually fitted on 42 Q2 events and validated on 28 Q3 events (25 surprise-complete
 scorer rows). Its full imputed ΔR² was 0.03871855275695035 versus the local model's
 0.04095315077531125, and its paired score was also lower. It remains unapproved;

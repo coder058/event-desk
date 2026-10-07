@@ -274,12 +274,14 @@ async def run() -> None:
     model = LocalModel(settings.model_path, expected_sha256=configuration.model_sha256 if configuration else None)
     if model.artifact.get("fixture_only") and not settings.fixture_mode:
         raise RuntimeError("Refusing synthetic fixture model in production")
-    async with httpx.AsyncClient(follow_redirects=False) as http:
+    # SOURCE: configured official/provider destinations; ambient proxy variables must not reroute credentials.
+    async with httpx.AsyncClient(follow_redirects=False, trust_env=False) as http:
         telemetry = Telemetry()
         worker = Worker(settings, store, model, http, telemetry=telemetry)
         if not settings.fixture_mode:
             worker.configuration_hash = verify_freeze(Path("competition-config.json"), model,
                 hybrid_enabled=worker.blend is not None,
+                post_submission_evidence_enabled=worker.router is not None and worker.blend is None,
                 provider_models={provider.name: provider.model for provider in providers_from_env()})
         await asyncio.to_thread(store.recover)
         LOG.info("worker_started model_hash=%s configuration_hash=%s fixture=%s",

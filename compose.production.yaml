@@ -38,6 +38,10 @@ services:
     build: .
     restart: unless-stopped
     env_file: [/etc/eventdesk/env, /etc/eventdesk/runtime.env]
+    environment:
+      # SOURCE: initial preregistration permits post-submission evidence, never a prediction-affecting blend.
+      EVENTDESK_LLM_ENABLED: "true"
+      EVENTDESK_BLEND_PATH: ""
     command: ["python", "-m", "eventdesk.worker"]
     volumes: ["/var/lib/eventdesk/models:/models:ro"]
     mem_limit: 512m # UNCALIBRATED GUESS: fitted sparse model plus shared I/O workers.

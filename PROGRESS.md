@@ -607,3 +607,14 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   metadata read-only: one sealed import, 26 Gemini and 111 Groq usage rows. Those
   rows include attempts and legacy records, not validated-event counts or available
   account capacity. Prompt/model-specific cohorts still require exact validation.
+- Walkthrough source 8d0c6c0 passed CI 37646673348. Public MCP source f157aec
+  also passed CI 37645113686. Both await the consolidated Dublin deployment.
+- Prepared production post-submission evidence enablement with an empty blend
+  path and the existing provider pins. Added startup enforcement of the declared
+  evidence permission and immutable first completion/identical retries for shadow
+  traces. Ambient proxy routing is disabled for credential-bearing HTTP clients.
+  Twenty-seven freeze/blend/dispatcher/router/isolation checks passed; strict
+  typing/lint passed. Runtime flags are not yet claimed enabled before deployment.
+- Current-prompt record counts are Gemini pinned 3.1 Flash-Lite: 13 Q2; Groq
+  pinned gpt-oss-120b: 42 Q2/55 Q3. Earlier model/prompt files are distinct and
+  excluded. This count does not evaluate a new blend or establish predictive skill.

@@ -47,7 +47,8 @@ def code_hashes() -> dict[str, str]:
 
 
 def verify_freeze(path: Path, model: LocalModel, *, hybrid_enabled: bool,
-                  provider_models: dict[str, str] | None = None) -> str:
+                  provider_models: dict[str, str] | None = None,
+                  post_submission_evidence_enabled: bool = False) -> str:
     raw = path.read_bytes()
     freeze = CompetitionFreeze.model_validate_json(raw)
     if model.sha256 != freeze.model_sha256 or model.artifact["enriched"]:
@@ -69,6 +70,8 @@ def verify_freeze(path: Path, model: LocalModel, *, hybrid_enabled: bool,
         raise ValueError("Submission policy differs from the declaration")
     if hybrid_enabled:
         raise ValueError("The current declaration permits no prediction-affecting LLM blend")
+    if post_submission_evidence_enabled and not freeze.post_submission_evidence_allowed:
+        raise ValueError("Post-submission evidence is not permitted by the declaration")
     # A missing optional key must not prevent local coverage; each enabled provider must still use its pin.
     if provider_models is not None and any(freeze.provider_models.get(name) != model_name
                                           for name, model_name in provider_models.items()):

@@ -65,3 +65,14 @@ view. Do not activate it to satisfy the product label. Keep production local-onl
 retain the unapproved artifact, exact input snapshots and negative public report.
 Small early-quarter cohorts and a constant feature further limit the inference.
 This is not evidence that every LLM or future event method must underperform.
+
+## 2026-10-07 — enable evidence without changing the prediction
+
+Shared research/runtime quota import and actual PostgreSQL admission passed CI
+and Dublin verification. Configure the separate post-submission lane on, with
+an explicitly empty blend path, then verify runtime flags after deployment.
+The existing model/configuration hashes and pinned providers remain unchanged.
+Enforce the manifest's evidence permission on startup. Evidence completion is
+first-write immutable with identical retries allowed; no later favorable replacement.
+No pending official event is fabricated to test this. Cloud evidence availability
+still depends on account limits and a genuine accepted event.

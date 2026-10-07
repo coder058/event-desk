@@ -98,5 +98,8 @@ def test_shadow_queue_restarts_without_revising_outbox(settings, store):
     with pytest.raises(ConflictError, match="cannot change"):
         restarted.finish_shadow(second.id, {"affects_prediction": True}, "validated")
     restarted.finish_shadow(second.id, {"affects_prediction": False}, "unavailable")
+    restarted.finish_shadow(second.id, {"affects_prediction": False}, "unavailable")
+    with pytest.raises(ConflictError, match="immutable"):
+        restarted.finish_shadow(second.id, {"affects_prediction": False, "retrospective_change": True}, "validated")
     assert restarted.public_event(e.event_id)["prediction"] == payload
     assert restarted.claim_shadow(time.time()) is None

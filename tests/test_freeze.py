@@ -37,3 +37,16 @@ def test_declared_model_hash_is_checked_before_deserializing_joblib(model, tmp_p
     with pytest.raises(ValueError, match="hash"):
         LocalModel(path, expected_sha256=model.sha256)
     assert called == []
+
+
+def test_shadow_enablement_requires_the_frozen_permission(model, tmp_path):
+    config = json.loads(Path("competition-config.json").read_text())
+    config["model_sha256"] = model.sha256  # PLACEHOLDER: isolated test artifact, not production settings.
+    path = tmp_path/"fixture-declaration.json"
+    path.write_text(json.dumps(config))
+    verify_freeze(path, model, hybrid_enabled=False, post_submission_evidence_enabled=True)
+    config["post_submission_evidence_allowed"] = False
+    path.write_text(json.dumps(config))
+    with pytest.raises(ValueError, match="Post-submission"):
+        verify_freeze(path, model, hybrid_enabled=False, post_submission_evidence_enabled=True)
+    verify_freeze(path, model, hybrid_enabled=False, post_submission_evidence_enabled=False)

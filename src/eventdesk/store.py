@@ -277,6 +277,12 @@ class Store:
                 raise ConflictError("Shadow evidence requires an accepted immutable local prediction")
             if trace.get("affects_prediction") is not False:
                 raise ConflictError("Shadow evidence cannot change a prediction")
+            if job.analysis_trace is not None:
+                if job.analysis_trace == trace and job.shadow_state == state:
+                    return  # Identical durable completion retry, not a revised explanation.
+                raise ConflictError("Retained shadow evidence is immutable")
+            if job.shadow_state != "working" or state not in {"validated", "unavailable", "failed"}:
+                raise ConflictError("Shadow completion requires claimed work and a known outcome")
             # Evidence attaches to the retained input hash; payload/provider/submission timestamps stay immutable.
             job.analysis_trace, job.shadow_state = trace, state
 
