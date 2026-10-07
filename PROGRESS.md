@@ -559,5 +559,8 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   the ciphertext filename variable. Receiver rejected the command with ValueError;
   the previously verified backup stayed intact. Metadata-only diagnostics exposed
   no credentials. Renamed loop variables and added a full mocked dump/encryption/
-  send regression, not just helper tests. Seven focused checks now pass. Three
-  failed encrypted local artifacts are retained; none was reported as transferred.
+  send regression, not just helper tests. Seven focused checks now pass. Failed
+  encrypted local artifacts are retained; none was reported as transferred.
+- CI then caught Linux-only double-mapping of temporary paths in the new mocked
+  backup test (112 checks passed, that test failed). Limited path substitution to
+  the declared host roots; this was a fixture bug, not a second production change.

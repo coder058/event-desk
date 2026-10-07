@@ -53,7 +53,9 @@ def test_complete_backup_sends_the_ciphertext_filename_and_preserves_research(tm
     module = backup_module()
     # PLACEHOLDER: synthetic root/project files and mocked dump/encryption/SSH, no actual secret or host.
     def host_path(value):
-        return tmp_path/str(value).lstrip("/")
+        if str(value).startswith(("/etc/eventdesk", "/var/lib/eventdesk", "/srv/eventdesk")):
+            return tmp_path/str(value).lstrip("/")
+        return Path(value)
     root = host_path("/var/lib/eventdesk")
     sources = {
         "/etc/eventdesk/backup.json": json.dumps({"recipient": "fixture", "destination": "fixture"}),
