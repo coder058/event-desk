@@ -543,3 +543,14 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   array-integrity checks. Ten synthetic parser cases passed, strict typing/lint
   passed. This is recent metadata discovery, not daily ingestion or verified filing
   bodies. External collection remains disabled until the documented contact exists.
+
+- Real shared-ledger collection completed ten additional valid Groq Q3 analyses
+  and three valid pinned Gemini Q2 analyses. Retained the exact appended private
+  bytes locally. Current verified cohorts: Groq 42 Q2/55 Q3; Gemini 3 Q2.
+  The initial negative blend/weights remain unchanged and unapproved.
+- Backup review found ingress/private research files were omitted, and hashes were
+  taken before rereading live files into the archive. Added explicit project files
+  and stable staging copies that reject mutation; restore receipts now publish
+  only after test-database cleanup and match the exact latest ciphertext.
+  Six focused snapshot/monitor checks passed; actual expanded backup/restore remains
+  to verify before claiming those new artifacts are recoverable.

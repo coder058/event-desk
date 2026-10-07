@@ -5,6 +5,7 @@ import json
 import shlex
 import subprocess
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 from bootstrap import SSH
@@ -93,12 +94,27 @@ def main() -> None:
                        "restored_competition_calendars": int(rows[3]),
                        "restored_competition_observations": int(rows[4]),
                        "limits": "One encrypted backup hash-check and isolated DB restore; production was not overwritten"})
-        Path("reports/backup-restore.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print(json.dumps(report))
     finally:
         removed = subprocess.run(SSH + [command + "dropdb -U eventdesk " + database], capture_output=True)
         if removed.returncode:
             raise RuntimeError("Disposable restore database cleanup failed; production untouched")
+    # Publish only after successful verification AND disposable-database cleanup.
+    report["verified_at"] = datetime.now(UTC).isoformat()
+    record = '''
+import json,os,sys,tempfile
+from pathlib import Path
+data=json.load(sys.stdin);directory=Path('/var/lib/eventdesk/backups')
+fd,temporary=tempfile.mkstemp(prefix='.restore-proof-',dir=directory)
+try:
+ with os.fdopen(fd,'w') as stream:
+  json.dump(data,stream,allow_nan=False);stream.flush();os.fsync(stream.fileno())
+ os.chmod(temporary,0o600);os.replace(temporary,directory/'restore-verification.json')
+finally:Path(temporary).unlink(missing_ok=True)
+print('dated_restore_proof_retained')
+'''
+    remote(SSH, record, json.dumps(report).encode())
+    Path("reports/backup-restore.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(report))
 
 
 if __name__ == "__main__":

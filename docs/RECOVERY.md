@@ -11,6 +11,13 @@ identity stays root-only at `/etc/eventdesk-backup/identity.txt`; private key va
 are never copied into this repository. Dublin retains local encrypted snapshots.
 No old bot journals or Fly Brain files are included or changed.
 
+Reviewed backup sources are copied into private staging before their hashes are
+computed. Mutation/replacement while copying causes failure rather than a manifest
+describing different archive bytes. These are per-file snapshots plus a PostgreSQL
+consistent dump, not an atomic cross-filesystem/database snapshot.
+The two ingress files and known private archive/evidence/quota research files are
+included. No broad scan of home directories or unrelated host projects occurs.
+
 ## Verification
 
 `python ops/verify_backup.py` checks ciphertext and every archived-file hash on
@@ -21,6 +28,9 @@ the production database. The public aggregate is `reports/backup-restore.json`.
 
 The archive model's hash is verified against the deployed artifact. No untrusted
 joblib artifact is loaded on the backup host. There is no raw secret-file output.
+Only after disposable-database cleanup does the verifier publish its dated receipt.
+The host monitor recognizes it only when filename, ciphertext and model hash match
+the latest backup. A verified older copy does not validate a newer nightly copy.
 
 ## Production recovery procedure
 

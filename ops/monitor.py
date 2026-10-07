@@ -101,6 +101,22 @@ def evaluate_official(observations: dict | None, now: float) -> list[str]:
     return sorted(alerts)
 
 
+def verified_restore(backup: dict | None, proof: dict | None, now: float) -> bool:
+    """An isolated restore proves only the identical immutable backup, not every later copy."""
+    if backup is None or proof is None or proof.get("restore_verified") is not True:
+        return False
+    if any(not backup.get(name) or backup.get(name) != proof.get(name)
+           for name in ("file", "ciphertext_sha256", "model_sha256")):
+        return False
+    try:
+        created = datetime.fromisoformat(backup["created_at"])
+        verified = datetime.fromisoformat(proof["verified_at"])
+        return (created.tzinfo is not None and verified.tzinfo is not None
+                and created.timestamp() <= verified.timestamp() <= now)
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
 def telegram(message: str) -> str:
     token, chat = os.getenv("TELEGRAM_BOT_TOKEN", ""), os.getenv("TELEGRAM_CHAT_ID", "")
     if not token or not chat:
@@ -169,7 +185,15 @@ def run() -> None:
         "https_external_probe_verified": external_https_verified,
         "limits": "An origin-side HTTPS probe cannot verify the Lightsail external inbound rule",
         "backup_transfer_at": backup.get("created_at") if backup else None,
-        "backup_restore_verified": False})
+        "backup_restore_verified": verified_restore(backup, restore_proof(), now)})
+
+
+def restore_proof() -> dict | None:
+    try:
+        result = json.loads(Path("/var/lib/eventdesk/backups/restore-verification.json").read_text())
+        return result if isinstance(result, dict) else None
+    except (OSError, ValueError):
+        return None
 
 
 if __name__ == "__main__":

@@ -6,6 +6,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
+import stat
 import subprocess
 import tarfile
 import tempfile
@@ -20,6 +22,48 @@ def file_hash(path: Path) -> str:
         while chunk := stream.read(64 * 1024):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def snapshot_regular_file(source: Path, destination: Path) -> None:
+    """Hash/archive only this completed private copy; reject mutation or a linked source."""
+    if source.is_symlink():
+        raise ValueError("Backup source cannot be a symlink")
+    destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    # SOURCE: O_NOFOLLOW rejects a raced symlink on the actual Linux backup host;
+    # zero is the neutral fallback for platforms used by the synthetic unit tests.
+    descriptor = os.open(source, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        with os.fdopen(descriptor, "rb") as original:
+            before = os.fstat(original.fileno())
+            if not stat.S_ISREG(before.st_mode):
+                raise ValueError("Backup requires a regular source file")
+            with destination.open("xb") as snapshot:
+                shutil.copyfileobj(original, snapshot)
+                snapshot.flush()
+                os.fsync(snapshot.fileno())
+            after, current = os.fstat(original.fileno()), source.stat(follow_symlinks=False)
+            def identity(state):
+                return state.st_dev, state.st_ino, state.st_size, state.st_mtime_ns
+            if identity(before) != identity(after) or identity(before) != identity(current):
+                raise ValueError("Backup source changed during capture")
+    except BaseException:
+        destination.unlink(missing_ok=True)
+        raise
+    os.chmod(destination, 0o600)
+
+
+def atomic_json(path: Path, value: dict) -> None:
+    descriptor, temporary = tempfile.mkstemp(prefix=".backup-state-", dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as output:
+            json.dump(value, output, allow_nan=False)
+            output.write("\n")
+            output.flush()
+            os.fsync(output.fileno())
+        os.chmod(temporary, 0o600)
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def run() -> dict[str, object]:
@@ -51,6 +95,25 @@ def run() -> dict[str, object]:
         for optional in ("competition-config.json", "PREREGISTRATION.md", "deployment.json"):
             if (source / optional).is_file():
                 files["source/" + optional] = source / optional
+        # SOURCE: both files are required to reconstruct the deployed TLS routing.
+        for name in ("Caddyfile", "haproxy.cfg"):
+            files["source/ops/"+name] = source/"ops"/name
+        # SOURCE: only this project's known research artifacts; no broad host/home scan.
+        research = Path("/var/lib/eventdesk/research")
+        for name in ("quota-source-sealed.json", "archive/2026Q2.jsonl.gz", "archive/2026Q3.jsonl.gz",
+                     "evidence/llm-groq-2026Q2.jsonl", "evidence/llm-groq-2026Q3.jsonl",
+                     "evidence/llm-gemini-2026Q2.jsonl", "evidence/llm-gemini-2026Q3.jsonl"):
+            path = research/name
+            if path.exists():
+                files["research/"+name] = path
+        # Snapshot sources before computing hashes. A later append/deploy cannot produce
+        # an archive whose bytes disagree with the manifest that described live files.
+        snapshots = {}
+        for archive_name, path in files.items():
+            target = stage/"snapshot"/archive_name
+            snapshot_regular_file(path, target)
+            snapshots[archive_name] = target
+        files = snapshots
         manifest = {"created_at": datetime.now(timezone.utc).isoformat(), "database_format": "pg_dump_custom",
             "files": {name: {"sha256": file_hash(path),
                               "bytes": path.stat().st_size} for name, path in files.items()}}
@@ -81,7 +144,7 @@ def run() -> dict[str, object]:
         "encrypted_bytes": encrypted.stat().st_size, "ciphertext_sha256": digest,
         "model_sha256": manifest["files"]["local-model.joblib"]["sha256"],
         "remote_receipt_verified": True, "restore_verified": False}
-    (backup_root / "latest.json").write_text(json.dumps(report, indent=2) + "\n")
+    atomic_json(backup_root/"latest.json", report)
     return report
 
 
