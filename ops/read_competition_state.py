@@ -19,7 +19,7 @@ def main() -> None:
     # GUESS: bounded diagnostic request; not a measured competition latency guarantee.
     # UNCALIBRATED GUESS
     with httpx.Client(base_url=COMPETITION_ORIGIN, headers={"X-API-Key": values["EM_API_KEY"]},
-                      timeout=15, follow_redirects=False) as client:
+                      timeout=15, trust_env=False, follow_redirects=False) as client:
         records = {}
         for route in ("events", "health"):
             response = client.get("/"+route)

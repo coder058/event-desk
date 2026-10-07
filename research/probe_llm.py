@@ -35,7 +35,8 @@ async def run() -> None:
         record = json.loads(next(source))
     items = select_items(record)
     results = []
-    async with httpx.AsyncClient() as http:
+    # Credential routing and TLS roots must not inherit ambient proxy/CA overrides.
+    async with httpx.AsyncClient(trust_env=False, follow_redirects=False) as http:
         for provider in providers_from_env():
             result = await Router(Quotas(store), http, (provider,)).analyze(items, time.time() + 300)
             saved = {"date": datetime.now(UTC).isoformat(), "event_id": record["event_id"],

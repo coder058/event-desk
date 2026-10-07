@@ -695,3 +695,30 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   new cross-check: zero source hashes and zero raw objects, matching the absence
   of actual SEC collection. That empty check does not prove populated production
   recovery. Synthetic populated archives test byte identity and rejection paths.
+
+## Scoped four-hour brief — October 7, from 21:59 UTC
+
+- The new brief supersedes expansion: no new features, event paper portfolio,
+  blend fitting or free-provider probes. All work stays local until Jordi gives
+  a contemporaneous yes to push. The old bot remains frozen.
+- Initial source check compared 93 committed code/configuration files with the
+  host and all src files with API/worker/observer containers: no discrepancies
+  from deployed 539718e. Database/worker and external HTTPS were healthy. The
+  three original 16:56 reports were committed locally as e7c961c after JSON/date
+  validation, secret scanning and 12 passing health/backup tests (one Windows
+  symlink skip). No push or deployment followed that documentation commit.
+- The owner initially opened the receiver URL in a browser: verified GET 405,
+  Allow POST. This was not a portal rejection. A genuine portal TEST then arrived
+  at 22:03:47 UTC. Fresh official health reported one 2xx delivery and
+  last_test_prediction_at 22:03:48.125853 UTC. Production PostgreSQL held one
+  delivery and one TEST job with persisted neutral 0.5 prediction, HTTP 201/
+  api_accepted, no error, and 539.119 ms local receipt-to-acceptance interval.
+  Official non-TEST events/submission_n_total remained zero. Exact evidence:
+  reports/official-test-20261007.json. TEST verifies connectivity, not scoring,
+  trained predictive quality or live market-event latency.
+- Four new entry-point regressions first failed because real HTTPX construction
+  accessed ambient proxies. Each then passed with trust_env=False and redirect
+  following explicitly disabled. Mock-only provider/official requests validated
+  that poisoned proxy/CA variables could not affect credential-bearing clients.
+  Twenty-six HTTP-environment/competition/router tests passed; lint, strict types
+  and owner-value secret scan passed. This correction is local, not deployed.

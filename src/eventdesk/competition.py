@@ -161,7 +161,8 @@ async def run() -> None:
     if settings.fixture_mode:
         raise ValueError("Official collector must not run in fixture compose")
     store = Store(settings.database_url)
-    async with httpx.AsyncClient() as http:
+    # Credential routing and TLS roots must not inherit ambient proxy/CA overrides.
+    async with httpx.AsyncClient(trust_env=False, follow_redirects=False) as http:
         while True:
             await observe(settings, store, http)
             await asyncio.sleep(POLL_SECONDS)

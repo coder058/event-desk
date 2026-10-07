@@ -62,7 +62,8 @@ async def main() -> None:
                  if result.get("analysis") and result["prompt_hash"] == PROMPT_HASH
                  and result["model"] == provider.model}
     count = 0
-    async with httpx.AsyncClient() as http:
+    # Credential routing and TLS roots must not inherit ambient proxy/CA overrides.
+    async with httpx.AsyncClient(trust_env=False, follow_redirects=False) as http:
         router = Router(Quotas(store), http, (provider,))
         for record in records:
             if record["event_id"] in completed:
