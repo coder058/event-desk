@@ -722,3 +722,15 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   that poisoned proxy/CA variables could not affect credential-bearing clients.
   Twenty-six HTTP-environment/competition/router tests passed; lint, strict types
   and owner-value secret scan passed. This correction is local, not deployed.
+- Cache entry-point regressions reproduced ten failures before correction:
+  altered/missing input hashes, invented quotes, wrong quarter/event, invalid
+  schema, conflicting retries, wrong provider, duplicate archive identity and
+  corruption concealed by cooldown. The collector now uses the exact existing
+  probe_blend.validated_samples validator before skipping any sample. Twenty
+  cache/calibration/environment tests passed; no provider call was made.
+- Read-only cache audit validated the retained five model-specific cohorts
+  against exact archive inputs/current prompt: pinned Gemini Q2 13/17 attempts,
+  Groq Q2 42/51 and Q3 55/60; other Gemini 3.5 cohorts remain separate (3/5 Q2,
+  3/3 Q3). Archived input/evidence hashes and limits are retained in
+  reports/research-cache-audit-20261007.json. No labels were fitted/scored,
+  no free quota spent and no new predictive or deployment claim was made.

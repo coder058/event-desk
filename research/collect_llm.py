@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
+from probe_blend import validated_samples
 
 from eventdesk.llm import PROMPT_HASH, Router, providers_from_env, reservation_tokens
 from eventdesk.materials import input_hash, select_items
@@ -58,9 +59,11 @@ async def main() -> None:
     output = directory / (f"llm-{args.provider}-{args.quarter}.jsonl" if args.model is None
                           else f"llm-{args.provider}-{provider.model.replace('/', '_')}-{args.quarter}.jsonl")
     existing = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()] if output.exists() else []
-    completed = {result["event_id"] for result in existing
-                 if result.get("analysis") and result["prompt_hash"] == PROMPT_HASH
-                 and result["model"] == provider.model}
+    # Use the same archive identity, input hash, quote/schema and conflicting-
+    # retry checks as calibration. Invalid matching evidence must stop collection,
+    # not silently become a cache hit or a favorable replacement provider call.
+    completed = set(validated_samples(records, existing, quarter=args.quarter,
+                                     provider=provider.name, model=provider.model))
     count = 0
     # Credential routing and TLS roots must not inherit ambient proxy/CA overrides.
     async with httpx.AsyncClient(trust_env=False, follow_redirects=False) as http:

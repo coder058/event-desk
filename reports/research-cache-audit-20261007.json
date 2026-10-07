@@ -1,0 +1,59 @@
+{
+  "checked_at": "2026-10-07T22:13:11.055686+00:00",
+  "validation": "probe_blend.validated_samples",
+  "prompt_sha256": "79d28bfb5f92ff28b0e9f376b100074ab25641e5646c75bdceeff8c240547c81",
+  "external_requests": 0,
+  "cohorts": [
+    {
+      "name": "llm-gemini-2026Q2.jsonl",
+      "quarter": "2026Q2",
+      "provider": "gemini",
+      "model": "gemini-3.1-flash-lite",
+      "attempts": 17,
+      "validated_unique_events": 13,
+      "archive_sha256": "04c3b1af2a900261c608ba1a92662ee76eb94db969f76841e27c2335eb6ae011",
+      "evidence_sha256": "2af735738084daf49008237fb887125672955ecfbe9393b300b46f8736cb7c42"
+    },
+    {
+      "name": "llm-groq-2026Q2.jsonl",
+      "quarter": "2026Q2",
+      "provider": "groq",
+      "model": "openai/gpt-oss-120b",
+      "attempts": 51,
+      "validated_unique_events": 42,
+      "archive_sha256": "04c3b1af2a900261c608ba1a92662ee76eb94db969f76841e27c2335eb6ae011",
+      "evidence_sha256": "edd1039efbd29f08675353133594257015c411a8735baad576811ae9f821379c"
+    },
+    {
+      "name": "llm-groq-2026Q3.jsonl",
+      "quarter": "2026Q3",
+      "provider": "groq",
+      "model": "openai/gpt-oss-120b",
+      "attempts": 60,
+      "validated_unique_events": 55,
+      "archive_sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c",
+      "evidence_sha256": "a331cda837dc554832afe6d97826cbb9c145cca9e29c505c36f1c80d08c46c1e"
+    },
+    {
+      "name": "llm-gemini-gemini-3.5-flash-lite-2026Q2.jsonl",
+      "quarter": "2026Q2",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "attempts": 5,
+      "validated_unique_events": 3,
+      "archive_sha256": "04c3b1af2a900261c608ba1a92662ee76eb94db969f76841e27c2335eb6ae011",
+      "evidence_sha256": "68be0300c6f93563ee9e2dbefadd730a85f2d33ab058c747179c3ecde91bae46"
+    },
+    {
+      "name": "llm-gemini-gemini-3.5-flash-lite-2026Q3.jsonl",
+      "quarter": "2026Q3",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "attempts": 3,
+      "validated_unique_events": 3,
+      "archive_sha256": "123ddf0cca379f4e647f4f3b5408437a98e85b049676901cf6913d1918f5712c",
+      "evidence_sha256": "eefe60589e17b6c36c98097451ce76828b1c1065886dd12b3705047d22fb05a7"
+    }
+  ],
+  "limits": "Read-only exact-input validation of retained cache snapshots; no refit, score, provider probe, quota debit or deployment. Separate provider/model cohorts are not merged."
+}
