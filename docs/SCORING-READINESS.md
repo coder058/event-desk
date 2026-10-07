@@ -8,6 +8,14 @@ Codex checklist authored from read-only production checks on 7 October,
 No code, model, service, wallet, provider quota or competition setting changed
 for this checklist. No new restore or backup was launched.
 
+**Later incident supersedes the initial no-alert snapshot:** the retained official
+observation at 7 October 23:44:03 UTC reports 15 consecutive webhook 4xx failures.
+Public health and the walkthrough still respond, but this does not establish
+signed delivery readiness. The original TEST is still the only accepted event;
+the exact rejection cause remains unknown. The prepared redacted logger is local
+and not deployed. [Follow-up evidence](../reports/delivery-failures-followup-readonly-20261008.json),
+[incident and remaining gates](INCIDENT-2026-10-08-delivery-4xx.md).
+
 ## Current readiness and unresolved gates
 
 | Gate | Verified observation | Remaining limit |

@@ -15,6 +15,22 @@ credentials matched the existing local credentials by hash; no values were expor
 API access logging was intentionally disabled, so no historical rejection body,
 headers or exact HTTP status was recovered. Root cause remains unknown.
 
+## Later read-only observation
+
+At `2026-10-07T23:52:44Z`, public HTTPS GETs returned 200 for the dashboard,
+walkthrough, health and public read-only APIs. The retained official observer
+snapshot from `2026-10-07T23:44:03.534902Z` reported **15** 4xx deliveries and
+**15** consecutive failures, latest delivery `2026-10-07T23:28:59.043690Z`.
+It still reported one 2xx and the original TEST prediction timestamp; production
+health retained one TEST/api_accepted job and the scoreboard had zero non-TEST
+received/accepted events. [Follow-up evidence](../reports/delivery-failures-followup-readonly-20261008.json).
+
+This was not a fresh authenticated portal GET. The growing count does not identify
+who triggered the deliveries or whether they were TEST, non-TEST or retries.
+Neither successful public GETs nor the available synthetic walkthrough diagnoses
+the rejection. No URL, secret, signature gate, runtime code or production log
+configuration was changed. The exact rejection cause remains unknown.
+
 ## Hypotheses, in requested order
 
 | Hypothesis | Observation | Conclusion |

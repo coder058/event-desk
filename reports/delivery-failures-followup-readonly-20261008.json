@@ -1,0 +1,76 @@
+{
+  "checked_at": "2026-10-07T23:52:44.305611+00:00",
+  "scope": "Read-only public HTTPS GETs and retained official observer snapshot; no portal change, signature replay, provider request or production code change",
+  "origin": "https://52.17.192.36.sslip.io",
+  "public_statuses": {
+    "/": 200,
+    "/walkthrough": 200,
+    "/healthz": 200,
+    "/api/walkthrough": 200,
+    "/api/scoreboard": 200,
+    "/api/competition": 200
+  },
+  "health": {
+    "states": {
+      "api_accepted": 1
+    },
+    "test_events": 1,
+    "database": "reachable",
+    "worker": {
+      "state": "recent_heartbeat",
+      "seen_at": 1791417164.582443,
+      "details": {
+        "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+        "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+        "synthetic_model": false,
+        "llm_enabled": true,
+        "hybrid_enabled": false,
+        "fixture_mode": false
+      }
+    },
+    "deadline_at_risk": false,
+    "fixture_mode": false
+  },
+  "walkthrough": {
+    "status": 200,
+    "fixture_only": true,
+    "external_requests": 0,
+    "database_origin": "disposable_local_sqlite",
+    "model_origin": "trained_archive_model",
+    "state": "simulated",
+    "ai_review_status": "retained_separate_provider_smoke"
+  },
+  "scoreboard": {
+    "received_submission_events": 0,
+    "api_accepted": 0,
+    "simulated": 0,
+    "material_fallbacks": 0,
+    "api_acceptance_fraction": null,
+    "receipt_to_response_p95_ms": null,
+    "official_calendar_coverage": null,
+    "official_live_score": null,
+    "limits": "Received submission-events exclude TEST; multiple slots count separately. API acceptance is not verified score eligibility; official calendar denominator is unavailable."
+  },
+  "official_snapshot_observed_at": "2026-10-07T23:44:03.534902+00:00",
+  "official_rolling_24h_counters": {
+    "webhook_n_2xx": 1,
+    "webhook_n_4xx": 15,
+    "webhook_n_5xx": 0,
+    "webhook_n_timeout": 0,
+    "webhook_consecutive_failures": 15,
+    "submission_n_total": 0,
+    "submission_n_duplicate": 0,
+    "submission_n_late": 0,
+    "submission_n_pre_broadcast": 0,
+    "submission_n_invalid_event": 0,
+    "webhook_last_delivery_at": "2026-10-07T23:28:59.043690+00:00",
+    "submission_last_at": null,
+    "last_test_prediction_at": "2026-10-07T22:03:48.125853+00:00"
+  },
+  "limits": [
+    "Official counters come from the retained observer snapshot, not a newly authenticated portal GET.",
+    "Public GET success does not prove signed delivery acceptance.",
+    "Exact rejected status, event type, timestamp headers, failed body and failure reason remain unavailable.",
+    "No historical rejection can be reconstructed by the locally prepared logger."
+  ]
+}
