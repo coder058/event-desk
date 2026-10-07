@@ -96,16 +96,16 @@ def run() -> dict[str, object]:
             if (source / optional).is_file():
                 files["source/" + optional] = source / optional
         # SOURCE: both files are required to reconstruct the deployed TLS routing.
-        for name in ("Caddyfile", "haproxy.cfg"):
-            files["source/ops/"+name] = source/"ops"/name
+        for ingress_name in ("Caddyfile", "haproxy.cfg"):
+            files["source/ops/"+ingress_name] = source/"ops"/ingress_name
         # SOURCE: only this project's known research artifacts; no broad host/home scan.
         research = Path("/var/lib/eventdesk/research")
-        for name in ("quota-source-sealed.json", "archive/2026Q2.jsonl.gz", "archive/2026Q3.jsonl.gz",
+        for research_name in ("quota-source-sealed.json", "archive/2026Q2.jsonl.gz", "archive/2026Q3.jsonl.gz",
                      "evidence/llm-groq-2026Q2.jsonl", "evidence/llm-groq-2026Q3.jsonl",
                      "evidence/llm-gemini-2026Q2.jsonl", "evidence/llm-gemini-2026Q3.jsonl"):
-            path = research/name
+            path = research/research_name
             if path.exists():
-                files["research/"+name] = path
+                files["research/"+research_name] = path
         # Snapshot sources before computing hashes. A later append/deploy cannot produce
         # an archive whose bytes disagree with the manifest that described live files.
         snapshots = {}

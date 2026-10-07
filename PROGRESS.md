@@ -554,3 +554,10 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   only after test-database cleanup and match the exact latest ciphertext.
   Six focused snapshot/monitor checks passed; actual expanded backup/restore remains
   to verify before claiming those new artifacts are recoverable.
+
+- The expanded backup failed at the restricted receiver: new research loops reused
+  the ciphertext filename variable. Receiver rejected the command with ValueError;
+  the previously verified backup stayed intact. Metadata-only diagnostics exposed
+  no credentials. Renamed loop variables and added a full mocked dump/encryption/
+  send regression, not just helper tests. Seven focused checks now pass. Three
+  failed encrypted local artifacts are retained; none was reported as transferred.
