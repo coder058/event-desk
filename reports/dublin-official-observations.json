@@ -2,22 +2,22 @@
   "official_observations": {
     "submissions": {
       "s1": {
-        "request_started_at": 1791370100.9390898,
-        "observed_at": 1791370102.7384148,
-        "calendar_sha256": "fe6ac53d46943973a8531466db48ff6f440e3bb236df414f5d6f518d0e20ce4c",
-        "calendar_raw_sha256": "eec354cc31df5e853b44786dc2adb4d5258a3f383ac7ad5889d662269ca1eb2a",
+        "request_started_at": 1791372341.418359,
+        "observed_at": 1791372343.2380395,
+        "calendar_sha256": "611e0435d9b5a6fb6eff5ee5bd6e8adc99e95c55889ab53ea5a10430ab6d31da",
+        "calendar_raw_sha256": "a6cf990535fb6bff842d3f27628a9b5ecd0c3f49d332cbc6f58321428d8bafde",
         "health_raw_sha256": "baceadc2a7f38b13fe990804577527dcaae6901ef5b8085a37877c80e6311df6",
         "calendar": {
-          "scheduled_entries": 3021,
+          "scheduled_entries": 3022,
           "event_types": {
-            "EARNINGS_RELEASE": 3021
+            "EARNINGS_RELEASE": 3022
           },
           "timing_categories": {
-            "SCHEDULED": 3021
+            "SCHEDULED": 3022
           },
           "first_calendar_day_central": "2026-10-07",
-          "last_calendar_day_central": "2026-11-06",
-          "scheduled_in_scoring_window": 3002,
+          "last_calendar_day_central": "2026-11-07",
+          "scheduled_in_scoring_window": 3003,
           "scheduled_due_in_scoring_window": 0,
           "scoring_window_daily_counts_central": {
             "2026-10-13": 16,
@@ -40,7 +40,8 @@
             "2026-11-03": 317,
             "2026-11-04": 415,
             "2026-11-05": 539,
-            "2026-11-06": 101
+            "2026-11-06": 101,
+            "2026-11-07": 1
           },
           "peak_scoring_window_day_central": "2026-11-05",
           "peak_scoring_window_entries": 539,
@@ -63,9 +64,9 @@
           "last_test_prediction_at": null
         },
         "collector": {
-          "checked_at": 1791370102.7384148,
+          "checked_at": 1791372343.2380395,
           "state": "observed",
-          "scheduled_entries": 3021
+          "scheduled_entries": 3022
         }
       }
     },
@@ -77,8 +78,8 @@
   },
   "schema_counts": {
     "schema": "009_source_checkpoints",
-    "calendar_versions": 48,
-    "health_observations": 196,
+    "calendar_versions": 49,
+    "health_observations": 200,
     "observer_source_lf_sha256": "3dc0afc30bdda4de0d8bd8a6d13da5008a7b82863f91fc097ed9fdaf2cc93bc4"
   },
   "observer_running": true,
@@ -89,7 +90,7 @@
     "database": "reachable",
     "worker": {
       "state": "recent_heartbeat",
-      "seen_at": 1791370614.2774744,
+      "seen_at": 1791372355.241381,
       "details": {
         "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
         "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",

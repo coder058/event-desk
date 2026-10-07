@@ -1,0 +1,13 @@
+{
+  "ci_run": 37613092682,
+  "source": "d641b506e67b438ba33cd3c9971dae76c6a463ed",
+  "check": {
+    "fixture_tls_verified": true,
+    "ack_ms": 7.452009999994402,
+    "duplicate_ack": true,
+    "changed_bytes_rejected": true,
+    "plaintext_redirect": true,
+    "worker_state": "simulated",
+    "limits": "One synthetic event; no public/official coverage or live latency proof"
+  }
+}

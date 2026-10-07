@@ -27,7 +27,8 @@ See [verified progress](PROGRESS.md), [plan](PLAN.md), [decisions](DECISIONS.md)
 and [external actions](BLOCKED.md).
 
 [Official competition](https://explainingmarkets.ai/) ·
-[Binding rules](https://explainingmarkets.ai/contest-rules)
+[Binding rules](https://explainingmarkets.ai/contest-rules) ·
+[Public dashboard](https://52.17.192.36.sslip.io:80/)
 
 ### Measured engineering evidence
 
@@ -39,8 +40,9 @@ and [external actions](BLOCKED.md).
 | Slowest trained-model fixture ACK | 1.249 s | One measured replay, below 20 s |
 
 Reports retain dataset, scorer and model hashes. The current live service has no
-official scored observations. Public HTTPS and the portal test are still blocked;
-the dashboard can be reached through the existing local SSH preview.
+official scored observations. Public HTTPS was externally verified on October 7;
+the owner still needs to save the webhook URL and send the official portal test.
+The explicit port 80 carries verified TLS; standard port 443 remains unreachable.
 
 ## Run locally
 

@@ -503,3 +503,20 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   duplicate receipt, modified-body rejection and simulated worker outcome. This
   integration check has not passed yet; public cutover waits for its CI result.
   Production proxy limits are labelled operational guesses, not capacity claims.
+
+- Signed TLS fixture passed CI 37613092682 for d641b50: synthetic durable ACK
+  7.452 ms, duplicate ACK, altered-body 401, redirect and simulated completion.
+  This is one fixture event, not official coverage or live end-to-end latency.
+- Deployed d641b50 after saving the exact prior ingress files privately for rollback.
+  External probe at 11:25:53 UTC verified TLS 1.3/certificate, production health 200,
+  unsigned webhook 401 and plaintext redirect 308 on the public port-80 TLS route.
+  Existing model/configuration stayed unchanged, local-only, with recent worker
+  heartbeat. Browser verified the real page and zero official observations.
+- Installed the matching independent monitor: no active alerts; external proof
+  and origin HTTPS checks pass. Standard 443 remains unreachable. The owner was
+  given the exact HTTPS URL and the existing portal's empty Webhook field; no
+  official test has been sent and portal acceptance of this port is not inferred.
+- Verified the October 7 encrypted nightly backup (1,513,460 bytes): all nine
+  archive members passed their hashes, schema 009 restored into a new disposable
+  database, 48 calendar versions/156 observations, zero deliveries/jobs. The
+  production database was not overwritten; the temporary database was removed.

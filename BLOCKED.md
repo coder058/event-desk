@@ -1,19 +1,18 @@
 # External actions and unresolved dependencies
 
-## Owner action — HTTPS networking
+## Owner action — connect the existing submission and send the portal test
 
-Dublin origin and PostgreSQL are running, and Caddy obtained a valid certificate.
-Public HTTP 80 responds; public HTTPS 443 times out. The host firewall accepts traffic.
-The existing Lightsail session is signed out. Log in on the opened AWS tab and leave
-the Dublin instance networking page available so the HTTPS rule can be verified.
-No password, MFA code or AWS key should be shared in chat. This is an additional
-external dependency discovered during the actual deployment, not a new account.
+External HTTPS was verified on October 7 at 11:25 UTC using the already reachable
+TCP 80 listener. Paste `https://52.17.192.36.sslip.io:80/competition/webhook` into
+the Webhook URL field of the existing LLMSITO submission, click Save webhook URL,
+then Send test event. No new account or paid provider is required. Do not replace
+credentials or paste them in chat. The portal currently shows Setup 1/3 and an
+empty URL; actual portal delivery/prediction remain unverified.
 
-## Owner action — portal test, after HTTPS is reachable
-
-Once HTTPS is verified, paste `https://52.17.192.36.sslip.io/competition/webhook` in the
-existing competition submission portal and click Send test event. No new account
-or paid provider is required. Do not paste credentials in chat.
+The nonstandard port is explicit and uses verified TLS, not plaintext HTTP.
+Standard HTTPS 443 still times out; the signed-out AWS session is no longer a
+dependency for this tested route. Acceptance of this URL by the portal is still
+an external check. No certificate-warning bypass or firewall weakening was used.
 
 ## Optional integrations
 
@@ -33,7 +32,7 @@ can continue without claiming live EDGAR ingestion; Phase A is independent.
 
 ## Verification still to perform
 
-- Public inbound HTTPS on Dublin (certificate issuance succeeded).
+- Official portal delivery and prediction after the owner saves the verified URL.
 - Archive baseline reproduction completed; measured results are in reports/archive-eval.md.
 - Gemini is intermittently unavailable (503); Groq has returned 429 even when
   its minute-token header showed capacity. Numeric quota diagnostics are retained;

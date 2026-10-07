@@ -39,3 +39,19 @@ An isolated restore drill does not establish a measured full-host recovery time.
 The decryption identity still depends on Frankfurt: loss of both hosts is not
 covered by an offline recovery copy. No automated destructive production restore
 is provided, and nightly copies are not deleted by a guessed retention policy.
+
+## Ingress routing and rollback
+
+The verified public URL is `https://52.17.192.36.sslip.io:80/`. HAProxy passes
+TLS bytes to Caddy:443 and ordinary HTTP to Caddy:8080. Caddy owns the existing
+certificate and ACME HTTP challenge; HAProxy holds no certificate or secret.
+Port 443 remains mapped but external access is unverified. Do not remove the
+certificate volumes or bypass client verification. Future certificate renewal
+has not yet occurred on this route; the monitor checks actual HTTPS health.
+
+Before the October 7 cutover, the exact prior Compose/Caddyfile bytes were retained
+in the owner's ignored `private/ingress-before-20261007.json`. To roll back, stop
+only the new ingress container, restore those two files under `/srv/eventdesk`,
+then run the old Compose configuration's `up -d caddy`. Preserve database/model/
+certificate volumes. The old path provides HTTP redirects, not verified external
+HTTPS; rollback does not establish competition readiness.
