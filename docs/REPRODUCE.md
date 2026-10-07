@@ -127,3 +127,18 @@ Their static metadata was inspected; these scripts were not run. Some create dis
 or call providers; none belongs in an automatic local fixture startup. The provider
 inventory remains outside the frozen runtime, and this audit did not spend provider
 quota. Zero files have been established as safely removable solely from the scan.
+
+## Final consecutive clean-clone checks
+
+A second new local clone at `514aa0b373ed82506187c3d337a95dbb68b18000` was tested
+with two sequential full-suite invocations, stopping on any failed run. Both passed:
+
+| Run | Actual result |
+| --- | --- |
+| First | 186 passed, 1 skipped; 107.80 s |
+| Second | 186 passed, 1 skipped; 110.96 s |
+
+The clone remained Git-clean at that exact commit. The single skip is the Windows
+symlink case. This closes the requested consecutive Python-suite gate; it does not
+turn the unavailable Docker fixture run into a pass or prove a fresh dependency
+installation. The incident logging remains local and production remains cee53c0.
