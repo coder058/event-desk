@@ -585,3 +585,25 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   Three MCP checks passed; actual official SDK read predictions/scoreboard over
   public verified HTTPS without credentials. No live event explanation could be
   verified because there are no events. Evidence: reports/public-mcp.json.
+- SEC source e75d409 passed CI 37644836771: 122 tests plus actual PostgreSQL
+  single-reader exclusion and durable cooldown. No external SEC calls occurred.
+- Initial walkthrough generated a real fitted-mean fallback: the fictional
+  preview was incorrectly supplied as a list instead of the official string
+  schema. Its mathematical-trace test failed rather than silently publishing a
+  successful-looking example. Corrected the fixture input; predictor unchanged.
+- Corrected walkthrough runs the signed receiver and actual trained model in a
+  new disposable SQLite database, without network calls. Receipt, duplicate,
+  changed-signature and conflicting-body outcomes are measured (200/200/401/409).
+  The numeric contribution trace matches its persisted simulated prediction.
+  Three walkthrough tests verify the computation, refusal to overwrite an existing
+  database and separation from the empty live ledger; a mislabeled accepted demo
+  is rejected. Eleven delivery/local-trace checks also passed in 57.00 seconds.
+- Browser reviewed all six desktop walkthrough steps, including source text,
+  actual fitted term contributions, hashes, simulation result and absent LLM
+  evidence. Screenshot docs/walkthrough.png retains the verified computation.
+  Added a public engineering case study and dashboard entry point. Deployment
+  remains pending the matching CI; no official events or new score were invented.
+- Retrieved the completed private provider evidence and verified shared quota
+  metadata read-only: one sealed import, 26 Gemini and 111 Groq usage rows. Those
+  rows include attempts and legacy records, not validated-event counts or available
+  account capacity. Prompt/model-specific cohorts still require exact validation.

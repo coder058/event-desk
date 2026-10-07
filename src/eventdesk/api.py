@@ -120,6 +120,23 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
     async def index() -> str:
         return Path(__file__).with_name("dashboard.html").read_text(encoding="utf-8")
 
+    @app.get("/walkthrough", response_class=HTMLResponse)
+    async def walkthrough_page() -> str:
+        return Path(__file__).with_name("walkthrough.html").read_text(encoding="utf-8")
+
+    @app.get("/api/walkthrough")
+    async def walkthrough_record() -> dict[str, object]:
+        # SOURCE: one generated synthetic report. Never query/seed the production event ledger here.
+        path = Path("reports/walkthrough.json")
+        if not path.is_file():
+            raise HTTPException(503, "Walkthrough has not been generated")
+        result = json.loads(path.read_text(encoding="utf-8"))
+        if (not isinstance(result, dict) or result.get("schema_version") != "eventdesk-walkthrough-v1"
+                or result.get("fixture_only") is not True or result.get("external_requests") != 0
+                or not isinstance(result.get("record"), dict) or result["record"].get("state") != "simulated"):
+            raise HTTPException(503, "Walkthrough provenance unavailable")
+        return result
+
     return app
 
 

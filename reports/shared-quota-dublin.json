@@ -9,7 +9,7 @@
   "provider_project_counts": [
     {
       "provider": "gemini",
-      "usage_rows": 16
+      "usage_rows": 26
     },
     {
       "provider": "groq",
@@ -19,6 +19,6 @@
   "sealed_usage_rows": 114,
   "external_requests": 0,
   "mode": "read_only",
-  "checked_at": "2026-10-07T11:53:31.127311+00:00",
+  "checked_at": "2026-10-07T15:42:59.033999+00:00",
   "limits": "Actual project ledger/import metadata; not provider-wide capacity or billing usage"
 }

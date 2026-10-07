@@ -1,0 +1,98 @@
+{
+  "schema_version": "eventdesk-walkthrough-v1",
+  "fixture_only": true,
+  "generated_at": "2026-10-07T15:38:08.146149+00:00",
+  "input_origin": "fictional_company_and_materials",
+  "model_origin": "trained_archive_model",
+  "database_origin": "disposable_local_sqlite",
+  "external_requests": 0,
+  "signed_body_sha256": "0df2dd90a6f9015eb29cd45514ce5336b74081c1aa08837846b0de419b5e69a0",
+  "receipt_checks": {
+    "signed_ack_status": 200,
+    "duplicate_status": 200,
+    "modified_signature_status": 401,
+    "conflicting_delivery_status": 409,
+    "local_asgi_ack_ms": 85.10759999990114
+  },
+  "record": {
+    "event_id": "walkthrough-fictional-event",
+    "slot": "s1",
+    "event_type": "EARNINGS_RELEASE",
+    "knowledge_cutoff": "2026-10-07T15:38:07.753458Z",
+    "official_items": {
+      "earnings-call-facts": [
+        "Revenue increased as demand for enterprise software improved.",
+        "Management raised full-year revenue guidance.",
+        "Operating margin declined due to higher investment in product development.",
+        "Management noted uncertainty in customer spending and longer sales cycles."
+      ],
+      "earnings-preview": "The fictional preview expected revenue growth and unchanged guidance. Investors were watching margin pressure and customer demand."
+    },
+    "prediction": {
+      "event_id": "walkthrough-fictional-event",
+      "predictions": [
+        {
+          "identifier_value": "DEMO",
+          "predicted_percentile": 0.5362418819046104
+        }
+      ]
+    },
+    "inputs_hash": "acf63720c82fd98cbcc5982b8c298b55d4f532c33d43f4a5b2515d0c3c334e08",
+    "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+    "configuration_hash": null,
+    "provider": "local",
+    "fallback": "llm_not_enabled",
+    "analysis_trace": null,
+    "local_trace": {
+      "kind": "tf_idf_ridge_computation",
+      "intercept": 0.47916438019877616,
+      "linear_total": 0.5362418819046104,
+      "prediction": 0.5362418819046104,
+      "terms": [
+        {
+          "feature": "text__raised year",
+          "feature_value": 0.15870661066806308,
+          "coefficient": 0.34423759132911935,
+          "contribution": 0.05463278138438235
+        },
+        {
+          "feature": "text__raised",
+          "feature_value": 0.09926945674337186,
+          "coefficient": 0.3393974904545719,
+          "contribution": 0.03369180449748909
+        },
+        {
+          "feature": "text__product",
+          "feature_value": 0.11594608848578877,
+          "coefficient": -0.13315160420846933,
+          "contribution": -0.01543840768357991
+        },
+        {
+          "feature": "text__declined",
+          "feature_value": 0.09147510356784253,
+          "coefficient": -0.16339749626698025,
+          "contribution": -0.01494680289374818
+        },
+        {
+          "feature": "text__improved",
+          "feature_value": 0.09773979273918514,
+          "coefficient": 0.13783932017316872,
+          "contribution": 0.013472386585035691
+        }
+      ],
+      "other_terms_contribution": -0.014334260183744806,
+      "limits": "Correlational text-feature weights; not causal evidence or a win probability"
+    },
+    "shadow_state": null,
+    "received_at": 1791387487.905359,
+    "deadline": 1791387787.905359,
+    "submitted_at": 1791387488.1205344,
+    "latency_ms": 215.17539024353027,
+    "submission_response": {
+      "state": "simulated"
+    },
+    "state": "simulated",
+    "error": null
+  },
+  "limits": "Synthetic inputs; actual receipt/worker/math in disposable SQLite. No broker, official POST, score or live latency."
+}

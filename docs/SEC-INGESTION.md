@@ -20,7 +20,9 @@ is still required before external automated reads; see BLOCKED.md.
   before network access, retains exact decoded entity bytes, and never stores
   block/error bodies or the administrative contact in provenance. Timeout,
   cancellation, size limits and block responses have synthetic tests. Its
-  shared PostgreSQL exclusion/cooldown fixture is awaiting CI verification.
+  shared PostgreSQL exclusion/cooldown fixture passed CI 37644836771: four
+  contenders admitted one reader, a fresh connection respected the persisted
+  cooldown, and admission resumed after a synthetic clock advance. No SEC calls.
   The entity size limit bounds retained bytes, not peak decompressor memory.
 
 Discovery retains a source hash and first-seen time. It does not prove when the

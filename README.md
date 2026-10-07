@@ -30,6 +30,11 @@ and [external actions](BLOCKED.md).
 [Binding rules](https://explainingmarkets.ai/contest-rules) ·
 [Public dashboard](https://52.17.192.36.sslip.io:80/)
 
+[Follow an event](https://52.17.192.36.sslip.io:80/walkthrough): a separately
+labelled synthetic signed request runs the actual receiver/model/worker. No
+official submission or production-ledger insertion. [Engineering case study](docs/CASE-STUDY.md)
+explains decisions, failed experiments, measurements and remaining limits.
+
 ### Measured engineering evidence
 
 | Check | Actual result | Boundary |
