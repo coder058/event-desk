@@ -31,3 +31,21 @@ changing public URLs. Expected standard webhook:
 `https://52.17.192.36.sslip.io/competition/webhook`.
 Keep the tested `https://52.17.192.36.sslip.io:80/competition/webhook` configured
 until standard HTTPS is actually verified. Do not bypass certificate warnings.
+
+## Resolved — October 7, 22:45 UTC (October 8 in Madrid)
+
+The owner explicitly confirmed saving HTTPS/TCP/443 from any IPv4 (0.0.0.0/0).
+The existing Dublin instance 52.17.192.36 lacked that rule. Lightsail now shows
+HTTPS TCP 443 / Any IPv4 address and its success notification. No instance was
+created, restarted or resized; no other rule was modified.
+
+An external check with normal CA/hostname validation passed TLS 1.3, dashboard
+and health HTTP 200, GET webhook 405 and unsigned POST 401. Production still
+has one accepted TEST and no non-TEST submissions.
+[Exact dated report](../reports/https443-20261008.json).
+
+The standard dashboard is `https://52.17.192.36.sslip.io/`. The owner can now
+replace the webhook field in the competition portal with
+`https://52.17.192.36.sslip.io/competition/webhook`, save and press Send test event.
+Opening that URL in the browser is GET and correctly returns Method Not Allowed;
+it is a POST receiver. Official delivery through 443 is not yet verified.

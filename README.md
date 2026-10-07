@@ -43,9 +43,9 @@ and [external actions](BLOCKED.md).
 
 [Official competition](https://explainingmarkets.ai/) ·
 [Binding rules](https://explainingmarkets.ai/contest-rules) ·
-[Public dashboard](https://52.17.192.36.sslip.io:80/)
+[Public dashboard](https://52.17.192.36.sslip.io/)
 
-[Follow an event](https://52.17.192.36.sslip.io:80/walkthrough): a separately
+[Follow an event](https://52.17.192.36.sslip.io/walkthrough): a separately
 labelled synthetic signed request runs the actual receiver/model/worker. No
 official submission or production-ledger insertion. [Engineering case study](docs/CASE-STUDY.md)
 explains decisions, failed experiments, measurements and remaining limits.
@@ -63,8 +63,10 @@ Reports retain dataset, scorer and model hashes. The current live service has no
 official scored observations. On October 7 at 22:03 UTC, one genuine portal TEST
 was durably received and its neutral prediction accepted (201); fresh official
 health confirmed it. [Exact evidence](reports/official-test-20261007.json).
-The explicit port 80 carries verified TLS; standard port 443 remains unreachable.
-[Owner's Lightsail 443 check](docs/HTTPS-443.md). Non-TEST events/submissions: zero
+Standard HTTPS 443 passed external CA/hostname, page, health and signature-gate
+checks after the owner approved the cloud rule. [Evidence](reports/https443-20261008.json).
+The portal TEST above used TLS 80; a portal TEST through 443 remains pending.
+Non-TEST events/submissions: zero
 at that observation. TEST is not scored; paper portfolio and blend remain disabled.
 
 ## Run locally

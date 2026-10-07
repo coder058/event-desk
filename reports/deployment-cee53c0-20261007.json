@@ -1,0 +1,96 @@
+{
+  "checked_at": "2026-10-07T22:36:39Z",
+  "commit": "cee53c02fded1e65976b42936cf50fcef69422b0",
+  "ci": {
+    "run": 37696439274,
+    "url": "https://github.com/coder058/event-desk/actions/runs/37696439274",
+    "conclusion": "success",
+    "linux_tests_passed": 174,
+    "tests_seconds": 12.89
+  },
+  "source_verification": {
+    "commit": "cee53c02fded1e65976b42936cf50fcef69422b0",
+    "host_files": 94,
+    "host_mismatches": [],
+    "containers": {
+      "eventdesk-api-1": {
+        "files": 28,
+        "mismatches": []
+      },
+      "eventdesk-worker-1": {
+        "files": 28,
+        "mismatches": []
+      },
+      "eventdesk-official-observer-1": {
+        "files": 28,
+        "mismatches": []
+      }
+    }
+  },
+  "worker_health": {
+    "states": {
+      "api_accepted": 1
+    },
+    "test_events": 1,
+    "database": "reachable",
+    "worker": {
+      "state": "recent_heartbeat",
+      "seen_at": 1791412431.5295453,
+      "details": {
+        "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+        "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+        "synthetic_model": false,
+        "llm_enabled": true,
+        "hybrid_enabled": false,
+        "fixture_mode": false
+      }
+    },
+    "deadline_at_risk": false,
+    "fixture_mode": false
+  },
+  "observer_running": true,
+  "observer_oom_killed": false,
+  "schema": "011_sec_http_gate",
+  "official_snapshot": {
+    "webhook_n_2xx": 1,
+    "webhook_n_4xx": 0,
+    "webhook_n_5xx": 0,
+    "webhook_n_timeout": 0,
+    "webhook_consecutive_failures": 0,
+    "submission_n_total": 0,
+    "submission_n_duplicate": 0,
+    "submission_n_late": 0,
+    "submission_n_pre_broadcast": 0,
+    "submission_n_invalid_event": 0,
+    "webhook_last_delivery_at": "2026-10-07T22:03:47.726068+00:00",
+    "submission_last_at": null,
+    "last_test_prediction_at": "2026-10-07T22:03:48.125853+00:00"
+  },
+  "external_https_snapshot": {
+    "origin": "https://52.17.192.36.sslip.io:80",
+    "checked_at": "2026-10-07T22:35:24.966026+00:00",
+    "verified": true,
+    "limits": "One external network observation; not portal delivery, continuous uptime or score eligibility",
+    "tls_version": "TLSv1.3",
+    "certificate_not_after": "Jan  3 20:26:29 2027 GMT",
+    "health_status": 200,
+    "unsigned_webhook_status": 401,
+    "plaintext_redirect_status": 308,
+    "worker_state": "recent_heartbeat",
+    "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1"
+  },
+  "lightsail": {
+    "instance_ipv4": "52.17.192.36",
+    "region": "eu-west-1",
+    "state": "Running",
+    "observed_rules": [
+      "HTTP TCP 80 any IPv4/IPv6",
+      "SSH TCP 22 any IPv4/IPv6 and browser SSH",
+      "Custom TCP 5000-5005 any IPv4"
+    ],
+    "https443_missing": true,
+    "change_saved": false,
+    "specific_confirmation_pending": true
+  },
+  "limits": "Dated post-deploy evidence. Official TEST is neutral, not scored; no non-TEST acceptance or predictive advantage. Public HTTPS 443 remains unverified; cloud rule prepared but not saved. No changed model, blend, portfolio or SEC collection."
+}

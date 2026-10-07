@@ -4,8 +4,8 @@
 then have an independent competition score the predictions. This is prediction
 research and operational engineering; the current service does not place trades.
 
-[Live service](https://52.17.192.36.sslip.io:80/) ·
-[Follow a fictional event through the actual code](https://52.17.192.36.sslip.io:80/walkthrough) ·
+[Live service](https://52.17.192.36.sslip.io/) ·
+[Follow a fictional event through the actual code](https://52.17.192.36.sslip.io/walkthrough) ·
 [Source](https://github.com/coder058/event-desk)
 
 ## One event, six steps
@@ -87,9 +87,11 @@ this verifies connectivity rather than predictive quality or market-event latenc
 [Exact production and official evidence](../reports/official-test-20261007.json).
 
 The existing Dublin VPS hosts the API, worker, observer and PostgreSQL. HTTPS was
-externally verified on explicit TLS port 80; standard 443 remains unreachable.
-[Owner check and bounded diagnosis](HTTPS-443.md): local TLS 443 works, but the
-Lightsail rule remains unverified. No firewall change was made by Codex.
+externally verified on explicit TLS port 80. After the owner approved adding the
+missing Lightsail HTTPS/TCP/443 IPv4 rule, external standard HTTPS also passed
+CA/hostname validation, page/health HTTP 200 and unsigned webhook HTTP 401.
+[Diagnosis and dated resolution](HTTPS-443.md). The signed official TEST above
+used TLS 80; the portal URL has not yet been switched and retested through 443.
 An independent monitor observes service/deadline health. Encrypted backups go to
 the existing Frankfurt host; an isolated restore verifies exact archive hashes
 without overwriting production. [Restore receipt](../reports/backup-restore.json).

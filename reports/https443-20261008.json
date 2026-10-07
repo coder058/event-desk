@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-10-07T22:45:11.176959+00:00",
+  "origin": "https://52.17.192.36.sslip.io",
+  "cloud_rule": "HTTPS/TCP/443 from 0.0.0.0/0 saved after owner confirmation",
+  "verified": true,
+  "tls_version": "TLSv1.3",
+  "certificate_not_after": "Jan  3 20:26:29 2027 GMT",
+  "health_status": 200,
+  "page_status": 200,
+  "webhook_get_status": 405,
+  "unsigned_webhook_status": 401,
+  "worker_state": "recent_heartbeat",
+  "test_events": 1,
+  "states": {
+    "api_accepted": 1
+  },
+  "limits": "External TLS and unsigned signature gate verified. Does not establish official portal delivery through port 443; configured portal URL unchanged."
+}
