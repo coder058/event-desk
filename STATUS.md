@@ -1,4 +1,4 @@
-# STATUS — 2026-10-07 23:00 UTC
+# STATUS — 2026-10-07 23:06 UTC
 
 TEST oficial: sí (test_d096b526791e46bdbf0012d63de8dbfd; delivery firmada aceptada por el receptor y 2xx oficial, predicción neutral persistida, HTTP 201/api_accepted; GET oficial fresco confirma last_test_prediction_at=2026-10-07T22:03:48.125853Z; reports/official-test-20261007.json) | Eventos oficiales: 0 (excluye TEST) | Envíos oficiales: 0 (submission_n_total; un TEST aceptado por separado)
 
@@ -19,6 +19,7 @@ ACK #2 — hecho — 94a1dd5: checklist de monitor/alertas/backup nocturno/lectu
 ACK #4 — hecho — 907cabd: el README abre con el servicio verificado, TEST neutral aceptado, cero eventos/envíos no-TEST y sin score. Objetivo de producto separado bajo Where this is going; descripción para copiar a GitHub incluida. Diff de README revisado, secret scan y diff --check pasaron; 109 líneas. Sin editar la descripción remota ni ejecutar nueva suite para un cambio de texto.
 
 Bloqueado (necesita a Jordi):
+- Incidencia nueva: portal y observer registran tres deliveries 4xx consecutivas, última 2026-10-07T23:02:19.406911Z; TEST aceptados sigue en uno, último 22:03. Monitor activó official_delivery_or_submission_failures. HTTPS 80 y 443 responden salud 200; credenciales de API runtime coinciden con locales; API activa y logs de acceso deshabilitados. Código exacto/payload/causa todavía desconocidos. Solicitado a Jordi si pulsó TEST y el mensaje exacto. Informe propio reports/delivery-failures-readonly-20261008.json. No se cambió URL/secret/validación ni producción para diagnosticar.
 - LISTO PARA TEST por HTTPS estándar: https://52.17.192.36.sslip.io/competition/webhook. Jordi actualiza el campo del portal y pulsa Send test event; no se ha verificado aún una delivery oficial por 443. La prueba previa por TLS 80 sí pasó.
 - SEC omitido sin contacto administrativo escrito. No bloquea Phase A.
 - Publicación y despliegue prohibidos por la instrucción actual. Commits siguientes exclusivamente locales.

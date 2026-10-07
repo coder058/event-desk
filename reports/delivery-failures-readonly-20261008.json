@@ -1,0 +1,78 @@
+{
+  "checked_at": "2026-10-07T23:06:27.841786+00:00",
+  "deployed_commit": "cee53c02fded1e65976b42936cf50fcef69422b0",
+  "official_observed_at_unix": 1791414235.5720274,
+  "official_rolling_24h_counters": {
+    "webhook_n_2xx": 1,
+    "webhook_n_4xx": 3,
+    "webhook_n_5xx": 0,
+    "webhook_n_timeout": 0,
+    "webhook_consecutive_failures": 3,
+    "submission_n_total": 0,
+    "submission_n_duplicate": 0,
+    "submission_n_late": 0,
+    "submission_n_pre_broadcast": 0,
+    "submission_n_invalid_event": 0,
+    "webhook_last_delivery_at": "2026-10-07T23:02:19.406911+00:00",
+    "submission_last_at": null,
+    "last_test_prediction_at": "2026-10-07T22:03:48.125853+00:00"
+  },
+  "monitor": {
+    "active_alerts": [
+      "official_delivery_or_submission_failures"
+    ],
+    "checked_at": 1791414325.685815,
+    "https_origin_probe_verified": true,
+    "https_external_probe_verified": true,
+    "backup_restore_verified": true
+  },
+  "configured_portal_url_observed_in_browser": "https://52.17.192.36.sslip.io:80/competition/webhook",
+  "tls80_health_probe": {
+    "observed_at": "2026-10-07T23:05:54.030269+00:00",
+    "origin": "https://52.17.192.36.sslip.io:80",
+    "status": 200,
+    "health": {
+      "states": {
+        "api_accepted": 1
+      },
+      "test_events": 1,
+      "database": "reachable",
+      "worker": {
+        "state": "recent_heartbeat",
+        "seen_at": 1791414353.038808,
+        "details": {
+          "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+          "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+          "synthetic_model": false,
+          "llm_enabled": true,
+          "hybrid_enabled": false,
+          "fixture_mode": false
+        }
+      },
+      "deadline_at_risk": false,
+      "fixture_mode": false
+    }
+  },
+  "tls443_health_probe": {
+    "observed_at": "2026-10-07T23:02:17.442393+00:00",
+    "status": 200,
+    "database": "reachable",
+    "worker": "recent_heartbeat",
+    "test_events": 1,
+    "accepted_jobs": 1
+  },
+  "read_only_diagnosis": {
+    "runtime_credential_hash_matches_local": {
+      "EM_API_KEY": true,
+      "EM_WEBHOOK_SECRET": true
+    },
+    "credential_check_at": "2026-10-07T23:05:15.443352+00:00",
+    "api_running": true,
+    "api_started_at": "2026-10-07T22:33:45.629799904Z",
+    "api_log_lines_since_2258": 0,
+    "access_logs_intentionally_disabled": true,
+    "exact_rejection_http_status": null,
+    "root_cause": null
+  },
+  "limits": "Official portal and observer show three client-error deliveries after the original successful TEST. Neither healthy GET nor matching local/runtime credentials identifies the rejected payload, exact 4xx or root cause. No new delivery accepted; no portal setting, signing secret, code, service or deployment changed. Owner was asked for the test action and displayed error; await evidence before changing validation."
+}
