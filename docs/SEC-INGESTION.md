@@ -16,6 +16,12 @@ is still required before external automated reads; see BLOCKED.md.
 - Only an explicit ISO timezone/Z produces an acceptance timestamp. A filing
   date, naive timestamp or unavailable timestamp does not become a pre-cutoff
   feature. Acceptance after capture is rejected.
+- Identified HTTP transport rejects redirects, persists a request reservation
+  before network access, retains exact decoded entity bytes, and never stores
+  block/error bodies or the administrative contact in provenance. Timeout,
+  cancellation, size limits and block responses have synthetic tests. Its
+  shared PostgreSQL exclusion/cooldown fixture is awaiting CI verification.
+  The entity size limit bounds retained bytes, not peak decompressor memory.
 
 Discovery retains a source hash and first-seen time. It does not prove when the
 exact filing-body bytes were available; the body must be captured separately.
@@ -25,7 +31,8 @@ no guessed rewrite is presented as a verified raw document.
 
 ## Next engineering steps
 
-1. Identified, bounded HTTP transport and one shared project pacing/cooldown gate.
+1. Verify the shared PostgreSQL transport gate, configure the real contact, then
+   verify an actual official read without calling it daily or all-market ingestion.
 2. Explicit universe/feed coverage and failures; no silent checkpoint over failed
    discovery or filing reads. Capture raw documents before committing provenance.
 3. Persist extractor version and typed output with verified evidence joins.

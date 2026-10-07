@@ -564,3 +564,16 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
 - CI then caught Linux-only double-mapping of temporary paths in the new mocked
   backup test (112 checks passed, that test failed). Limited path substitution to
   the declared host roots; this was a fixture bug, not a second production change.
+
+- Corrected source 693cda4 passed CI 37619622647. The expanded encrypted backup
+  actually transferred and restored into an isolated database: 17 archive files
+  verified, schema 010, 49 calendar versions/205 observations and zero deliveries.
+  Production was not overwritten; monitor verified the exact latest ciphertext.
+- Continued under the owner's four-hour repair/optimization goal. Current HTTPS
+  health verifies a recent worker and unchanged local model/configuration, with
+  LLM and hybrid disabled and zero TEST events. Portal URL is prepared but not
+  saved; the owner still performs the final portal actions. Useful independent
+  work remains: finish SEC transport verification, enable safe post-submission
+  evidence, and add a clearly separate keyless event walkthrough/public case study.
+- Local lint and strict typing passed in 22 modules. The first focused test call
+  named a nonexistent backup test and did not run; corrected selection follows.

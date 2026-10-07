@@ -21,6 +21,7 @@ jobs:
       - run: docker compose exec -T api python fixtures/receipt_concurrency.py
       - run: docker compose exec -T api python fixtures/source_concurrency.py
       - run: docker compose exec -T api python fixtures/quota_concurrency.py
+      - run: docker compose exec -T api python fixtures/sec_gate_concurrency.py
       - run: docker compose -f compose.yaml -f compose.mux.fixture.yaml up -d
       - run: python fixtures/tls_mux.py
       - if: always()
