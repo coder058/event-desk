@@ -618,3 +618,9 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
 - Current-prompt record counts are Gemini pinned 3.1 Flash-Lite: 13 Q2; Groq
   pinned gpt-oss-120b: 42 Q2/55 Q3. Earlier model/prompt files are distinct and
   excluded. This count does not evaluate a new blend or establish predictive skill.
+- Source 104d088 passed CI 37647441702. Prepared an isolated real-provider smoke:
+  actual worker/shadow code, fictional inputs, disposable SQLite event book,
+  mock official GET/POST, and the deployed PostgreSQL provider quota ledger.
+  Its synthetic-provider test passed and verifies unchanged prediction/one mock
+  POST/post-submission evidence. No real-provider smoke has run yet. Production
+  event rows will not be seeded to create an apparent official success.
