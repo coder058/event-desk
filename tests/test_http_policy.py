@@ -98,7 +98,7 @@ def test_observed_201_invalid_body_never_causes_repost(settings, store, model, b
 
 
 @pytest.mark.parametrize("headers_seen", [False, True])
-def test_submission_entire_attempt_bounded_and_unknown_result_reuses_outbox(
+def test_submission_transport_attempt_bounded_and_unknown_result_reuses_outbox(
         settings, store, model, headers_seen):
     event = Event(id="stalled-submit", event_id="stalled-submit", event_type="TEST",
                   focal_assets=[{"identifier_type": "TICKER", "identifier_value": "FIXTURE"}])
@@ -116,8 +116,12 @@ def test_submission_entire_attempt_bounded_and_unknown_result_reuses_outbox(
     async def run():
         async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
             work = store.claim(time.time())
-            # PLACEHOLDER: inject a 50 ms attempt deadline after database setup; not a production latency claim.
-            work = replace(work, deadline=time.time()+.05)
+            # SOURCE: the official TEST uses a neutral percentile; this is a persisted fixture outbox.
+            payload = {"event_id": event.event_id, "predictions": [
+                {"identifier_value": "FIXTURE", "predicted_percentile": 0.5}]}
+            store.persist_prediction(work.id, payload, {}, model.sha256, "official_test_event")
+            # PLACEHOLDER: 50 ms HTTP-attempt budget after outbox setup, not a DB/network latency claim.
+            work = replace(work, payload=payload, deadline=time.time()+.05)
             # GUESS: test watchdog catches an unbounded header/body await. # UNCALIBRATED GUESS
             async with asyncio.timeout(2):
                 await Worker(replace(settings, fixture_mode=False), store, model, http).process(work)

@@ -73,6 +73,9 @@ those documentation commits have not been pushed.
 | Full pytest suite, clean clone | 1 failed, 172 passed, 1 skipped; 198.97 s | Failure described below; not a green gate |
 | Isolated failed test, both parameter cases | 2 passed, 9 deselected; 2.87 s | Isolated success does not erase the full-run failure |
 | Full suite rerun, source worktree | 173 passed, 1 skipped; 161.08 s | No test or production code changed; Windows symlink case skipped |
+| Second full clean-clone run | 1 failed, 172 passed, 1 skipped; 151.83 s | Same old 50 ms setup failure, retained below |
+| Transport fixture corrected, both cases | 2 passed, 9 deselected; 3.30 s | Only test setup changed; production source unchanged |
+| Full suite after fixture correction | 173 passed, 1 skipped; 144.16 s | Windows symlink case skipped; no production source change |
 
 The failing case was
 `test_submission_entire_attempt_bounded_and_unknown_result_reuses_outbox[True]`.
@@ -84,6 +87,13 @@ this run did not record enough timing to prove the exact cause. No deadline,
 assertion or production code was relaxed. The isolated retry exercised both the
 stalled-header and stalled-body variants successfully; a complete rerun is retained
 separately rather than replacing the failed observation.
+
+After the second clean-clone failure, the test fixture was corrected to persist
+the immutable outbox before starting its 50 ms HTTP budget. Its name now says
+`submission_transport_attempt`, matching that scope. Both stalled-header and
+stalled-body assertions remain; the production worker and real deadline were not
+changed. The isolated corrected test passed both cases. This does not establish
+a measured production latency or resolve the independent official 4xx incident.
 
 The previously deployed `cee53c0` passed Linux CI 37696439274, including Compose
 smoke and concurrency checks. That is separate evidence, not a successful local
