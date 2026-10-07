@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -22,6 +23,30 @@ def file_hash(path: Path) -> str:
         while chunk := stream.read(64 * 1024):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def evidence_files(root: Path) -> dict[str, Path]:
+    """Only this project's immutable, hash-shaped objects; never follow linked directories."""
+    if root.is_symlink():
+        raise ValueError("Evidence root cannot be linked")
+    if not root.exists():
+        return {}
+    if not root.is_dir():
+        raise ValueError("Evidence root must be a directory")
+    files = {}
+    for shard in root.iterdir():
+        # SOURCE: RawObjects uses the first SHA-256 byte as its two-character shard directory.
+        if shard.is_symlink() or not shard.is_dir() or re.fullmatch(r"[0-9a-f]{2}", shard.name) is None:
+            raise ValueError("Unexpected evidence shard")
+        for path in shard.iterdir():
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("Evidence object must be a regular unlinked file")
+            if path.name.startswith(".capture-"):
+                continue  # RawObjects' unfinished temporary write is not a retained object or DB reference.
+            if re.fullmatch(r"[0-9a-f]{64}", path.name) is None or not path.name.startswith(shard.name):
+                raise ValueError("Unexpected evidence object identity")
+            files["evidence/objects/"+shard.name+"/"+path.name] = path
+    return files
 
 
 def snapshot_regular_file(source: Path, destination: Path) -> None:
@@ -106,12 +131,18 @@ def run() -> dict[str, object]:
             path = research/research_name
             if path.exists():
                 files["research/"+research_name] = path
+        # RawObjects creates durable bytes before any source DB commit and never rewrites/deletes them.
+        # Scan after pg_dump so every referenced immutable object is available; later unreferenced objects
+        # may also be included. Restore checks the exact dump's content hashes against this archive.
+        files.update(evidence_files(Path("/var/lib/eventdesk/evidence/objects")))
         # Snapshot sources before computing hashes. A later append/deploy cannot produce
         # an archive whose bytes disagree with the manifest that described live files.
         snapshots = {}
         for archive_name, path in files.items():
             target = stage/"snapshot"/archive_name
             snapshot_regular_file(path, target)
+            if archive_name.startswith("evidence/objects/") and file_hash(target) != path.name:
+                raise ValueError("Evidence object bytes disagree with content identity")
             snapshots[archive_name] = target
         files = snapshots
         manifest = {"created_at": datetime.now(timezone.utc).isoformat(), "database_format": "pg_dump_custom",

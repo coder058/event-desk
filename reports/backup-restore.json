@@ -12,6 +12,9 @@
   "restored_deliveries": 0,
   "restored_competition_calendars": 49,
   "restored_competition_observations": 231,
+  "archive_raw_objects": 0,
+  "restored_source_content_hashes": 0,
+  "source_object_references_verified": true,
   "limits": "One encrypted backup hash-check and isolated DB restore; production was not overwritten",
-  "verified_at": "2026-10-07T16:29:44.443715+00:00"
+  "verified_at": "2026-10-07T16:47:19.584145+00:00"
 }

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shlex
 import subprocess
 import time
@@ -11,8 +12,8 @@ from pathlib import Path
 from bootstrap import SSH
 from setup_backup import FRANKFURT, remote
 
-VERIFY = '''
-import hashlib,json,subprocess,sys,tarfile,tempfile
+VERIFY = Path("ops/backup_archive.py").read_text(encoding="utf-8")+'''
+import subprocess,sys,tempfile
 from pathlib import Path
 data=json.load(sys.stdin)
 path=Path('/home/ubuntu/eventdesk-backups')/data['file']
@@ -21,19 +22,7 @@ assert hashlib.sha256(path.read_bytes()).hexdigest()==data['ciphertext_sha256']
 with tempfile.TemporaryDirectory(prefix='eventdesk-restore-') as temporary:
  archive=Path(temporary)/'backup.tar.gz'
  subprocess.run(['age','-d','-i','/etc/eventdesk-backup/identity.txt','-o',str(archive),str(path)],capture_output=True,check=True)
- with tarfile.open(archive,'r:gz') as tar:
-  members=tar.getmembers()
-  assert all(member.isfile() and not member.name.startswith('/') and '..' not in Path(member.name).parts for member in members)
-  assert len({member.name for member in members})==len(members)
-  manifest=json.load(tar.extractfile('manifest.json'))
-  assert {member.name for member in members}==set(manifest['files'])|{'manifest.json'}
-  for name,metadata in manifest['files'].items():
-   digest=hashlib.sha256();size=0
-   with tar.extractfile(name) as stream:
-    while chunk:=stream.read(65536):digest.update(chunk);size+=len(chunk)
-   assert digest.hexdigest()==metadata['sha256'] and size==metadata['bytes']
-  assert manifest['files']['local-model.joblib']['sha256']==data['model_sha256']
- print(json.dumps({'archive_files_verified':len(manifest['files']),'model_sha256':data['model_sha256']}))
+ print(json.dumps(verify_plain_archive(archive,data['model_sha256'])))
 '''
 
 EXPORT_DUMP = '''
@@ -55,6 +44,7 @@ def main() -> None:
     if Path(report["file"]).name != report["file"]:
         raise ValueError("Unexpected backup filename")
     verified = json.loads(remote(FRANKFURT, VERIFY, json.dumps(report).encode()))
+    raw_objects = set(verified.pop("raw_objects_sha256"))
     database = "eventdesk_restore_" + str(time.time_ns())
     command = "sudo docker exec eventdesk-db-1 "
     # Exact newly created test database name is retained; the production database is never a restore/drop target.
@@ -88,11 +78,19 @@ def main() -> None:
         # SOURCE: this probe returns schema plus four exact table counts, including schema-008 observations.
         if len(rows) != 5:
             raise RuntimeError("Unexpected isolated restore schema probe")
+        captured = subprocess.run(SSH+[command+"psql -U eventdesk -d "+database+" -At -c "+shlex.quote(
+            "SELECT DISTINCT content_hash FROM source_captures ORDER BY content_hash")], capture_output=True, check=True)
+        referenced = set(captured.stdout.decode().splitlines())
+        if (any(re.fullmatch(r"[0-9a-f]{64}", digest) is None for digest in referenced)
+                or not referenced.issubset(raw_objects)):
+            raise RuntimeError("Restored source ledger references bytes missing from the verified backup")
         report.update(verified)
         report.update({"restore_verified": True, "restored_schema": rows[0],
                        "restored_jobs": int(rows[1]), "restored_deliveries": int(rows[2]),
                        "restored_competition_calendars": int(rows[3]),
                        "restored_competition_observations": int(rows[4]),
+                       "archive_raw_objects": len(raw_objects), "restored_source_content_hashes": len(referenced),
+                       "source_object_references_verified": True,
                        "limits": "One encrypted backup hash-check and isolated DB restore; production was not overwritten"})
     finally:
         removed = subprocess.run(SSH + [command + "dropdb -U eventdesk " + database], capture_output=True)

@@ -50,7 +50,12 @@ or SEC-wide coverage. The command uses DATABASE_URL/SEC_USER_AGENT from the priv
 environment; never pass their values in command arguments. It requires PostgreSQL
 and the current migrations. A partial run exits nonzero with safe structured
 counts. It does not send predictions or place orders. Raw-object backup coverage
-must be verified before enabling persistent external collection.
+must be verified before enabling persistent external collection. The scoped
+backup inventories the content-addressed objects after the database dump,
+rejects unexpected/linked paths and checks each object's bytes against its name.
+The isolated restore then requires every restored source content hash to have a
+verified archive object. This relies on RawObjects' create-before-commit and
+no-rewrite/no-delete contract; it is not an atomic snapshot of mutable host files.
 
 ## Next engineering steps
 

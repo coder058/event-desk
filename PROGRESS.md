@@ -681,3 +681,17 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   PostgreSQL collector-resume fixture to CI; it is not yet asserted passed.
   Actual SEC reads, daily scheduling, raw-object backup coverage and prospective
   outcomes remain unfinished. No SEC access or all-market completeness is claimed.
+- SEC collector source 7fd4605 passed CI 37654199705: 149 tests and actual
+  PostgreSQL resume/pacing with four mocked HTTP requests, two retained fictional
+  bodies and zero pending references. No external SEC request occurred.
+- Extended the encrypted backup to inventory only the project's hash-shaped raw
+  object store. An unfinished temporary capture is excluded; arbitrary/linked paths
+  and object/name mismatches fail verification. Decrypted archives are checked
+  without extracting files. Isolated restore now requires every restored source
+  content hash to exist in the verified archive before publishing its receipt.
+- Eleven backup/archive/receiver tests passed locally; the directory-symlink test
+  was skipped because this Windows host cannot create that link. Linux CI still
+  must exercise it. The current encrypted production copy was verified with the
+  new cross-check: zero source hashes and zero raw objects, matching the absence
+  of actual SEC collection. That empty check does not prove populated production
+  recovery. Synthetic populated archives test byte identity and rejection paths.
