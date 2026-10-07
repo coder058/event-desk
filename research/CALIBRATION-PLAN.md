@@ -40,9 +40,13 @@ model-selection result. Q2 is now inspected development evidence.
 `collect_llm.py --wait-local-seconds` allows waiting only for the local ledger's
 recorded window release, within the caller's explicit bound. External cooldowns
 remain stops. Admission is checked again transactionally; this cannot establish
-account-wide available quota. Research SQLite and production PostgreSQL budgets
-are still separate; they must share/synchronize usage before concurrent live LLM
-collection is enabled. Production remains local-only.
+account-wide available quota. Collection now requires the same migrated PostgreSQL
+ledger as the production worker. The stopped local SQLite ledger is sealed and
+imported once before enabling either research or shadow calls; an identical retry
+does not charge twice and a changed snapshot is rejected. Import and runtime
+reservations share the provider advisory lock. Deployment/actual PostgreSQL
+verification must still succeed before this is considered operational.
+Production predictions remain local-only.
 
 `probe_blend.py` fits the inherited fixed ridge alpha with training-only standard
 scaling, once on the retained Q2 successful-output cohort. It verifies exact
@@ -67,3 +71,19 @@ features, with constant `surprise_vs_preview`. Groq stopped collection on an
 actual TPD 429 (200,000 limit, 198,677 used, 1,637 requested); local ledger usage
 did not imply available account capacity. Do not bypass that account limit.
 Further evidence must remain label-blind; do not tune repeatedly on this cohort.
+
+## October 7 collection and shared-budget transition
+
+After the actual provider cooldown expired, the bounded collector added 17 valid
+Q3 analyses. It then stopped on a nonverbatim evidence quote, retaining that invalid
+attempt and its charged usage. There are now 42 current-prompt Q2 and 45 Q3 validated
+events. These are response cohorts, not 45 scored rows or a new evaluation result.
+The prior negative probe is retained; its fitted mapping/weights have not changed.
+
+`ops/seal_research_quota.py` retained 114 usage rows from the stopped legacy ledger
+with no keys/provider error bodies. `ops/run_collection_dublin.py --prepare-only`
+uploads only private archives/evidence and imports this snapshot. Subsequent bounded
+calls run in a one-off container with the deployed worker's environment/network and
+shared database. Shorter/divergent evidence uploads cannot erase existing results.
+No official prediction is submitted by these research commands. Other applications
+using the same account remain outside this ledger; provider 429/cooldown still wins.

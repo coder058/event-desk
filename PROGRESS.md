@@ -520,3 +520,14 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   archive members passed their hashes, schema 009 restored into a new disposable
   database, 48 calendar versions/156 observations, zero deliveries/jobs. The
   production database was not overwritten; the temporary database was removed.
+
+- Bounded Groq collection added 17 valid Q3 analyses, then stopped on a quote that
+  was not verbatim. Invalid output and usage were retained. Verified exact current
+  cohorts: 42 Q2 and 45 Q3. No refit, new score or blend approval follows from this.
+- Added immutable one-time legacy quota import, migration 010 and shared PostgreSQL
+  research collection. Duplicate imports/cooldown preservation/pending-token charge
+  checks passed; the stopped source snapshot contains 114 usage rows. Local checks:
+  98 tests passed in 97.09 seconds, strict typing in 20 modules and lint clean.
+  An initial literal-return typing check failed and was corrected; no external
+  research calls used the new path yet. Actual PostgreSQL races/deployment remain
+  to verify, so shared-budget operation is not claimed yet.

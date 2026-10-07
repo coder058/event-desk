@@ -26,6 +26,8 @@ async def main() -> None:
     parser.add_argument("--quarter", choices=["2026Q2", "2026Q3"], required=True)
     parser.add_argument("--provider", choices=["gemini", "groq"], required=True)
     parser.add_argument("--count", type=int, required=True)
+    parser.add_argument("--archive-dir", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
     # SOURCE: exact IDs in authenticated model inventory and official free-tier pricing on 2026-10-05.
     parser.add_argument("--model", choices=["gemini-3.1-flash-lite", "gemini-3.5-flash-lite",
                                           "gemini-3.8-flash", "openai/gpt-oss-120b"])
@@ -34,15 +36,16 @@ async def main() -> None:
     args = parser.parse_args()
     if args.count <= 0 or not math.isfinite(args.wait_local_seconds) or args.wait_local_seconds < 0:
         raise ValueError("Collection count/wait must be finite and nonnegative (count positive)")
-    for line in (Path.home() / ".eventdesk/.env").read_text(encoding="utf-8-sig").splitlines():
-        if "=" in line and not line.lstrip().startswith("#"):
-            name, value = line.split("=", 1)
-            os.environ[name.strip()] = value.strip().strip('"').strip("'")
-    directory = Path("private")
-    directory.mkdir(exist_ok=True)
-    store = Store("sqlite:///private/provider-probe.sqlite")
-    store.initialize_fixture()
-    archive = Path.home() / ".eventdesk/research/archive" / (args.quarter + ".jsonl.gz")
+    # SOURCE: research and live calls must debit the same migrated PostgreSQL ledger.
+    # No automatic local ledger or key-file loading can silently create a second budget.
+    url = os.environ.get("DATABASE_URL", "")
+    if not url.startswith("postgresql"):
+        raise RuntimeError("Research calls require the shared PostgreSQL DATABASE_URL")
+    store = Store(url)
+    Quotas(store).summary()  # Verify migrated connectivity before loading inputs or calling a provider.
+    directory = args.output_dir
+    directory.mkdir(parents=True, exist_ok=True)
+    archive = args.archive_dir / (args.quarter + ".jsonl.gz")
     with gzip.open(archive, "rt", encoding="utf-8") as source:
         records = [json.loads(line) for line in source]
     # SOURCE: deterministic label-blind chronological sample, not best-return selection.

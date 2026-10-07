@@ -1,6 +1,7 @@
 """One archived inference per free provider; local results never POST to the competition."""
 from __future__ import annotations
 
+import argparse
 import asyncio
 import gzip
 import json
@@ -19,17 +20,18 @@ from eventdesk.store import Store
 
 
 async def run() -> None:
-    env_path = Path.home() / ".eventdesk/.env"
-    for line in env_path.read_text(encoding="utf-8-sig").splitlines():
-        if "=" in line and not line.lstrip().startswith("#"):
-            name, value = line.split("=", 1)
-            os.environ[name.strip()] = value.strip().strip('"').strip("'")
-    directory = Path("private")
-    directory.mkdir(exist_ok=True)
-    store = Store("sqlite:///private/provider-probe.sqlite")
-    # Importing provider models above registers the quota tables for this private offline probe DB.
-    store.initialize_fixture()
-    with gzip.open(Path.home() / ".eventdesk/research/archive/2026Q2.jsonl.gz", "rt", encoding="utf-8") as source:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--archive", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    args = parser.parse_args()
+    url = os.environ.get("DATABASE_URL", "")
+    if not url.startswith("postgresql"):
+        raise RuntimeError("Provider probes require the shared PostgreSQL ledger")
+    store = Store(url)
+    Quotas(store).summary()
+    directory = args.output_dir
+    directory.mkdir(parents=True, exist_ok=True)
+    with gzip.open(args.archive, "rt", encoding="utf-8") as source:
         record = json.loads(next(source))
     items = select_items(record)
     results = []
