@@ -1,4 +1,4 @@
-# STATUS — 2026-10-07 23:44:43 UTC
+# STATUS — 2026-10-07 23:54:45 UTC
 
 TEST oficial: sí (test_d096b526791e46bdbf0012d63de8dbfd; delivery firmada aceptada por el receptor y 2xx oficial, predicción neutral persistida, HTTP 201/api_accepted; GET oficial fresco confirma last_test_prediction_at=2026-10-07T22:03:48.125853Z; reports/official-test-20261007.json) | Eventos oficiales: 0 (excluye TEST) | Envíos oficiales: 0 (submission_n_total; un TEST aceptado por separado)
 
@@ -22,17 +22,19 @@ ACK #5 — hecho — 3c1a763 / 463190f / 514aa0b: reproducción documentada, req
 ACK #6 — hecho — cancelada por #8, sin commit en otro repo: no se leyó ni modificó ai-ocaml-bot para esta entrada. Alcance sigue exclusivamente en event-desk.
 
 ACK #7 — bloqueado — 514aa0b: diagnóstico e informe local preparados. URL actual del portal sigue TLS :80; comparación ASGI preserva bytes/cabeceras, pero no ejecuta Caddy/HAProxy. Docker local no disponible: comparación real de dos proxies incompleta. Chrony sincronizado, offset actual microsegundos; timestamps de entregas fallidas no retenidos. DB conserva un TEST y ninguna tabla de rechazos; tipo/código/causa de los 4xx siguen desconocidos. Propuesta mínima de logs privados con códigos/motivos enumerados: 9 regresiones rojas antes, 13 casos de diagnóstico verdes después; full suite 186 passed/1 skipped, ruff/mypy verdes. Sin push ni deploy.
-ACK #8 — hecho — 514aa0b (diagnóstico prioritario) / sin commit en otro repo: #6 cancelada; diagnóstico prioritario #7 preparado; el clon limpio pasó dos suites consecutivas y #5 está cerrada. Nueva entrada #9 pendiente: material de portfolio, solo docs.
+ACK #8 — hecho — 514aa0b (diagnóstico prioritario) / sin commit en otro repo: #6 cancelada; diagnóstico prioritario #7 preparado; el clon limpio pasó dos suites consecutivas y #5 está cerrada. Entrada #9 completada localmente en b40aab8; sin publicación.
+
+ACK #9 — hecho — b40aab8: docs/PORTFOLIO-SUMMARY.md (43 líneas, cinco cajas/tres decisiones, métricas con enlaces y alcance) y docs/DEMO-90S.md (guion propuesto, no duración medida; controles reales del walkthrough, FAQ edge/autoría/blend). Cifras/rounding/enlaces locales y límite de líneas verificados, secret scan y diff --check verdes. Suite completa del mismo código: 186 passed/1 skipped en 117.21 s. Revisión de status/diff antes del commit: solo las cinco rutas propias explícitas, sin cambios de Cursor. GETs públicos verificaron dashboard/demo/salud 200; walkthrough sintético/trained model y evidencia separada disponible, sin nuevas llamadas LLM. La observación oficial retenida creció a 15 rechazos; reporte follow-up y advertencia en scoring-readiness añadidos. Sin push ni deploy.
 
 Bloqueado (necesita a Jordi):
-- Incidencia nueva: portal y observer registran tres deliveries 4xx consecutivas, última 2026-10-07T23:02:19.406911Z; TEST aceptados sigue en uno, último 22:03. Monitor activó official_delivery_or_submission_failures. HTTPS 80 y 443 responden salud 200; credenciales de API runtime coinciden con locales; API activa y logs de acceso deshabilitados. Código exacto/payload/causa todavía desconocidos. Solicitado a Jordi si pulsó TEST y el mensaje exacto. Informe propio reports/delivery-failures-readonly-20261008.json. No se cambió URL/secret/validación ni producción para diagnosticar.
+- Incidencia: inicialmente se observaron tres deliveries 4xx. GET público a las 23:52:44 UTC leyó un snapshot oficial retenido de 23:44:03 UTC con 15 deliveries 4xx/15 fallos consecutivos, última 2026-10-07T23:28:59.043690Z; TEST aceptados sigue en uno, último 22:03. Monitor activó official_delivery_or_submission_failures. HTTPS 80 y 443 responden salud 200; credenciales de API runtime coinciden con locales; API activa y logs de acceso deshabilitados. Código exacto/payload/causa todavía desconocidos. Solicitado a Jordi si pulsó TEST y el mensaje exacto. Informes propios reports/delivery-failures-readonly-20261008.json y reports/delivery-failures-followup-readonly-20261008.json. El follow-up no fue un nuevo GET autenticado al portal. No se cambió URL/secret/validación ni producción para diagnosticar.
 - LISTO PARA TEST por HTTPS estándar: https://52.17.192.36.sslip.io/competition/webhook. Jordi actualiza el campo del portal y pulsa Send test event; no se ha verificado aún una delivery oficial por 443. La prueba previa por TLS 80 sí pasó.
 - SEC omitido sin contacto administrativo escrito. No bloquea Phase A.
 - Publicación y despliegue prohibidos por la instrucción actual. Commits siguientes exclusivamente locales.
 
 Siguiente bloque:
-- Entradas #1–#4 completadas; #7 preparada localmente con causa desconocida y comparación real de proxies pendiente; #5 cerrada tras dos suites consecutivas del clon final; #6 cancelada por #8. Revisar diff/staged antes de cualquier nueva entrada autorizada.
+- Entradas #1–#5 y #9 completadas localmente; #7 preparada con causa desconocida y comparación real de proxies pendiente; #6 cancelada por #8. Para continuar la incidencia hacen falta diagnóstico en producción aprobado y/o el resultado exacto del TEST del titular. La ausencia de Docker local impide afirmar la comparación real de proxies. No instalar ni desplegar a ciegas. Revisar diff/staged antes de cualquier nueva entrada autorizada.
 - Releer INBOX_CODEX.md al terminar cada punto o cada 20 minutos de trabajo activo; no seguir bandejas de otros repos.
 - Verificar ambas partes cuando el titular envíe TEST por 443; no inventar scores ni eventos. Backup siguiente programado, no realizado ni restaurado aún.
 
-Tiempo activo real del objetivo: 5.855 segundos (1 h 37 min 35 s), última lectura get_goal; no cuatro horas completadas. Objetivo activo. Sin push, despliegue nuevo, gasto, cartera paper ni blend.
+Tiempo activo real del objetivo: 6.571 segundos (1 h 49 min 31 s), última lectura get_goal; no cuatro horas completadas. Objetivo activo. Sin push, despliegue nuevo, gasto, cartera paper ni blend.
