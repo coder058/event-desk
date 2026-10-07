@@ -531,3 +531,15 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   An initial literal-return typing check failed and was corrected; no external
   research calls used the new path yet. Actual PostgreSQL races/deployment remain
   to verify, so shared-budget operation is not claimed yet.
+
+- CI 37615557536 passed the actual PostgreSQL quota race: four duplicate imports
+  committed once; two simultaneous runtime reservations fit the remaining synthetic
+  budget, two were denied. No provider request was made by that fixture.
+- Deployed c95438c/schema 010 on Dublin; imported the sealed 114-row legacy ledger
+  and verified an identical second import returned false. Both real free providers
+  subsequently returned valid archived analyses through this shared ledger. Local
+  prediction/configuration hashes stayed unchanged; public HTTPS still verifies.
+- Added retained-JSON SEC discovery with acceptance timezone/CIK/accession/path/
+  array-integrity checks. Ten synthetic parser cases passed, strict typing/lint
+  passed. This is recent metadata discovery, not daily ingestion or verified filing
+  bodies. External collection remains disabled until the documented contact exists.

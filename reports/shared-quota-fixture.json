@@ -1,0 +1,10 @@
+{
+  "kind": "shared_postgresql_quota_fixture",
+  "duplicate_import_attempts": 4,
+  "committed_imports": 1,
+  "accepted_runtime_reservations": 2,
+  "external_requests": 0,
+  "limits": "Synthetic project budget; not actual provider/account capacity",
+  "source_commit": "c95438c3ecb941fd2593b3e571dce31954ddc84a",
+  "ci_run": 37615557536
+}

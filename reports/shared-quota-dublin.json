@@ -1,0 +1,24 @@
+{
+  "imports": [
+    {
+      "ledger_id": "eventdesk-local-research-v1",
+      "snapshot_sha256": "af79ccca7a9392b8124cf65bcbb3b3d93f3e9b41f4cef4a7b03b8c70638be4b4",
+      "usage_rows": 114
+    }
+  ],
+  "provider_project_counts": [
+    {
+      "provider": "gemini",
+      "usage_rows": 16
+    },
+    {
+      "provider": "groq",
+      "usage_rows": 111
+    }
+  ],
+  "sealed_usage_rows": 114,
+  "external_requests": 0,
+  "mode": "read_only",
+  "checked_at": "2026-10-07T11:53:31.127311+00:00",
+  "limits": "Actual project ledger/import metadata; not provider-wide capacity or billing usage"
+}
