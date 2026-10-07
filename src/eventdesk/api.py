@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import time
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
@@ -21,6 +23,33 @@ from eventdesk.vendor.webhook_verification import WebhookVerificationError, veri
 # SOURCE: official ACK maximum is 20 seconds; the stricter whole-receipt guard below
 # is an UNCALIBRATED GUESS leaving network headroom, not an observed network guarantee.
 RECEIPT_GUARD_SECONDS = 10
+
+LOG = logging.getLogger("eventdesk.receipt")
+RejectionReason = Literal[
+    "unknown_submission_slot", "body_too_large", "body_timeout",
+    "signature_headers_missing", "signature_timestamp_invalid",
+    "signature_timestamp_outside_tolerance", "signature_verification_failed",
+    "body_identity_mismatch", "missing_cutoff", "invalid_schema",
+    "receipt_budget_exhausted", "conflicting_delivery", "database_acceptance_uncertain",
+]
+
+
+def _rejection(status: int, reason: RejectionReason, detail: str | None = None) -> HTTPException:
+    # SOURCE: existing receipt response branches; never log body, headers, identity or exception text.
+    LOG.warning("webhook_rejection status=%s reason=%s", status, reason)
+    return HTTPException(status, detail)
+
+
+def _signature_reason(error: WebhookVerificationError) -> RejectionReason:
+    # SOURCE: fixed messages from the vendored official verifier; unknown text stays private.
+    message = str(error)
+    if message.startswith("missing one of Webhook-Id, Webhook-Timestamp, Webhook-Signature"):
+        return "signature_headers_missing"
+    if message == "Webhook-Timestamp is not an integer":
+        return "signature_timestamp_invalid"
+    if message.startswith("Webhook-Timestamp outside "):
+        return "signature_timestamp_outside_tolerance"
+    return "signature_verification_failed"
 
 
 def create_app(settings: Settings, store: Store) -> FastAPI:
@@ -39,7 +68,7 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
         budget_started = time.monotonic()
         submission = settings.submissions.get(slot)
         if submission is None:
-            raise HTTPException(404)
+            raise _rejection(404, "unknown_submission_slot")
         # GUESS: 1 MiB ceiling for small official event metadata; not a content/model calibration. # UNCALIBRATED GUESS
         max_bytes = 1024 * 1024
         async def read_raw() -> bytes:
@@ -47,12 +76,12 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
             async for chunk in request.stream():
                 raw.extend(chunk)
                 if len(raw) > max_bytes:
-                    raise HTTPException(413)
+                    raise _rejection(413, "body_too_large")
             return bytes(raw)
         try:
             raw = await asyncio.wait_for(read_raw(), timeout=RECEIPT_GUARD_SECONDS)
         except TimeoutError:
-            raise HTTPException(503, "Receipt body timeout") from None
+            raise _rejection(503, "body_timeout", "Receipt body timeout") from None
         try:
             parsed = verify_webhook(raw_body=bytes(raw), headers=request.headers,
                                     secret=submission.webhook_secret)
@@ -61,25 +90,27 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
             event = Event.model_validate(parsed)
             delivery_id = request.headers["webhook-id"]
             if event.id != delivery_id:
-                raise HTTPException(400, "Signed body/header identity mismatch")
+                raise _rejection(400, "body_identity_mismatch", "Signed body/header identity mismatch")
             if event.event_type != "TEST" and event.knowledge_cutoff is None:
-                raise HTTPException(400, "Missing knowledge cutoff")
-        except (WebhookVerificationError, UnicodeDecodeError):
-            raise HTTPException(401, "Signature verification failed") from None
+                raise _rejection(400, "missing_cutoff", "Missing knowledge cutoff")
+        except WebhookVerificationError as exc:
+            raise _rejection(401, _signature_reason(exc), "Signature verification failed") from None
+        except UnicodeDecodeError:
+            raise _rejection(401, "signature_verification_failed", "Signature verification failed") from None
         except (ValidationError, ValueError):
-            raise HTTPException(400, "Invalid event schema") from None
+            raise _rejection(400, "invalid_schema", "Invalid event schema") from None
         try:
             remaining = RECEIPT_GUARD_SECONDS - (time.monotonic() - budget_started)
             if remaining <= 0:
-                raise TimeoutError
+                raise _rejection(503, "receipt_budget_exhausted", "Durable receipt unavailable")
             # Body reading, signature/schema validation and DB acceptance share one receipt budget.
             await asyncio.wait_for(asyncio.to_thread(store.receive, slot, delivery_id, bytes(raw), event, started),
                                    timeout=remaining)
         except ConflictError:
-            raise HTTPException(409, "Conflicting delivery") from None
+            raise _rejection(409, "conflicting_delivery", "Conflicting delivery") from None
         except (SQLAlchemyError, TimeoutError):
             # No 200 when durable acceptance is uncertain. A retry deduplicates a commit that finished late.
-            raise HTTPException(503, "Durable receipt unavailable") from None
+            raise _rejection(503, "database_acceptance_uncertain", "Durable receipt unavailable") from None
         return Response(status_code=200)
 
     @app.get("/api/predictions")
