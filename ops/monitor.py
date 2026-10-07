@@ -13,7 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ORIGIN = "http://127.0.0.1:8800"
-PUBLIC = "https://52.17.192.36.sslip.io"
+# SOURCE: reviewed shared TLS listener; separate dated external proof must match this exact origin.
+PUBLIC = "https://52.17.192.36.sslip.io:80"
 # GUESS: three-second operational probe and twenty-six-hour backup age allowance.
 # UNCALIBRATED GUESS: these alert thresholds need observed operational behavior.
 PROBE_SECONDS = 3

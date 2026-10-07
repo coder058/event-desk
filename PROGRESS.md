@@ -484,3 +484,22 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   No completion declaration or additional SEC implementation follows from this pause.
   Next feasible work is the identified/bounded SEC transport and typed ingestion;
   public HTTPS/portal test and SEC contact still need the documented external inputs.
+
+## 2026-10-07 — resumed goal and isolated HTTPS path
+
+- Goal status returned active. Worktree started clean; be6efaf/bba95e6 CI green.
+  Actual Dublin worker/observer remain healthy with the unchanged local-only
+  configuration. Official counters still record no portal test or delivery.
+- Rechecked external 443: connection timeout; existing AWS tab remains signed out.
+  Prepared TLS passthrough on the already accessible public 80 path with official
+  HAProxy 3.2, preserving Caddy certificate management and plaintext ACME routing.
+  No firewall, account, certificate validation or owner credentials are bypassed.
+- Actual loopback-only prototype passed verified certificate/health/401/308 checks.
+  Earlier attempts failed: unreadable mode-600 static configuration under the
+  unprivileged image, then transient cold-start EOF. Corrected static file mode
+  and bounded readiness retries; failed diagnostics stay private. Original public
+  listeners were untouched during these probes; every temporary proxy was removed.
+- Added a keyless Compose TLS fixture for exact signed unicode/whitespace bytes,
+  duplicate receipt, modified-body rejection and simulated worker outcome. This
+  integration check has not passed yet; public cutover waits for its CI result.
+  Production proxy limits are labelled operational guesses, not capacity claims.

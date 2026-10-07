@@ -1,0 +1,18 @@
+# Keyless overlay: test both protocol paths, with a fixture-only local CA.
+services:
+  caddy:
+    image: caddy:2-alpine
+    volumes: ["./ops/Caddyfile.fixture:/etc/caddy/Caddyfile:ro", "fixture-caddy:/data"]
+    depends_on: [api]
+  ingress:
+    # SOURCE: exact official image used by the actual loopback probe and production.
+    image: haproxy@sha256:5d97434a423c2533cfeb42874d45cf6d69a840b60334582dfbfd5008e94c80be
+    # GUESS: isolated unused fixture port. # UNCALIBRATED GUESS
+    ports: ["127.0.0.1:18881:80"]
+    volumes: ["./ops/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on: [caddy]
+volumes:
+  fixture-caddy:

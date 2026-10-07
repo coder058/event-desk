@@ -47,10 +47,22 @@ services:
     logging: *local-logging
     image: caddy:2-alpine
     restart: unless-stopped
-    ports: ["80:80", "443:443"]
+    ports: ["443:443"] # SOURCE: standard HTTPS stays available when the existing cloud rule is restored.
     volumes: ["./ops/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy-data:/data", "caddy-config:/config"]
     depends_on: [api]
     mem_limit: 128m # UNCALIBRATED GUESS: existing VPS operational budget.
+  ingress:
+    logging: *local-logging
+    # SOURCE: Docker official HAProxy 3.2 image, exact digest retained in the loopback probe report.
+    image: haproxy@sha256:5d97434a423c2533cfeb42874d45cf6d69a840b60334582dfbfd5008e94c80be
+    restart: unless-stopped
+    ports: ["80:80"] # SOURCE: already accessible public listener; TLS remains terminated by Caddy.
+    volumes: ["./ops/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro"]
+    depends_on: [caddy]
+    mem_limit: 64m # GUESS: operational memory ceiling, not a measured capacity. # UNCALIBRATED GUESS
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
   official-observer:
     logging: *local-logging
     build: .

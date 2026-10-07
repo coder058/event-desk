@@ -1,0 +1,10 @@
+{
+  "image": "haproxy@sha256:5d97434a423c2533cfeb42874d45cf6d69a840b60334582dfbfd5008e94c80be",
+  "tls_certificate_verified": true,
+  "health_status": 200,
+  "unsigned_webhook_status": 401,
+  "plaintext_redirect_status": 308,
+  "listener": "loopback_only",
+  "public_listeners_changed": false,
+  "limits": "No portal delivery or public reachability is established by this probe"
+}

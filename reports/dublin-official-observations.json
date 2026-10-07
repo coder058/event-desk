@@ -2,49 +2,48 @@
   "official_observations": {
     "submissions": {
       "s1": {
-        "request_started_at": 1791311714.326225,
-        "observed_at": 1791311716.316154,
-        "calendar_sha256": "af297a9ad0376f8eb70d7d226a44c60d9aa75720eefb0f91edc079de5c2423b1",
-        "calendar_raw_sha256": "d9308e97f83e619c50142bcdbd78690a02fa1a24ba054b636d23773ce90683a6",
+        "request_started_at": 1791370100.9390898,
+        "observed_at": 1791370102.7384148,
+        "calendar_sha256": "fe6ac53d46943973a8531466db48ff6f440e3bb236df414f5d6f518d0e20ce4c",
+        "calendar_raw_sha256": "eec354cc31df5e853b44786dc2adb4d5258a3f383ac7ad5889d662269ca1eb2a",
         "health_raw_sha256": "baceadc2a7f38b13fe990804577527dcaae6901ef5b8085a37877c80e6311df6",
         "calendar": {
-          "scheduled_entries": 2933,
+          "scheduled_entries": 3021,
           "event_types": {
-            "EARNINGS_RELEASE": 2933
+            "EARNINGS_RELEASE": 3021
           },
           "timing_categories": {
-            "SCHEDULED": 2933
+            "SCHEDULED": 3021
           },
-          "first_calendar_day_central": "2026-10-06",
+          "first_calendar_day_central": "2026-10-07",
           "last_calendar_day_central": "2026-11-06",
-          "scheduled_in_scoring_window": 2834,
+          "scheduled_in_scoring_window": 3002,
           "scheduled_due_in_scoring_window": 0,
           "scoring_window_daily_counts_central": {
-            "2026-10-12": 2,
-            "2026-10-13": 22,
-            "2026-10-14": 23,
-            "2026-10-15": 24,
-            "2026-10-16": 19,
-            "2026-10-19": 32,
-            "2026-10-20": 74,
+            "2026-10-13": 16,
+            "2026-10-14": 10,
+            "2026-10-15": 18,
+            "2026-10-16": 7,
+            "2026-10-19": 33,
+            "2026-10-20": 235,
             "2026-10-21": 121,
-            "2026-10-22": 143,
+            "2026-10-22": 139,
             "2026-10-23": 34,
-            "2026-10-26": 68,
-            "2026-10-27": 180,
-            "2026-10-28": 240,
-            "2026-10-29": 307,
-            "2026-10-30": 58,
+            "2026-10-26": 65,
+            "2026-10-27": 185,
+            "2026-10-28": 242,
+            "2026-10-29": 305,
+            "2026-10-30": 59,
             "2026-10-31": 1,
             "2026-11-01": 1,
-            "2026-11-02": 163,
-            "2026-11-03": 312,
-            "2026-11-04": 410,
-            "2026-11-05": 535,
-            "2026-11-06": 65
+            "2026-11-02": 159,
+            "2026-11-03": 317,
+            "2026-11-04": 415,
+            "2026-11-05": 539,
+            "2026-11-06": 101
           },
           "peak_scoring_window_day_central": "2026-11-05",
-          "peak_scoring_window_entries": 535,
+          "peak_scoring_window_entries": 539,
           "official_eligible_coverage": null,
           "limits": "Calendar entries are mutable schedules, not broadcasts or the final eligible scored set. Official health counters are a separate rolling 24-hour snapshot; coverage is not inferred."
         },
@@ -64,9 +63,9 @@
           "last_test_prediction_at": null
         },
         "collector": {
-          "checked_at": 1791311716.316154,
+          "checked_at": 1791370102.7384148,
           "state": "observed",
-          "scheduled_entries": 2933
+          "scheduled_entries": 3021
         }
       }
     },
@@ -78,8 +77,8 @@
   },
   "schema_counts": {
     "schema": "009_source_checkpoints",
-    "calendar_versions": 35,
-    "health_observations": 99,
+    "calendar_versions": 48,
+    "health_observations": 196,
     "observer_source_lf_sha256": "3dc0afc30bdda4de0d8bd8a6d13da5008a7b82863f91fc097ed9fdaf2cc93bc4"
   },
   "observer_running": true,
@@ -90,7 +89,7 @@
     "database": "reachable",
     "worker": {
       "state": "recent_heartbeat",
-      "seen_at": 1791311728.485055,
+      "seen_at": 1791370614.2774744,
       "details": {
         "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
         "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",

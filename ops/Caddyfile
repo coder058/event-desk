@@ -1,3 +1,7 @@
+{
+    # GUESS: private HTTP port behind the shared public listener. # UNCALIBRATED GUESS
+    http_port 8080
+}
 52.17.192.36.sslip.io {
     reverse_proxy api:8000
     header {
@@ -6,4 +10,8 @@
         -Server
     }
     # Access logging intentionally disabled: incoming metadata/signed URL fragments must not leak.
+}
+http://52.17.192.36.sslip.io:8080 {
+    # SOURCE: TLS uses the existing public 80 path; ACME HTTP-01 is handled by Caddy before this redirect.
+    redir https://52.17.192.36.sslip.io:80{uri} 308
 }

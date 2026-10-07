@@ -1,0 +1,12 @@
+{
+    # SOURCE: same private HTTP port as the production multiplexing configuration.
+    http_port 8080
+    local_certs
+}
+localhost {
+    reverse_proxy api:8000
+}
+http://localhost:8080 {
+    # GUESS: isolated loopback fixture port; never a production URL. # UNCALIBRATED GUESS
+    redir https://localhost:18881{uri} 308
+}

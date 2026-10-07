@@ -59,6 +59,15 @@ os.chmod(runtime,0o600)
 print(json.dumps({'database_env_mode':oct(db.stat().st_mode&0o777),'runtime_env_mode':oct(runtime.stat().st_mode&0o777)}))
 """)
     # SOURCE: host allowlist was read from the authenticated official archive manifest.
+    # Validate both listeners before replacing the existing public path. Neither command changes listeners.
+    remote_python("""import subprocess,json
+commands=[['sudo','docker','run','--rm','-v','/srv/eventdesk/ops/Caddyfile:/etc/caddy/Caddyfile:ro','caddy:2-alpine','caddy','validate','--config','/etc/caddy/Caddyfile','--adapter','caddyfile'],
+ ['sudo','docker','run','--rm','--network','eventdesk_default','-v','/srv/eventdesk/ops/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro','haproxy@sha256:5d97434a423c2533cfeb42874d45cf6d69a840b60334582dfbfd5008e94c80be','haproxy','-c','-f','/usr/local/etc/haproxy/haproxy.cfg']]
+for command in commands:
+ result=subprocess.run(command,capture_output=True)
+ if result.returncode: raise RuntimeError('Ingress configuration validation failed; output withheld')
+print(json.dumps({'ingress_configuration_validated':True}))
+""")
     result = subprocess.run(SSH + ["cd /srv/eventdesk && sudo docker compose -p eventdesk -f compose.production.yaml up --build -d"])
     raise SystemExit(result.returncode)
 
