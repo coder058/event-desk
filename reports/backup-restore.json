@@ -1,8 +1,8 @@
 {
-  "created_at": "2026-10-07T16:29:34.987025+00:00",
-  "file": "eventdesk-20261007T162934Z.tar.gz.age",
-  "encrypted_bytes": 10835974,
-  "ciphertext_sha256": "4f5ffd2ed9925ab10a6b996dc096deb6a8a65c3876525557961a21603825412a",
+  "created_at": "2026-10-07T16:56:12.195683+00:00",
+  "file": "eventdesk-20261007T165611Z.tar.gz.age",
+  "encrypted_bytes": 10836145,
+  "ciphertext_sha256": "18bb82e983a660f8c929cc24bd15dbf1c6f0ca5262bc8ae05c308a6b12af00ad",
   "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
   "remote_receipt_verified": true,
   "restore_verified": true,
@@ -11,10 +11,10 @@
   "restored_jobs": 0,
   "restored_deliveries": 0,
   "restored_competition_calendars": 49,
-  "restored_competition_observations": 231,
+  "restored_competition_observations": 235,
   "archive_raw_objects": 0,
   "restored_source_content_hashes": 0,
   "source_object_references_verified": true,
   "limits": "One encrypted backup hash-check and isolated DB restore; production was not overwritten",
-  "verified_at": "2026-10-07T16:47:19.584145+00:00"
+  "verified_at": "2026-10-07T16:56:21.721359+00:00"
 }
