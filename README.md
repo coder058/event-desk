@@ -1,11 +1,23 @@
 # Event Desk
 
-**Event Desk: AI agents that read every earnings call and SEC filing as it happens,
-predict how the market will react, and are scored live — in the Optiver × Chicago
-Booth "Explaining Markets" competition and on our own public scoreboard.**
+A signed-webhook prediction service for the Optiver × Chicago Booth
+"Explaining Markets" competition. Events are committed to PostgreSQL; the worker
+persists a frozen local-model prediction before submission. Optional LLM evidence
+runs separately, with quoted evidence checked against the input.
 
-This is the product objective. The signed production pipeline passed one genuine
-portal TEST; SEC daily ingestion and live scoring are not yet operational.
+One official portal TEST was accepted on **7 October 2026 at 22:03 UTC**. It used
+a neutral TEST prediction, not trained-model inference. Non-TEST events and
+submissions remain zero; there is no live score. Scoring is scheduled to start
+on **12 October**.
+
+**GitHub description to copy:** Signed-webhook prediction service with PostgreSQL,
+a local model and auditable LLM evidence. One official TEST accepted; no live score yet.
+
+## Where this is going
+
+The product objective is to explain market reactions to earnings calls and SEC
+filings, then evaluate predictions prospectively. SEC daily ingestion and live
+scoring are not yet operational.
 
 ![Production dashboard after the genuine portal TEST; non-TEST counters remain zero](docs/official-test.png)
 
