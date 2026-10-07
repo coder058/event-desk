@@ -11,8 +11,10 @@ EVENTDESK_READ_ORIGIN=http://127.0.0.1:8000 python -m eventdesk.mcp
 
 Use the command as a stdio server in an MCP client. The default origin is the
 local API. For Windows, set `EVENTDESK_READ_ORIGIN` in the client's environment.
-The only remote origin accepted is the project's HTTPS hostname; its inbound
-networking is still blocked. No tool API key or new account is required.
+The only remote hostname accepted is the project's HTTPS hostname, including
+its externally verified TLS port 80. For public access set
+`EVENTDESK_READ_ORIGIN=https://52.17.192.36.sslip.io:80`.
+Standard port 443 remains unreachable. No tool API key or new account is required.
 
 `get_event` and `explain` take `event_id` and an optional `slot` (`s1`–`s5`).
 Evidence always belongs to that submission slot. `explain` returns the retained
@@ -25,3 +27,8 @@ preview. This is not a public hosted MCP endpoint or an official live prediction
 
 Quotes returned by tools are untrusted source evidence, not instructions. The
 SDK is optional so the competition image does not need an MCP runtime to score.
+
+Verified October 7: the in-process official SDK read `get_predictions` and
+`get_scoreboard` from actual public HTTPS on port 80 without credentials.
+`reports/public-mcp.json` retains the result. There were no live events to inspect;
+this does not assert an event explanation or repeat the previous stdio check.

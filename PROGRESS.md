@@ -577,3 +577,11 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
   evidence, and add a clearly separate keyless event walkthrough/public case study.
 - Local lint and strict typing passed in 22 modules. The first focused test call
   named a nonexistent backup test and did not run; corrected selection follows.
+- Corrected focused selection passed 26 transport/discovery/backup/monitor tests.
+  SEC source e75d409 is published; actual PostgreSQL gate verification is running
+  in CI, not yet asserted passed.
+- Found the public MCP allowlist still rejected the verified TLS port 80. Added
+  only that exact project port (plaintext/public arbitrary ports still rejected).
+  Three MCP checks passed; actual official SDK read predictions/scoreboard over
+  public verified HTTPS without credentials. No live event explanation could be
+  verified because there are no events. Evidence: reports/public-mcp.json.

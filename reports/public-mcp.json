@@ -1,0 +1,16 @@
+{
+  "checked_at": "2026-10-07T15:34:32.192397+00:00",
+  "origin": "https://52.17.192.36.sslip.io:80",
+  "sdk_read_tools_verified": [
+    "get_predictions",
+    "get_scoreboard"
+  ],
+  "advertised_tools": [
+    "explain",
+    "get_event",
+    "get_predictions",
+    "get_scoreboard"
+  ],
+  "credentials_used": false,
+  "limits": "In-process SDK over actual HTTPS GETs; no live event to inspect, no stdio recheck"
+}

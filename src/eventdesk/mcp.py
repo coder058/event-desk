@@ -22,7 +22,8 @@ class PublicReadAPI:
     def __init__(self, origin: str, client: httpx.AsyncClient | None = None) -> None:
         parsed = urlsplit(origin)
         local = parsed.hostname in {"127.0.0.1", "localhost", "::1"} and parsed.scheme == "http"
-        deployed = parsed.hostname == "52.17.192.36.sslip.io" and parsed.scheme == "https" and parsed.port in (None, 443)
+        # SOURCE: reports/external-https.json verifies this project's TLS listener on explicit port 80.
+        deployed = parsed.hostname == "52.17.192.36.sslip.io" and parsed.scheme == "https" and parsed.port in (None, 443, 80)
         if (not (local or deployed) or parsed.username or parsed.password or parsed.query or parsed.fragment
                 or parsed.path not in ("", "/")):
             raise ValueError("Read origin must be the project's loopback or verified HTTPS hostname")
@@ -44,7 +45,7 @@ class PublicReadAPI:
             if self.client is not None:
                 return await fetch(self.client)
             # GUESS: ten-second read timeout; read-only tools cannot affect submission deadlines. # UNCALIBRATED GUESS
-            async with httpx.AsyncClient(timeout=10, follow_redirects=False) as client:
+            async with httpx.AsyncClient(timeout=10, follow_redirects=False, trust_env=False) as client:
                 return await fetch(client)
         except (httpx.HTTPError, ValueError):
             raise ToolError("Event Desk public record unavailable; no fallback record invented") from None
