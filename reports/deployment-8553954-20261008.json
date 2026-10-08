@@ -1,0 +1,181 @@
+{
+  "checked_at": "2026-10-08T11:12:08.142534+00:00",
+  "commit": "855395446e41813eb3584dab516f20ceced7ed10",
+  "source_verification": {
+    "host_files": 217,
+    "host_mismatches": [],
+    "containers": {
+      "eventdesk-api-1": {
+        "files": 28,
+        "mismatches": [],
+        "running": true,
+        "oom_killed": false
+      },
+      "eventdesk-worker-1": {
+        "files": 28,
+        "mismatches": [],
+        "running": true,
+        "oom_killed": false
+      },
+      "eventdesk-official-observer-1": {
+        "files": 28,
+        "mismatches": [],
+        "running": true,
+        "oom_killed": false
+      }
+    }
+  },
+  "external_https_443": {
+    "status": 200,
+    "ca_hostname_verified": true
+  },
+  "worker_health": {
+    "states": {
+      "api_accepted": 1
+    },
+    "test_events": 1,
+    "database": "reachable",
+    "worker": {
+      "state": "recent_heartbeat",
+      "seen_at": 1791457924.5348372,
+      "details": {
+        "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+        "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+        "synthetic_model": false,
+        "llm_enabled": true,
+        "hybrid_enabled": false,
+        "fixture_mode": false
+      }
+    },
+    "deadline_at_risk": false,
+    "fixture_mode": false
+  },
+  "scoreboard": {
+    "received_submission_events": 0,
+    "api_accepted": 0,
+    "simulated": 0,
+    "material_fallbacks": 0,
+    "api_acceptance_fraction": null,
+    "receipt_to_response_p95_ms": null,
+    "official_calendar_coverage": null,
+    "official_live_score": null,
+    "limits": "Received submission-events exclude TEST; multiple slots count separately. API acceptance is not verified score eligibility; official calendar denominator is unavailable.",
+    "archive_validation": {
+      "quarter": "2026Q3",
+      "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+      "delta_r_squared_imputed": 0.04095315077531125,
+      "scorer_rows": 2275,
+      "predicted_rows": 2362,
+      "limits": "Q3 was already examined in prior research; it is development validation, not an untouched test. No sweep or LLM blend selected here."
+    }
+  },
+  "official_observations": {
+    "submissions": {
+      "s1": {
+        "request_started_at": 1791457890.53129,
+        "observed_at": 1791457892.387369,
+        "calendar_sha256": "af1a0d171f3b4d2ef66021a4f98d0713a9d8254c612d62cd8323788b06d55f8f",
+        "calendar_raw_sha256": "4904ef3cca794e0e8ac0da8435d3aa3efe0e23b2916deed63ed7bc23437de557",
+        "health_raw_sha256": "d5202ea8d5bc05253be080eb27519319f2424307b8a74144b7ca3740fe454e5a",
+        "calendar": {
+          "scheduled_entries": 3022,
+          "event_types": {
+            "EARNINGS_RELEASE": 3022
+          },
+          "timing_categories": {
+            "SCHEDULED": 3022
+          },
+          "first_calendar_day_central": "2026-10-08",
+          "last_calendar_day_central": "2026-11-08",
+          "scheduled_in_scoring_window": 3010,
+          "scheduled_due_in_scoring_window": 0,
+          "scoring_window_daily_counts_central": {
+            "2026-10-13": 16,
+            "2026-10-14": 10,
+            "2026-10-15": 18,
+            "2026-10-16": 7,
+            "2026-10-19": 32,
+            "2026-10-20": 231,
+            "2026-10-21": 124,
+            "2026-10-22": 134,
+            "2026-10-23": 35,
+            "2026-10-26": 66,
+            "2026-10-27": 185,
+            "2026-10-28": 250,
+            "2026-10-29": 304,
+            "2026-10-30": 57,
+            "2026-10-31": 1,
+            "2026-11-01": 1,
+            "2026-11-02": 160,
+            "2026-11-03": 315,
+            "2026-11-04": 420,
+            "2026-11-05": 539,
+            "2026-11-06": 100,
+            "2026-11-07": 2,
+            "2026-11-08": 3
+          },
+          "peak_scoring_window_day_central": "2026-11-05",
+          "peak_scoring_window_entries": 539,
+          "official_eligible_coverage": null,
+          "limits": "Calendar entries are mutable schedules, not broadcasts or the final eligible scored set. Official health counters are a separate rolling 24-hour snapshot; coverage is not inferred."
+        },
+        "official_rolling_24h_counters": {
+          "webhook_n_2xx": 1,
+          "webhook_n_4xx": 15,
+          "webhook_n_5xx": 0,
+          "webhook_n_timeout": 0,
+          "webhook_consecutive_failures": 15,
+          "submission_n_total": 0,
+          "submission_n_duplicate": 0,
+          "submission_n_late": 0,
+          "submission_n_pre_broadcast": 0,
+          "submission_n_invalid_event": 0,
+          "webhook_last_delivery_at": "2026-10-07T23:28:59.043690+00:00",
+          "submission_last_at": null,
+          "last_test_prediction_at": "2026-10-07T22:03:48.125853+00:00"
+        },
+        "collector": {
+          "checked_at": 1791457892.387369,
+          "state": "observed",
+          "scheduled_entries": 3022
+        }
+      }
+    },
+    "official_eligible_coverage": null,
+    "limits": "Read-only calendar and rolling counters; this does not establish scoring eligibility.",
+    "configured_slots": [
+      "s1"
+    ]
+  },
+  "diagnostic_probe": {
+    "signed": false,
+    "status": 401,
+    "db_counts_unchanged": true,
+    "enum_rejections": [
+      {
+        "status": 401,
+        "reason": "signature_headers_missing"
+      }
+    ]
+  },
+  "limits": "Unsigned probe verifies rejection logging only. Owner must trigger a genuine signed portal TEST. Historical rejection causes remain unknown.",
+  "ci": {
+    "run": 37768023493,
+    "url": "https://github.com/coder058/event-desk/actions/runs/37768023493",
+    "head_sha": "855395446e41813eb3584dab516f20ceced7ed10",
+    "conclusion": "success",
+    "linux_tests_passed": 187,
+    "linux_tests_seconds": 12.68,
+    "docker_smoke_concurrency_tls_mux": "passed"
+  },
+  "local_checks": {
+    "tests_passed": 186,
+    "tests_skipped": 1,
+    "tests_seconds": 104.1,
+    "skip_reason": "Windows symlink fixture",
+    "ruff": "passed",
+    "strict_mypy": "passed",
+    "owner_secret_scan": "passed"
+  },
+  "authorization": "Jordi: ok hazlo \u2014 current publication and deployment approval after reviewing the prepared diagnostic."
+}

@@ -126,3 +126,20 @@ This proposal has not been pushed or deployed. It cannot reconstruct past failur
 Jordi must approve publication/deployment before production can expose a future
 rejection reason in private logs. The owner question about the attempted TEST and
 its displayed error remains pending; no synthetic signed production POST was sent.
+
+## Owner-approved deployment — 8 October 2026, 13:12 Madrid
+
+Jordi approved publication/deployment with “ok hazlo”. The reviewed 14 commits
+were published through 8553954; CI 37768023493 passed all checks, including
+187 Linux tests and Docker concurrency/TLS fixtures. That exact source was then
+deployed to Dublin. All 217 host files and 28 installed package files in each
+API/worker/observer matched the commit.
+
+A controlled unsigned request through standard HTTPS 443 returned 401 and produced
+only `webhook_rejection status=401 reason=signature_headers_missing` in the private
+log. Database event counts were unchanged. This verifies the deployed rejection
+logger, not official signed delivery. The earlier paragraphs describe the proposal
+before approval; it is now deployed. The previous 15 rejections remain unexplained.
+
+The owner must still trigger a genuine portal TEST through standard HTTPS.
+[Deployment evidence](../reports/deployment-8553954-20261008.json).
