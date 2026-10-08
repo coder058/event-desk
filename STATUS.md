@@ -1,6 +1,6 @@
-# STATUS — 2026-10-08 11:13:45 UTC
+# STATUS — 2026-10-08 11:18:29 UTC
 
-TEST oficial: sí, uno histórico (test_d096b526791e46bdbf0012d63de8dbfd; TEST neutral/API 201; last_test_prediction_at=2026-10-07T22:03:48.125853Z). TEST nuevo por 443: pendiente del titular. | Eventos oficiales: 0, excluye TEST | Envíos oficiales: 0 no-TEST.
+TEST oficial: sí, dos aceptados. Nuevo test_1a4c82c1e3864fec89861a8f249f3fa1 recibido el 8 oct 11:13:57 UTC (13:13:57 Madrid), predicción neutral persistida y HTTP 201/api_accepted. GET oficial fresco: dos 2xx, last_test_prediction_at=2026-10-08T11:13:57.697648Z y cero fallos consecutivos. | Eventos oficiales: 0, excluye TEST | Envíos oficiales: 0 no-TEST.
 
 ## Hecho
 
@@ -13,6 +13,9 @@ TEST oficial: sí, uno histórico (test_d096b526791e46bdbf0012d63de8dbfd; TEST n
 - Comprobación controlada del logger: una petición sin firma por 443 recibió 401 y dejó únicamente `webhook_rejection status=401 reason=signature_headers_missing` en el registro privado. Estados/TEST de la base permanecieron iguales. No fue un TEST oficial ni una delivery firmada.
 - Modelo da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce y configuración 7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1 sin cambios; fixture=false, hybrid=false. Sin nueva cartera, blend, sondas LLM ni SEC.
 - Evidencia fechada: reports/deployment-8553954-20261008.json. La observación oficial retenida tras el arranque seguía en un 2xx y 15 fallos 4xx consecutivos anteriores; cero no-TEST, sin score. No identifica su causa.
+
+- TEST del titular verificado en ambos lados: una delivery/un job para el nuevo evento en PostgreSQL, dos deliveries/dos jobs totales, respuesta persistida y payload del mismo event_id; HTTP 201 inferido del estado api_accepted que el worker solo escribe después de observar ese código, corroborado por timestamp oficial actualizado. No duplicados del evento. reports/official-test-20261008.json. Primera comprobación suplementaria asumió que el cuerpo upstream contenía http_status; ese campo no es obligatorio y se corrigió la consulta de lectura, sin cambios de producción.
+- Tiempo observado recibido → resultado de ese único TEST: 519,9339389801025 ms; no p95 ni inferencia entrenada. TEST neutral 0,5, sin LLM. Los quince 4xx históricos siguen en la ventana móvil de 24 horas; la alerta agregada puede seguir activa aunque el contador consecutivo sea cero. No se ocultaron ni cambiaron alertas.
 
 ## Desplegado
 
@@ -32,13 +35,13 @@ ACK #9 — hecho — b40aab8 / b4080dc: resumen de portfolio de 43 líneas y gui
 
 ## Bloqueado (necesita a Jordi)
 
-- LISTO PARA TEST: https://52.17.192.36.sslip.io/competition/webhook. Jordi pega esta URL en el campo Webhook URL de su submission, guarda y pulsa Send test event. Abrirla en el navegador hace GET y no envía el TEST. Falta verificar una delivery firmada y predicción aceptada por HTTPS estándar en ambos lados.
+- TEST solicitado ya completado por el titular y verificado en ambos lados. No necesita repetirlo. El titular informó haber realizado el paso después de recibir https://52.17.192.36.sslip.io/competition/webhook; el receptor no guarda el puerto de ingress de cada petición y no se afirma una traza independiente de ese puerto.
 - Los 15 rechazos anteriores no se pueden reconstruir. Ante un próximo rechazo se leerá el motivo privado enumerado; no cambiar firma, reloj ni secretos a ciegas.
 - SEC omitido sin contacto administrativo escrito; no bloquea Phase A. Alertas externas no conectadas; diagnóstico/alertas actuales locales. Sin score ni evidencia prospectiva de edge.
 
 ## Siguiente bloque
 
-- Verificar la nueva recepción/ACK/job/predicción persistida y aceptación oficial cuando Jordi envíe TEST. Si falla, leer solo el enum y código de rechazo; conservar evidencia fechada.
+- Mantener observación operacional hasta eventos reales del scoring; si vuelve a fallar una entrega, leer solo el enum/código privado y conservar evidencia fechada. No crear nuevas funciones, repetir TEST a ciegas ni cambiar el modelo/blend.
 - Releer INBOX_CODEX.md al cerrar cada punto y revisar status/diff antes de cualquier commit. Mantener alcance Event Desk.
 - Informe y STATUS de este despliegue quedan locales; una nueva publicación necesita la confirmación correspondiente. No repetir el despliegue para cambios documentales.
 

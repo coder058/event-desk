@@ -1,0 +1,134 @@
+{
+  "checked_at": "2026-10-08T11:15:13.105675+00:00",
+  "official_health": {
+    "webhook_n_2xx": 2,
+    "webhook_n_4xx": 15,
+    "webhook_n_5xx": 0,
+    "webhook_n_timeout": 0,
+    "webhook_consecutive_failures": 0,
+    "submission_n_total": 0,
+    "submission_n_duplicate": 0,
+    "submission_n_late": 0,
+    "submission_n_pre_broadcast": 0,
+    "submission_n_invalid_event": 0,
+    "webhook_last_delivery_at": "2026-10-08T11:13:57.286756+00:00",
+    "submission_last_at": null,
+    "last_test_prediction_at": "2026-10-08T11:13:57.697648+00:00"
+  },
+  "receiver_health": {
+    "states": {
+      "api_accepted": 2
+    },
+    "test_events": 2,
+    "database": "reachable",
+    "worker": {
+      "state": "recent_heartbeat",
+      "seen_at": 1791458104.6417487,
+      "details": {
+        "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+        "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+        "synthetic_model": false,
+        "llm_enabled": true,
+        "hybrid_enabled": false,
+        "fixture_mode": false
+      }
+    },
+    "deadline_at_risk": false,
+    "fixture_mode": false
+  },
+  "latest_job": {
+    "event_id": "test_1a4c82c1e3864fec89861a8f249f3fa1",
+    "event_type": "TEST",
+    "slot": "s1",
+    "received_at": 1791458037.2262506,
+    "deadline": 1791458334.237758,
+    "state": "api_accepted",
+    "predictions": [
+      {
+        "identifier_value": "TEST",
+        "predicted_percentile": 0.5
+      }
+    ],
+    "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+    "inputs_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+    "provider": "local",
+    "fallback": "official_test_event",
+    "latency_ms": 519.9339389801025,
+    "shadow_state": null,
+    "error": null,
+    "submission_status": "api_accepted"
+  },
+  "persisted_event_detail": {
+    "event_id": "test_1a4c82c1e3864fec89861a8f249f3fa1",
+    "slot": "s1",
+    "event_type": "TEST",
+    "knowledge_cutoff": null,
+    "official_items": {},
+    "prediction": {
+      "event_id": "test_1a4c82c1e3864fec89861a8f249f3fa1",
+      "predictions": [
+        {
+          "identifier_value": "TEST",
+          "predicted_percentile": 0.5
+        }
+      ]
+    },
+    "inputs_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+    "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+    "provider": "local",
+    "fallback": "official_test_event",
+    "analysis_trace": null,
+    "local_trace": null,
+    "shadow_state": null,
+    "received_at": 1791458037.2262506,
+    "deadline": 1791458334.237758,
+    "submitted_at": 1791458037.7461846,
+    "latency_ms": 519.9339389801025,
+    "submission_response": {
+      "state": "api_accepted",
+      "http_status": 201
+    },
+    "state": "api_accepted",
+    "error": null
+  },
+  "database_verification": {
+    "delivery_count_for_event": 1,
+    "job_count_for_event": 1,
+    "delivery_rows": [
+      {
+        "event_id": "test_1a4c82c1e3864fec89861a8f249f3fa1",
+        "body_hash": "7bbbd455c2b0f3ee1f1ce7f828b0f755e30cc6f8d08b01012d30c4ff53c2ef2c",
+        "received_at": 1791458037.2262506
+      }
+    ],
+    "jobs": [
+      {
+        "event_id": "test_1a4c82c1e3864fec89861a8f249f3fa1",
+        "slot": "s1",
+        "event_type": "TEST",
+        "state": "api_accepted",
+        "prediction_event_id": "test_1a4c82c1e3864fec89861a8f249f3fa1",
+        "response_persisted": true,
+        "response_field_names": [
+          "accepted",
+          "prediction_deadline",
+          "status",
+          "submission_index"
+        ],
+        "received_at": 1791458037.2262506,
+        "submitted_at": 1791458037.7461846,
+        "latency_ms": 519.9339389801025,
+        "fallback": "official_test_event",
+        "error": null
+      }
+    ],
+    "total_deliveries": 2,
+    "total_jobs": 2
+  },
+  "deployed_commit": "855395446e41813eb3584dab516f20ceced7ed10",
+  "verification_scope": "Fresh authenticated official health GET, public persisted job and read-only PostgreSQL joins. Owner reported sending the TEST after receiving the standard HTTPS URL; the receiver does not retain the ingress port per request. No agent-triggered delivery, prediction, provider probe or code change.",
+  "diagnostic_attempt_note": "The first supplementary database assertion expected http_status in the raw upstream response. That field is not required there; corrected verification uses the persisted api_accepted state (written only after HTTP 201), public status mapping and fresh official TEST timestamp. No production change.",
+  "limits": "The official TEST uses a neutral 0.5 and bypasses trained inference/LLM. One observed 519.93 ms receipt-to-result interval is not p95 or a live market latency/quality claim. Historical 15 rejections remain unexplained. No non-TEST events, submissions or score."
+}

@@ -143,3 +143,23 @@ before approval; it is now deployed. The previous 15 rejections remain unexplain
 
 The owner must still trigger a genuine portal TEST through standard HTTPS.
 [Deployment evidence](../reports/deployment-8553954-20261008.json).
+
+## Genuine owner-triggered TEST accepted — 8 October, 13:13:57 Madrid
+
+After the owner reported sending the requested portal TEST, fresh authenticated
+official health showed a second 2xx delivery, last_test_prediction_at
+2026-10-08T11:13:57.697648Z and zero consecutive failures. PostgreSQL retained
+one delivery and one job for test_1a4c82c1e3864fec89861a8f249f3fa1, with a frozen
+neutral 0.5 prediction and api_accepted state. The worker writes that state only
+after observing HTTP 201. There are two total deliveries/jobs, both TEST.
+
+The receiver requires signature verification before persistence. The owner was
+given the standard HTTPS URL and reported completing that step; the receiver does
+not persist the ingress port per request. This proves accepted signed delivery
+and TEST prediction submission, not an independent per-request port trace.
+
+The 15 earlier failures remain in the rolling counter and their cause remains
+unknown. The aggregate monitor can remain alerting until they age out of its
+24-hour view; it was not changed to hide them. No non-TEST events/submissions or
+score were observed. This TEST bypasses trained inference and LLM analysis.
+[Both-side TEST evidence](../reports/official-test-20261008.json).

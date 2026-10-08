@@ -28,6 +28,21 @@ same signed body/header bytes on both paths and one durable SQLite receipt.
 This does not verify the cloud ingress or replace Jordi's signed portal TEST.
 [Actual fixture](../reports/two-proxy-bytes-20261008.json).
 
+## Approved diagnostic deployment and new genuine TEST
+
+On 8 October the owner approved publication/deployment of 8553954. CI passed
+187 Linux tests plus Docker concurrency/TLS fixtures; installed source matched
+Git. The private rejection logger was verified with an unsigned 401 probe.
+[Deployment evidence](../reports/deployment-8553954-20261008.json).
+
+The owner then triggered the requested portal TEST at 13:13:57 Madrid. Fresh
+official health and PostgreSQL agree: second 2xx, neutral prediction persisted,
+api_accepted/HTTP 201, one delivery/job for that event, zero consecutive failures.
+The receiver does not record the ingress port per request. The historical 15 4xx
+remain in the rolling 24-hour counters, so the aggregate alert can remain active;
+its logic has not been changed. No non-TEST events/submissions or score.
+[Both-side TEST evidence](../reports/official-test-20261008.json).
+
 ## Initial readiness snapshot and unresolved gates
 
 | Gate | Verified observation | Remaining limit |
