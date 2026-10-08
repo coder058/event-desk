@@ -1,25 +1,21 @@
-# STATUS — 2026-10-08 11:18:29 UTC
+# STATUS — 2026-10-08 11:53:50 UTC
 
-TEST oficial: sí, dos aceptados. Nuevo test_1a4c82c1e3864fec89861a8f249f3fa1 recibido el 8 oct 11:13:57 UTC (13:13:57 Madrid), predicción neutral persistida y HTTP 201/api_accepted. GET oficial fresco: dos 2xx, last_test_prediction_at=2026-10-08T11:13:57.697648Z y cero fallos consecutivos. | Eventos oficiales: 0, excluye TEST | Envíos oficiales: 0 no-TEST.
+TEST oficial: sí, dos aceptados; último recibido 8 oct 11:13:57 UTC / 13:13:57 Madrid, neutral persistido y HTTP 201; portal confirma aceptación y cero fallos consecutivos. | Eventos oficiales: 0 durables no-TEST | Envíos oficiales: 0 no-TEST. El portal identifica APLD/RGP/LEVI del 7 oct como Delivery refused, sin payload/motivo histórico recuperable.
 
 ## Hecho
 
-- Jordi autorizó la publicación y el despliegue con «ok hazlo». Se publicaron los 14 commits revisados hasta 8553954; worktree e índice estaban limpios, sin incorporar cambios ajenos.
-- Gate local previo a publicación: 186 tests pasaron, uno omitido por symlinks Windows, 104.10 s; ruff global, mypy estricto de 23 módulos, secret scan contra claves privadas del titular y diff --check pasaron. Tests, push y deploy fueron comandos separados.
-- CI 37768023493 del SHA exacto 855395446e41813eb3584dab516f20ceced7ed10: success. Linux: 187 tests pasaron en 12.68 s; Docker smoke, concurrencia y TLS mux también pasaron.
-- Despliegue autorizado mediante ops/deploy.py: archivo de fuente verificado contra blobs Git, modelo SHA declarado sin cambios, configuración de ingress validada, migración y servicios arrancados.
-- Verificación posterior: 217 archivos del host y 28 archivos de cada paquete instalado en API, worker y observer coinciden con 8553954, sin discrepancias. Servicios running, no OOM; base reachable y worker recent_heartbeat.
-- HTTPS estándar con CA/hostname válidos: dashboard, walkthrough, salud y APIs de lectura respondieron 200.
-- Comprobación controlada del logger: una petición sin firma por 443 recibió 401 y dejó únicamente `webhook_rejection status=401 reason=signature_headers_missing` en el registro privado. Estados/TEST de la base permanecieron iguales. No fue un TEST oficial ni una delivery firmada.
-- Modelo da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce y configuración 7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1 sin cambios; fixture=false, hybrid=false. Sin nueva cartera, blend, sondas LLM ni SEC.
-- Evidencia fechada: reports/deployment-8553954-20261008.json. La observación oficial retenida tras el arranque seguía en un 2xx y 15 fallos 4xx consecutivos anteriores; cero no-TEST, sin score. No identifica su causa.
-
-- TEST del titular verificado en ambos lados: una delivery/un job para el nuevo evento en PostgreSQL, dos deliveries/dos jobs totales, respuesta persistida y payload del mismo event_id; HTTP 201 inferido del estado api_accepted que el worker solo escribe después de observar ese código, corroborado por timestamp oficial actualizado. No duplicados del evento. reports/official-test-20261008.json. Primera comprobación suplementaria asumió que el cuerpo upstream contenía http_status; ese campo no es obligatorio y se corrigió la consulta de lectura, sin cambios de producción.
-- Tiempo observado recibido → resultado de ese único TEST: 519,9339389801025 ms; no p95 ni inferencia entrenada. TEST neutral 0,5, sin LLM. Los quince 4xx históricos siguen en la ventana móvil de 24 horas; la alerta agregada puede seguir activa aunque el contador consecutivo sea cero. No se ocultaron ni cambiaron alertas.
+- Revisión manual del portal, dashboard y seis pasos del walkthrough con la skill computer-use. URL guardada estándar HTTPS y submission Live. Sin devolver pasos rutinarios a Jordi.
+- Bug concreto reproducido: el ejemplo oficial non-TEST omite knowledge_cutoff, pero nuestra recepción lo exigía. Dos tests primero fallaron con 400/missing_cutoff. Reparación aeee057: acepta ausente/null, mantiene validación de firma/identidad/fechas suministradas, tamaño, conflictos, deadlines y commit antes del ACK.
+- Regresión end-to-end offline: delivery duplicada → un job → materiales oficiales seleccionados → modelo fixture entrenado → payload persistido → 201 simulado. URL privada no consultada; fallback registrado. No prueba de que esa incompatibilidad causara los quince rechazos históricos.
+- Dashboard corregido: checkpoints actuales de TEST, cero no-TEST correctamente etiquetado, snapshot oficial cada diez minutos explicado, quince fallos móviles separados de cero consecutivos y filas estables al refrescar. Click de TEST real y foco tras polling verificados en producción.
+- README, case study, resumen de portfolio y demo actualizados. Ficha modelo docs/MODEL-CARD.md publicada y página pública comprobada: https://explainingmarkets.ai/models/s_21bb635e6192. Enlaces Code repository/Website guardados en el portal; descripción GitHub puesta y leída de vuelta.
+- Gate local: 189 tests pasaron, uno omitido Windows, 117.83 s; 19 regresiones enfocadas en 7.15 s, sin warnings. Ruff global, mypy estricto (23 módulos), escaneo de secretos y sintaxis JS pasaron.
+- Commit aeee0578a900df7203776485b99cdb429a72c24c publicado bajo la autorización actual de corrección directa. CI 37772388655 del SHA exacto success: 190 tests Linux, 14.68 s, Docker smoke/concurrencia/TLS mux. Tests, push y deploy en comandos separados; ningún archivo ajeno incorporado.
+- Evidencia: reports/deployment-aeee057-20261008.json y reports/official-test-20261008.json. Capturas reales privadas guardadas de dashboard/ficha; no eventos ficticios insertados en producción, sondas LLM nuevas ni trading.
 
 ## Desplegado
 
-855395446e41813eb3584dab516f20ceced7ed10, coincide con GitHub main y CI aprobada. El diagnóstico de rechazo está activo en producción. Los nuevos informes/STATUS posteriores al despliegue son documentación local; no constituyen otro despliegue.
+aeee0578a900df7203776485b99cdb429a72c24c. Verificación a las 11:51:41 UTC: 221 archivos del host y 28 archivos por paquete en API/worker/observer coinciden sin diferencias, running y sin OOM. HTTPS/CA/hostname válidos, páginas/APIs 200, DB reachable y worker recent_heartbeat. Modelo da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce y config 7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1 sin cambios; fixture=false, hybrid=false. El informe y STATUS posteriores son documentación de este despliegue; un commit documental posterior no significa un runtime distinto.
 
 ## ACK de la bandeja
 
@@ -35,16 +31,16 @@ ACK #9 — hecho — b40aab8 / b4080dc: resumen de portfolio de 43 líneas y gui
 
 ## Bloqueado (necesita a Jordi)
 
-- TEST solicitado ya completado por el titular y verificado en ambos lados. No necesita repetirlo. El titular informó haber realizado el paso después de recibir https://52.17.192.36.sslip.io/competition/webhook; el receptor no guarda el puerto de ingress de cada petición y no se afirma una traza independiente de ese puerto.
-- Los 15 rechazos anteriores no se pueden reconstruir. Ante un próximo rechazo se leerá el motivo privado enumerado; no cambiar firma, reloj ni secretos a ciegas.
-- SEC omitido sin contacto administrativo escrito; no bloquea Phase A. Alertas externas no conectadas; diagnóstico/alertas actuales locales. Sin score ni evidencia prospectiva de edge.
+- Ningún paso rutinario del portal está pendiente: URL, TEST y enlaces/ficha verificados. No necesita repetir TEST.
+- Falta una siguiente delivery non-TEST genuina para comprobar materiales/inferencia/envío en producción. No se fabrica ni se envía una predicción tardía de APLD/RGP/LEVI. Los quince motivos históricos siguen desconocidos; logger privado preparado para futuros rechazos.
+- SEC omitido sin contacto administrativo escrito; no bloquea Phase A. Alertas externas no conectadas. Score/outcomes prospectivos aún ausentes; ni edge ni rentabilidad verificados.
 
 ## Siguiente bloque
 
-- Mantener observación operacional hasta eventos reales del scoring; si vuelve a fallar una entrega, leer solo el enum/código privado y conservar evidencia fechada. No crear nuevas funciones, repetir TEST a ciegas ni cambiar el modelo/blend.
-- Releer INBOX_CODEX.md al cerrar cada punto y revisar status/diff antes de cualquier commit. Mantener alcance Event Desk.
-- Informe y STATUS de este despliegue quedan locales; una nueva publicación necesita la confirmación correspondiente. No repetir el despliegue para cambios documentales.
+- Mantener observación y verificar el próximo evento real desde receipt firmado hasta resultado oficial, con input/model/config hashes, payload y deadlines.
+- Si se rechaza, consultar solo el enum/código privado, conservar evidencia fechada y corregir la causa demostrada. No cambiar secretos/firma/cutoff suplementario a ciegas ni fabricar cobertura.
+- Modelo/blend/cartera y otros repos permanecen fuera de este encargo. La corrección actual termina con publicación, despliegue y verificación; no añade funciones de producto.
 
 ## Tiempo activo real del objetivo
 
-La última lectura disponible del objetivo anterior fue 8.596 segundos (2 h 23 min 16 s), antes de este turno. Este turno de autorización y despliegue se registra por sus comandos y timestamps; no se ha medido por separado como tiempo activo y no se afirma un bloque de cuatro horas completado.
+Última lectura registrada del objetivo anterior: 8.596 segundos (2 h 23 min 16 s), anterior a estos turnos. El trabajo posterior está demostrado por commits, tests y timestamps, pero no tiene medición independiente de tiempo activo; no se afirma haber completado cuatro u ocho horas por tiempo transcurrido.

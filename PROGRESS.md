@@ -830,3 +830,27 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
 - Portal Public Profile was empty: no repository/website links or model card.
   Prepared a factual model card from frozen config and retained reports, explicitly
   separating TEST transport, real-event readiness and unproven predictive skill.
+
+
+### October 8, web repair published and deployment verified
+
+- Published scoped own repair aeee057 under the owner's current instruction to
+  inspect/correct directly. Reviewed status/diff; no foreign changes included.
+  Tests, publication and deployment were separate commands.
+- CI 37772388655 for the exact source passed: 190 Linux tests in 14.68 s,
+  lint/types/secret scan, Docker smoke, PostgreSQL concurrent fixtures and TLS mux.
+- Deployed aeee057; 221 host files and 28 package files in each API/worker/observer
+  match committed bytes. All three running, no OOM; DB reachable, recent heartbeat.
+  Trained model/config hashes unchanged, fixture false and hybrid false.
+- Post-deploy manual browser shows current two TEST checkpoints, market counters
+  excluding TEST, snapshot age explanation, fifteen rolling failures/zero
+  consecutive failures. Opened the actual latest TEST: retained result shows 201;
+  focus and selected event survived polling. All six walkthrough steps reviewed.
+- Saved portal repository/website links, published the factual model card and
+  verified its public page at https://explainingmarkets.ai/models/s_21bb635e6192.
+  Set/read back the previously empty GitHub description. No name/key/account reset.
+- Post-deploy verification used GET only. No new official TEST/market submission,
+  provider probe, blend, portfolio, wallet or supplemental source enabled.
+  A genuine non-TEST round trip remains unverified; historical refusal cause unknown.
+- Dated public evidence: reports/deployment-aeee057-20261008.json. Final receipt/
+  STATUS are documentation after that runtime deployment, not a different runtime.
