@@ -163,3 +163,42 @@ unknown. The aggregate monitor can remain alerting until they age out of its
 24-hour view; it was not changed to hide them. No non-TEST events/submissions or
 score were observed. This TEST bypasses trained inference and LLM analysis.
 [Both-side TEST evidence](../reports/official-test-20261008.json).
+
+
+## Manual portal review and reproduced contract incompatibility — October 8
+
+The owner authorised direct website inspection/correction. The signed-in portal
+shows the saved standard HTTPS URL, Live status, two 2xx, fifteen historical 4xx
+and zero consecutive failures after the latest TEST. Predictions identifies
+APLD (fiscal Q1 2027), RGP (fiscal Q1 2027) and LEVI (fiscal Q3 2026), dated
+October 7, as Delivery refused. Their prediction/outcome columns are empty.
+The UI does not expose the rejected raw body or exact HTTP reason. This adds
+event identity/category evidence; it does not recover the original failures.
+
+A distinct reproducible bug was found in our receiver: non-TEST events without
+knowledge_cutoff received HTTP 400/missing_cutoff. The official starter's
+[verified webhook example](https://github.com/explaining-markets/starter-modal/blob/main/src/explaining_markets/event_utils.py)
+omits that field. Its [README](https://github.com/explaining-markets/starter-modal/blob/main/README.md#rules--knowledge-cutoff)
+places it on GET /v1/events. The [official FAQ](https://explainingmarkets.ai/faq)
+explicitly permits platform-delivered materials, including the earnings summary
+after the cutoff; supplementary external sources remain subject to the calendar
+cutoff. The official starter fetches the signed information_url without requiring
+that field in the webhook.
+
+Attempt record: two new offline end-to-end cases first failed at reception with
+400/missing_cutoff (absent and null cutoff). After removing only that incompatible
+receipt requirement, both reached a single durable job, fitted fixture inference,
+frozen payload and mocked 201, with duplicate delivery deduplicated. A third case
+checks that missing cutoff does not enable a private HTTP material fetch. The
+existing diagnostic case now checks malformed supplied cutoff instead: it still
+returns 400/invalid_schema. Signature, identity, size, conflicts, deadlines and
+uncertain DB acceptance remain enforced. No external supplemental feed, wallet,
+provider probe, blend or scoring-model change was introduced.
+
+Current production workers read only allowlisted official delivered materials;
+outcome blocks remain excluded from model features. No cutoff is guessed from
+receipt time or event time. The calendar cutoff would be required before enabling
+any supplemental source. Historical 15 rejection causes remain unknown: the bug
+is compatible with the observed TEST/non-TEST distinction, but rejected bodies
+were not retained. No synthetic production market event or late historical
+prediction is being sent to make this appear verified.

@@ -8,7 +8,7 @@ The walkthrough loads retained evidence automatically. Its buttons change views;
 
 **0–12 seconds — dashboard: establish the boundary.**
 “This is an earnings-event prediction service, not a trading bot. The dashboard separates retained jobs from official observations. We verified a genuine TEST; that TEST used a neutral prediction and does not establish model accuracy.”
-Point to the current submission state and timestamp. If failures are visible, acknowledge them: the initial incident snapshot had three rejected deliveries and a later observation had 15 consecutive failures; their cause remains unknown. [TEST](../reports/official-test-20261007.json), [initial incident](../reports/delivery-failures-readonly-20261008.json), [follow-up](../reports/delivery-failures-followup-readonly-20261008.json).
+Point to the current submission state and timestamp. Two TESTs are accepted; after the latest, consecutive failures are zero while 15 earlier 4xx remain in the rolling view. The portal names three refused market events. A webhook-contract bug was reproduced and repaired, but those historical causes remain unproven. [Latest TEST](../reports/official-test-20261008.json), [incident](INCIDENT-2026-10-08-delivery-4xx.md).
 
 **12–27 seconds — `1. Read the inputs`, then `2. Verify and retain`.**
 “This example has fictional earnings text and a disposable SQLite database. It uses the actual receiver code. Retained checks show signed acceptance, deduplicated retry, altered-byte rejection and a signed conflicting-body rejection. This fixture does not measure public TLS or production PostgreSQL.” [Retained walkthrough](../reports/walkthrough.json)
@@ -47,5 +47,5 @@ There is no verified per-line authorship ledger. Do not invent percentages or cl
 ## Before presenting
 
 - Check that both pages load and the walkthrough says **SYNTHETIC EXAMPLE · NO OFFICIAL SUBMISSION**. If unavailable, open the retained report and label it as a dated record.
-- Identify the deployed revision separately from unpublished local changes. The prepared rejection logger is not proof that production rejection reasons are now recorded.
+- Identify the deployed revision separately from unpublished local changes. The private logger is deployed and an unsigned rejection probe verified its enumerated output; it cannot reconstruct historical causes.
 - Do not hide delivery failures, claim an official score, imply trading execution or present fixture compute latency as live end-to-end latency.

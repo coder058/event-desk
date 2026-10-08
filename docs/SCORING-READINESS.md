@@ -8,7 +8,7 @@ Codex checklist authored from read-only production checks on 7 October,
 No code, model, service, wallet, provider quota or competition setting changed
 for this checklist. No new restore or backup was launched.
 
-**Later incident supersedes the initial no-alert snapshot:** the retained official
+**Historical incident snapshot (superseded by the October 8 verification below):** the retained official
 observation at 7 October 23:44:03 UTC reports 15 consecutive webhook 4xx failures.
 Public health and the walkthrough still respond, but this does not establish
 signed delivery readiness. The original TEST is still the only accepted event;
@@ -154,7 +154,7 @@ The receiver code `src/eventdesk/api.py` enforces these existing outcomes:
 | Condition | Response and handling |
 | --- | --- |
 | Signature or verifier decoding fails | HTTP 401; no accepted inbox entry |
-| Invalid event schema, non-finite JSON, body/header identity mismatch, non-TEST without cutoff | HTTP 400 before durable acceptance |
+| Invalid event schema, non-finite JSON, body/header identity mismatch, malformed supplied cutoff | HTTP 400 before durable acceptance |
 | Same delivery identity with changed bytes | HTTP 409 conflict; never replace the retained event |
 | Body exceeds metadata ceiling | HTTP 413 |
 | Body timeout or uncertain database acceptance | HTTP 503; a late database commit may have happened |
@@ -174,3 +174,30 @@ original bytes were preserved in the ignored private folder and their SHA is
 recorded in the read-only audit. This replacement was written afresh from the
 verified observations and deployed source. No foreign draft or Stockline change
 is included in the proposed local commit. Review the staged diff before committing.
+
+
+## October 8 manual portal review and webhook compatibility repair
+
+The signed-in portal's saved URL is standard HTTPS and the submission is Live.
+Predictions names APLD (Q1 2027), RGP (Q1 2027) and LEVI (Q3 2026), dated
+October 7, as Delivery refused. No raw payload or exact HTTP reason is exposed
+there. Latest official TEST is accepted; consecutive failures are zero, but the
+15 historical 4xx remain in the rolling count. These are distinct observations.
+
+The official starter's webhook example omits knowledge_cutoff; the field is
+specified on the calendar. The receiver wrongly required it on non-TEST delivery.
+Tests first reproduced HTTP 400 for both absent and null fields. The repair
+accepts that shape, still verifies exact bytes/identity and commits before ACK.
+A supplied malformed cutoff still fails. The worker's only material source is
+the signed event's allowlisted official URL; no supplementary external data is
+added. The official FAQ explicitly permits platform-delivered materials after
+the calendar cutoff. Supplemental sources would still need that cutoff before
+use; this repair does not enable them or invent a cutoff.
+
+Offline regression verifies duplicate ACK, one durable job, official-shaped
+material selection, trained fixture inference, immutable payload and mocked 201.
+A separate case confirms that a private HTTP material URL is never contacted.
+No official market event was manufactured or retrospectively predicted.
+This is a concrete compatibility repair, not proof of the historical cause.
+A next real event must verify trained inference and submission in production.
+[Contract and attempt record](INCIDENT-2026-10-08-delivery-4xx.md).

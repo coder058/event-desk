@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 import time
 from types import SimpleNamespace
@@ -18,7 +19,7 @@ from eventdesk.api import create_app
     ("changed_body", 401, "signature_verification_failed"),
     ("invalid_schema", 400, "invalid_schema"),
     ("identity_mismatch", 400, "body_identity_mismatch"),
-    ("missing_cutoff", 400, "missing_cutoff"),
+    ("invalid_cutoff", 400, "invalid_schema"),
     ("unknown_slot", 404, "unknown_submission_slot"),
 ])
 def test_rejections_log_only_status_and_enumerated_reason(settings, store, caplog, case, status, reason):
@@ -43,8 +44,11 @@ def test_rejections_log_only_status_and_enumerated_reason(settings, store, caplo
         headers = signed(raw, e.id)
     elif case == "identity_mismatch":
         headers = signed(raw, "different-synthetic-delivery")
-    elif case == "missing_cutoff":
-        raw = e.model_copy(update={"knowledge_cutoff": None}).model_dump_json().encode()
+    elif case == "invalid_cutoff":
+        # PLACEHOLDER: timezone-free metadata remains invalid when the field is supplied.
+        malformed = e.model_dump(mode="json")
+        malformed["knowledge_cutoff"] = "2026-01-01T00:00:00"
+        raw = json.dumps(malformed).encode()
         headers = signed(raw, e.id)
     elif case == "unknown_slot":
         url += "/unconfigured"

@@ -29,7 +29,7 @@ RejectionReason = Literal[
     "unknown_submission_slot", "body_too_large", "body_timeout",
     "signature_headers_missing", "signature_timestamp_invalid",
     "signature_timestamp_outside_tolerance", "signature_verification_failed",
-    "body_identity_mismatch", "missing_cutoff", "invalid_schema",
+    "body_identity_mismatch", "invalid_schema",
     "receipt_budget_exhausted", "conflicting_delivery", "database_acceptance_uncertain",
 ]
 
@@ -91,8 +91,10 @@ def create_app(settings: Settings, store: Store) -> FastAPI:
             delivery_id = request.headers["webhook-id"]
             if event.id != delivery_id:
                 raise _rejection(400, "body_identity_mismatch", "Signed body/header identity mismatch")
-            if event.event_type != "TEST" and event.knowledge_cutoff is None:
-                raise _rejection(400, "missing_cutoff", "Missing knowledge cutoff")
+            # SOURCE: official starter's verified webhook example omits knowledge_cutoff;
+            # the calendar carries it. Official delivered materials are permitted by the FAQ.
+            # This worker reads only the signed event's allowlisted official materials,
+            # not supplemental external sources; absence must not reject a valid delivery.
         except WebhookVerificationError as exc:
             raise _rejection(401, _signature_reason(exc), "Signature verification failed") from None
         except UnicodeDecodeError:

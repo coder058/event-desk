@@ -1,32 +1,36 @@
 # External actions and unresolved dependencies
 
-## Resolved — genuine portal TEST
+## Resolved — genuine portal TEST and standard HTTPS configuration
 
-October 7, 22:03 UTC: the configured TLS 80 webhook received one genuine portal
-TEST. Fresh official health reported a 2xx delivery and the accepted TEST prediction
-timestamp; PostgreSQL retained one delivery, the neutral 0.5 payload and HTTP 201/
-api_accepted. [Exact evidence](reports/official-test-20261007.json).
-Non-TEST events and official submission_n_total were still zero. TEST is not scored.
-Opening this POST-only webhook in a browser returns expected GET 405, not a portal
-rejection. No synthetic event was inserted to manufacture a success.
+Two genuine portal TESTs are now accepted. The latest was received on 8 October
+at 13:13:57 Madrid; fresh official health and read-only PostgreSQL queries agree:
+2xx delivery, neutral prediction persisted, HTTP 201/api_accepted and one delivery/
+job for that event. Consecutive failures are zero. TEST does not score.
+[Latest evidence](reports/official-test-20261008.json).
 
-## Resolved — standard HTTPS 443; portal migration pending
+A manual browser review confirmed the portal's saved webhook is
+`https://52.17.192.36.sslip.io/competition/webhook` and the submission is Live.
+The Health tab shows two 2xx, fifteen older 4xx and zero consecutive failures.
+No further owner TEST is required for this verification. The receiver does not
+retain the ingress port per request; the saved URL was independently inspected.
 
-At October 7, 22:45 UTC the owner-confirmed HTTPS/TCP/443 IPv4 rule was saved
-in Lightsail Dublin. External CA/hostname validation, dashboard/health 200 and
-unsigned webhook 401 passed. [Evidence](reports/https443-20261008.json).
+## Resolved — diagnostic publication and authority for this web repair
 
-The owner must save `https://52.17.192.36.sslip.io/competition/webhook` in the
-existing competition portal and press Send test event to verify official delivery
-through 443. The prior accepted official TEST used the working TLS 80 URL.
-Opening the webhook URL as a browser GET correctly returns 405.
+Jordi approved publication/deployment with “ok hazlo”. Source 8553954 passed CI
+37768023493 (187 Linux tests and Docker fixtures), was deployed and matched
+installed bytes. The private rejection logger was verified with an unsigned
+401 probe. [Evidence](reports/deployment-8553954-20261008.json).
 
-## Publication frozen by the latest instruction
+The latest instruction asks Codex to inspect and correct the website directly,
+with permission, rather than return routine work to the owner. The current
+presentation and reproduced webhook-compatibility repairs will be tested, published and deployed within that scope.
+This does not authorise new functions, a paper portfolio, blend or spending.
 
-Five approved commits through cee53c0 were pushed and deployed before the latest
-freeze. Exact CI 37696439274 passed 174 Linux tests, Compose fixtures and TLS mux.
-Post-deploy host/container byte comparisons matched that source. New reports and
-documentation remain local. No further push, deployment or spending is authorized.
+The historical 15 rejections still cannot be reconstructed. A new rejected
+request can now expose a private enumerated reason. The review reproduced an
+incompatible required webhook-cutoff field against the official example; its
+scoped repair is recorded in the incident report. A genuine non-TEST round trip
+remains to be observed. Do not manufacture an event or infer the historical cause.
 
 ## Repository clarification resolved
 

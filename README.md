@@ -5,13 +5,14 @@ A signed-webhook prediction service for the Optiver × Chicago Booth
 persists a frozen local-model prediction before submission. Optional LLM evidence
 runs separately, with quoted evidence checked against the input.
 
-One official portal TEST was accepted on **7 October 2026 at 22:03 UTC**. It used
-a neutral TEST prediction, not trained-model inference. Non-TEST events and
-submissions remain zero; there is no live score. Scoring is scheduled to start
-on **12 October**.
+Two official portal TESTs have been accepted. The latest was received on
+**8 October 2026 at 13:13:57 Madrid / 11:13:57 UTC**, with the neutral prediction
+persisted and accepted by the official API. These TESTs bypass trained inference
+and do not score. Accepted non-TEST events/submissions remain zero; there is no live score.
+Scoring is scheduled to start on **12 October**. [Verified round trip](reports/official-test-20261008.json).
 
 **GitHub description to copy:** Signed-webhook prediction service with PostgreSQL,
-a local model and auditable LLM evidence. One official TEST accepted; no live score yet.
+a local model and auditable LLM evidence. Official portal TESTs verified; no live score yet.
 
 ## Where this is going
 
@@ -71,15 +72,20 @@ explains decisions, failed experiments, measurements and remaining limits.
 | Dublin trained-model fixture | 400 ACKs + 400 simulated results, 10.626 s | Real archived inputs; no outcomes or official POST |
 | Slowest trained-model fixture ACK | 1.249 s | One measured replay, below 20 s |
 
-Reports retain dataset, scorer and model hashes. The current live service has no
-official scored observations. On October 7 at 22:03 UTC, one genuine portal TEST
-was durably received and its neutral prediction accepted (201); fresh official
-health confirmed it. [Exact evidence](reports/official-test-20261007.json).
-Standard HTTPS 443 passed external CA/hostname, page, health and signature-gate
-checks after the owner approved the cloud rule. [Evidence](reports/https443-20261008.json).
-The portal TEST above used TLS 80; a portal TEST through 443 remains pending.
-Non-TEST events/submissions: zero
-at that observation. TEST is not scored; paper portfolio and blend remain disabled.
+Reports retain dataset, scorer and model hashes. Two genuine portal TESTs were
+durably received and their neutral predictions accepted (201); fresh official
+health confirmed them. [Latest evidence](reports/official-test-20261008.json).
+Manual portal review confirmed the saved standard HTTPS URL and Live status.
+Its Predictions tab lists APLD, RGP and LEVI as “Delivery refused” on October 7.
+No non-TEST prediction has been accepted and there is no live score.
+
+The review reproduced a receiver incompatibility with the official webhook
+example: it rejected non-TEST payloads lacking `knowledge_cutoff`, a calendar
+field absent from that example. The compatibility repair accepts that documented
+shape while retaining signed-byte verification, durable deduplication and the
+official-material URL boundary. The historical rejection cause remains unproven.
+[Incident and regression evidence](docs/INCIDENT-2026-10-08-delivery-4xx.md).
+TEST is not scored; paper portfolio and blend remain disabled.
 
 ## Run locally
 

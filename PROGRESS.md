@@ -785,3 +785,48 @@ PostgreSQL source verification, identified live SEC reads and future scored cove
 - Checklist documents daily reads, signature/schema/conflict errors and uncertain
   503 acceptance. HTTPS 443 external proof is separate from the monitor's TLS 80
   probe. No new code, model, quota requests, notifications or publication.
+
+### October 8, manual browser review and presentation repair
+
+- Inspected the signed-in competition portal directly. Saved URL uses standard
+  HTTPS, submission Live, Health shows 2xx=2, earlier 4xx=15, consecutive=0.
+  The first Overview was stale; reload removed its old consecutive-failure copy.
+  No extra TEST, credential change, pause or account mutation was needed.
+- Reviewed the real dashboard and its retained TEST detail plus all six demo
+  steps. Actual public endpoints work; the fictional demo remains labelled.
+- Found fixed first-TEST copy and unexplained official snapshot lag. Replaced the
+  fixed copy with current ledger/portal observations; exposed configured ten-minute
+  polling and the consecutive failure counter, keeping historical failures visible.
+- Reproduced a detached ledger click caused by automatic DOM reconstruction.
+  Unchanged ledger rows now stay mounted. A local read-only preview with frozen
+  public JSON opened the retained event after multiple refreshes; focus stayed on
+  the same button. Preview made no deliveries or submissions.
+- README and dependency notes now reflect the second TEST and resolved owner step.
+  No forecast, model, broker, AI-blend, quota or observer-cadence change.
+- This is a prepared repair checkpoint; publication, CI and deployed browser
+  verification will be recorded after they actually complete.
+
+
+### October 8, manual review exposed a non-TEST webhook incompatibility
+
+- Portal Predictions identifies October 7 APLD, RGP and LEVI as Delivery refused;
+  exact historical bodies/statuses remain unavailable. This is new evidence from
+  the signed-in UI, not a reconstructed broker or market record.
+- Official starter webhook example omits knowledge_cutoff; the FAQ permits the
+  platform-delivered materials and applies the calendar cutoff to supplemental
+  sources. Our receipt path wrongly required that optional webhook field.
+- Tests first: two absent/null-cutoff end-to-end cases failed with 400/missing_cutoff.
+  Removed only that incompatible requirement. Existing raw signature, identity,
+  size, conflict, deadline and durable receipt checks remain.
+- The first focused run passed 18 cases with one serializer warning in the new
+  malformed-cutoff fixture. The fixture now constructs malformed JSON directly;
+  added a private-URL isolation case. No production event or provider probe sent.
+- Prepared case-study/portfolio/demo copy now reflects both TESTs, deployed private
+  diagnostics, standard URL and the observed market-event refusal limit.
+
+- Focused final regression: 19 passed in 7.15 s, without the serializer warning.
+  Full local gate: 189 passed, one Windows symlink skip in 117.83 s. Ruff global,
+  strict mypy (23 modules), private owner-secret scan and dashboard JS syntax pass.
+- Portal Public Profile was empty: no repository/website links or model card.
+  Prepared a factual model card from frozen config and retained reports, explicitly
+  separating TEST transport, real-event readiness and unproven predictive skill.

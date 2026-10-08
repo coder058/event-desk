@@ -91,7 +91,10 @@ externally verified on explicit TLS port 80. After the owner approved adding the
 missing Lightsail HTTPS/TCP/443 IPv4 rule, external standard HTTPS also passed
 CA/hostname validation, page/health HTTP 200 and unsigned webhook HTTP 401.
 [Diagnosis and dated resolution](HTTPS-443.md). The signed official TEST above
-used TLS 80; the portal URL has not yet been switched and retested through 443.
+used TLS 80. On October 8 at 13:13:57 Madrid a second signed TEST was durably
+received and its neutral prediction accepted; manual browser inspection confirms
+the saved URL now uses standard HTTPS. The receiver does not retain the ingress
+port per request. [Second TEST evidence](../reports/official-test-20261008.json).
 An independent monitor observes service/deadline health. Encrypted backups go to
 the existing Frankfurt host; an isolated restore verifies exact archive hashes
 without overwriting production. [Restore receipt](../reports/backup-restore.json).
@@ -109,9 +112,15 @@ CI also exercises actual PostgreSQL concurrency. [CI](https://github.com/coder05
 
 ## What remains unproven
 
-As of the October 7 post-TEST verification: one genuine TEST was accepted, but
-there are zero received non-TEST events, zero scored observations and no ten-day
-eligible coverage record. SEC reads were skipped without the owner's written
+As of the October 8 manual review: two genuine TESTs were accepted, but there
+are zero durably accepted non-TEST events, zero scored observations and no ten-day
+eligible coverage record. The portal identifies APLD, RGP and LEVI as refused
+deliveries on October 7. An incompatible mandatory webhook-cutoff requirement was
+reproduced locally and repaired against the official example; whether it caused
+those historical failures is still unknown. The next genuine market event must
+verify the trained inference and submission path in production.
+[Incident and source contract](INCIDENT-2026-10-08-delivery-4xx.md).
+SEC reads were skipped without the owner's written
 admin contact; daily ingestion and prospective event studies remain unfinished.
 The paper portfolio is deferred until real outcomes. The AI blend stays disabled.
 No generative improvement, durable trading edge, profitability or recruitment
