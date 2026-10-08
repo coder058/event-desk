@@ -1,0 +1,225 @@
+{
+  "checked_at": "2026-10-08T08:19:22.583621+00:00",
+  "units": {
+    "eventdesk-backup.timer": {
+      "NextElapseUSecRealtime": "Fri 2026-10-09 04:10:00 UTC",
+      "LastTriggerUSec": "Thu 2026-10-08 04:10:02 UTC",
+      "Result": "success",
+      "ActiveState": "active",
+      "SubState": "waiting",
+      "UnitFileState": "enabled"
+    },
+    "eventdesk-backup.service": {
+      "Result": "success",
+      "ExecMainStartTimestamp": "Thu 2026-10-08 04:10:02 UTC",
+      "ExecMainExitTimestamp": "Thu 2026-10-08 04:10:08 UTC",
+      "ExecMainStatus": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "UnitFileState": "static"
+    },
+    "eventdesk-monitor.timer": {
+      "NextElapseUSecRealtime": "",
+      "LastTriggerUSec": "Thu 2026-10-08 08:18:37 UTC",
+      "Result": "success",
+      "ActiveState": "active",
+      "SubState": "waiting",
+      "UnitFileState": "enabled"
+    },
+    "eventdesk-monitor.service": {
+      "Result": "success",
+      "ExecMainStartTimestamp": "Thu 2026-10-08 08:18:37 UTC",
+      "ExecMainExitTimestamp": "Thu 2026-10-08 08:18:38 UTC",
+      "ExecMainStatus": "0",
+      "ActiveState": "inactive",
+      "SubState": "dead",
+      "UnitFileState": "static"
+    }
+  },
+  "records": {
+    "backup": {
+      "created_at": "2026-10-08T04:10:05.024294+00:00",
+      "file": "eventdesk-20261008T041002Z.tar.gz.age",
+      "encrypted_bytes": 10926219,
+      "ciphertext_sha256": "c4c9c27ba3e45e02475047a641c7eb9cb96d6632aa5acec9633b12f3a5b4bab2",
+      "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+      "remote_receipt_verified": true,
+      "restore_verified": false
+    },
+    "restore": {
+      "created_at": "2026-10-07T16:56:12.195683+00:00",
+      "file": "eventdesk-20261007T165611Z.tar.gz.age",
+      "encrypted_bytes": 10836145,
+      "ciphertext_sha256": "18bb82e983a660f8c929cc24bd15dbf1c6f0ca5262bc8ae05c308a6b12af00ad",
+      "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+      "remote_receipt_verified": true,
+      "restore_verified": true,
+      "archive_files_verified": 17,
+      "restored_schema": "011_sec_http_gate",
+      "restored_jobs": 0,
+      "restored_deliveries": 0,
+      "restored_competition_calendars": 49,
+      "restored_competition_observations": 235,
+      "archive_raw_objects": 0,
+      "restored_source_content_hashes": 0,
+      "source_object_references_verified": true,
+      "limits": "One encrypted backup hash-check and isolated DB restore; production was not overwritten",
+      "verified_at": "2026-10-07T16:56:21.721359+00:00"
+    },
+    "monitor": {
+      "active_alerts": [
+        "official_delivery_or_submission_failures"
+      ],
+      "backup_restore_verified": false,
+      "backup_transfer_at": "2026-10-08T04:10:05.024294+00:00",
+      "checked_at": 1791447517.9624104,
+      "https_external_probe_verified": true,
+      "https_origin_probe_verified": true,
+      "limits": "An origin-side HTTPS probe cannot verify the Lightsail external inbound rule",
+      "summary_day": "2026-10-08"
+    }
+  },
+  "dublin_ciphertext": {
+    "sha256": "c4c9c27ba3e45e02475047a641c7eb9cb96d6632aa5acec9633b12f3a5b4bab2",
+    "bytes": 10926219
+  },
+  "frankfurt_ciphertext": {
+    "file": "eventdesk-20261008T041002Z.tar.gz.age",
+    "sha256": "c4c9c27ba3e45e02475047a641c7eb9cb96d6632aa5acec9633b12f3a5b4bab2",
+    "bytes": 10926219
+  },
+  "ciphertext_copies_match": true,
+  "latest_restore_applies_to_current_backup": false,
+  "public_observations": {
+    "/healthz": {
+      "status": 200,
+      "data": {
+        "states": {
+          "api_accepted": 1
+        },
+        "test_events": 1,
+        "database": "reachable",
+        "worker": {
+          "state": "recent_heartbeat",
+          "seen_at": 1791447593.4813368,
+          "details": {
+            "model_hash": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+            "configuration_hash": "7e15d626651b578a1686c90b1ee1c473f29f9355ef6aa1b4c866ee520f538cd1",
+            "synthetic_model": false,
+            "llm_enabled": true,
+            "hybrid_enabled": false,
+            "fixture_mode": false
+          }
+        },
+        "deadline_at_risk": false,
+        "fixture_mode": false
+      }
+    },
+    "/api/scoreboard": {
+      "status": 200,
+      "data": {
+        "received_submission_events": 0,
+        "api_accepted": 0,
+        "simulated": 0,
+        "material_fallbacks": 0,
+        "api_acceptance_fraction": null,
+        "receipt_to_response_p95_ms": null,
+        "official_calendar_coverage": null,
+        "official_live_score": null,
+        "limits": "Received submission-events exclude TEST; multiple slots count separately. API acceptance is not verified score eligibility; official calendar denominator is unavailable.",
+        "archive_validation": {
+          "quarter": "2026Q3",
+          "model_sha256": "da212d24d1f3bb2c0d8528d62160667f7ca61029e748ca8dac6b5df9a2210bce",
+          "delta_r_squared_imputed": 0.04095315077531125,
+          "scorer_rows": 2275,
+          "predicted_rows": 2362,
+          "limits": "Q3 was already examined in prior research; it is development validation, not an untouched test. No sweep or LLM blend selected here."
+        }
+      }
+    },
+    "/api/competition": {
+      "status": 200,
+      "data": {
+        "submissions": {
+          "s1": {
+            "request_started_at": 1791447340.3654377,
+            "observed_at": 1791447342.1027834,
+            "calendar_sha256": "74ab65aa8d0899dd172a88130485f692fa4d5899f000d6ca143e8b49e46ab756",
+            "calendar_raw_sha256": "83830b669d707c68a0d49a046afd9f8ed93fc86c598ad406f4859c22bfcc378b",
+            "health_raw_sha256": "d5202ea8d5bc05253be080eb27519319f2424307b8a74144b7ca3740fe454e5a",
+            "calendar": {
+              "scheduled_entries": 3023,
+              "event_types": {
+                "EARNINGS_RELEASE": 3023
+              },
+              "timing_categories": {
+                "SCHEDULED": 3023
+              },
+              "first_calendar_day_central": "2026-10-08",
+              "last_calendar_day_central": "2026-11-08",
+              "scheduled_in_scoring_window": 3008,
+              "scheduled_due_in_scoring_window": 0,
+              "scoring_window_daily_counts_central": {
+                "2026-10-13": 16,
+                "2026-10-14": 10,
+                "2026-10-15": 18,
+                "2026-10-16": 7,
+                "2026-10-19": 32,
+                "2026-10-20": 231,
+                "2026-10-21": 124,
+                "2026-10-22": 134,
+                "2026-10-23": 35,
+                "2026-10-26": 66,
+                "2026-10-27": 185,
+                "2026-10-28": 250,
+                "2026-10-29": 304,
+                "2026-10-30": 57,
+                "2026-10-31": 1,
+                "2026-11-01": 1,
+                "2026-11-02": 160,
+                "2026-11-03": 315,
+                "2026-11-04": 420,
+                "2026-11-05": 539,
+                "2026-11-06": 100,
+                "2026-11-07": 2,
+                "2026-11-08": 1
+              },
+              "peak_scoring_window_day_central": "2026-11-05",
+              "peak_scoring_window_entries": 539,
+              "official_eligible_coverage": null,
+              "limits": "Calendar entries are mutable schedules, not broadcasts or the final eligible scored set. Official health counters are a separate rolling 24-hour snapshot; coverage is not inferred."
+            },
+            "official_rolling_24h_counters": {
+              "webhook_n_2xx": 1,
+              "webhook_n_4xx": 15,
+              "webhook_n_5xx": 0,
+              "webhook_n_timeout": 0,
+              "webhook_consecutive_failures": 15,
+              "submission_n_total": 0,
+              "submission_n_duplicate": 0,
+              "submission_n_late": 0,
+              "submission_n_pre_broadcast": 0,
+              "submission_n_invalid_event": 0,
+              "webhook_last_delivery_at": "2026-10-07T23:28:59.043690+00:00",
+              "submission_last_at": null,
+              "last_test_prediction_at": "2026-10-07T22:03:48.125853+00:00"
+            },
+            "collector": {
+              "checked_at": 1791447342.1027834,
+              "state": "observed",
+              "scheduled_entries": 3023
+            }
+          }
+        },
+        "official_eligible_coverage": null,
+        "limits": "Read-only calendar and rolling counters; this does not establish scoring eligibility.",
+        "configured_slots": [
+          "s1"
+        ]
+      }
+    }
+  },
+  "scope": "Read-only Dublin timers, receipt and encrypted archive hash; one exact ciphertext hash read on Frankfurt; public HTTPS read-only GETs. No backup/restore triggered, no deployment, no code/provider/wallet/Fly Brain change.",
+  "limits": "Successful nightly transfer and matching ciphertext are verified. Prior restore proof is for a different archive, so current restoration is not established. Public GET success is separate from signed portal delivery.",
+  "report_completed_at": "2026-10-08T08:20:52.076625+00:00"
+}

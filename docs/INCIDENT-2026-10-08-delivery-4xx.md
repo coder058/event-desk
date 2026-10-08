@@ -37,7 +37,7 @@ configuration was changed. The exact rejection cause remains unknown.
 | --- | --- | --- |
 | Portal currently switched to 443 | Existing portal Overview showed `https://52.17.192.36.sslip.io:80/competition/webhook` during the investigation | Current switch to 443 is not supported; exact historical URL for each failed delivery is not retained |
 | Proxy changed signed bytes or headers | Production HAProxy is TCP passthrough to Caddy; both origin health routes work. Earlier Linux CI exercised signed TLS 80; the genuine earlier TEST also passed that route | Config and GETs do not prove byte/header equivalence for failed requests or the direct 443 route; not ruled out |
-| Local receiver depends on origin form | ASGI fixture sends the same signed indented Unicode bytes through explicit-port HTTP and default-port HTTPS origins; capture compares raw-body SHA and the three signing header values at the application boundary | Local receiver control passed. It bypasses TLS, HAProxy and Caddy, so it does not complete the actual proxy comparison |
+| Proxy transport changes the tested signed bytes | ASGI control passed first. Later, an isolated WSL fixture used copied/hash-matched deployed HAProxy/Caddy executables and cee53c0 receiver source. Both real proxy paths preserved the full body and three signing-header values; two 200 ACKs retained one delivery/job, and altered bytes produced 401 on both | The local real-proxy comparison passed. Cloud ingress and actual failed portal payloads remain untested; this does not identify the historical cause |
 | Gross current host clock drift | `NTPSynchronized=yes`, Chrony active/running, leap status Normal at `2026-10-07T23:24:17Z` | Current gross NTP drift is not supported; failed delivery timestamp/portal clock remain unavailable |
 | Signature timestamp is outside tolerance | Vendored official verifier uses 5 × 60 seconds; receiver does not override it | Expired, missing or malformed signing timestamps remain possible; actual failed headers were not retained |
 | A non-TEST/new-schema/conflicting delivery was rejected | Read-only database at `23:25:16Z`: one delivery, one TEST/api_accepted job; no dedicated rejections table or incoming-status column | Accepted-event table cannot identify rejected event types; schema/conflict hypothesis remains unknown |
@@ -63,7 +63,7 @@ in this receiver. An official aggregate `http_4xx` does not identify one of thes
 statuses or establish that this app, rather than another HTTP layer, generated it.
 Job submission responses describe outbound predictions, not inbound rejections.
 
-## Actual proxy reproduction remains incomplete
+## Actual local proxy comparison completed; public portal path still pending
 
 The attempted local fixture startup failed because `docker` is unavailable in this
 Windows shell. No Docker engine was installed and no production fixture/container
@@ -71,12 +71,28 @@ was started to work around that restriction. [Clean-checkout attempt](REPRODUCE.
 The existing `compose.mux.fixture.yaml` publishes the TLS-80 mux path only; its
 signed smoke does not compare a directly published fixture Caddy-443 route.
 
-A real follow-up comparison needs a keyless isolated fixture with both ingress
-paths to the same app and an application-boundary body/header capture. Send one
-identical signed Unicode/whitespace request through each path, compare body SHA
-and signing-header bytes, and verify both signatures and one deduplicated receipt.
-Keep its CA, ports, volumes and capture separate from production; do not substitute
-mock origin names for actual proxy evidence. No such two-proxy test is claimed here.
+The later native WSL run avoided installing a Docker engine. It copied only the
+public deployed executables/libraries by read-only SSH, verified their hashes and
+ran them with private loopback ports/CA/storage. The exact cee53c0 receiver source
+was archived locally; all 28 source files and installed runtime API package files
+matched that Git revision. HAProxy 3.2.25 and Caddy 2.11.7 processed the same signed
+Unicode/whitespace request via TCP passthrough and direct TLS termination.
+
+Both paths retained the exact body and signing-header bytes and returned 200;
+one delivery/job remained in disposable SQLite. Altering the body under the same
+signature returned 401 through each path. CA/hostname validation stayed enabled,
+Caddy did not install its CA globally, and all owned fixture listeners were released.
+The first private helper had a final row-count API error; the corrected helper and
+repository runner passed. No VPS service, secret, firewall or runtime code changed.
+[Actual proxy evidence](../reports/two-proxy-bytes-20261008.json),
+[reproduction and exact scope](TWO-PROXY-REPRODUCE.md).
+
+This establishes the local proxy comparison, not the failed public requests.
+Local DNS, CA, ports, SQLite and Python 3.14 differ from production; the latter
+Dockerfile uses Python 3.12. Actual portal payloads/timestamps remain unavailable,
+PostgreSQL concurrency was not exercised here and no official POST was made.
+The incident cause and a genuine signed portal TEST through standard 443 remain
+unverified. The original whole Docker/Compose startup gate also remains unrun.
 
 ## Prepared minimal change: private rejection reasons
 

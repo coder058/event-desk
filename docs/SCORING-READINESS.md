@@ -16,7 +16,19 @@ the exact rejection cause remains unknown. The prepared redacted logger is local
 and not deployed. [Follow-up evidence](../reports/delivery-failures-followup-readonly-20261008.json),
 [incident and remaining gates](INCIDENT-2026-10-08-delivery-4xx.md).
 
-## Current readiness and unresolved gates
+**Nightly follow-up:** the scheduled 8 October 04:10 UTC backup completed with
+service exit 0. Its exact encrypted bytes/SHA match on Dublin and the scoped
+Frankfurt backup directory. The older restore receipt applies to a different
+archive; restoration of this new backup is not verified. The read-only observation
+still reports the delivery-failure alert and no non-TEST accepted events.
+[Nightly evidence](../reports/nightly-backup-readonly-20261008.json).
+
+**Proxy follow-up:** the local real HAProxy/Caddy comparison now preserves the
+same signed body/header bytes on both paths and one durable SQLite receipt.
+This does not verify the cloud ingress or replace Jordi's signed portal TEST.
+[Actual fixture](../reports/two-proxy-bytes-20261008.json).
+
+## Initial readiness snapshot and unresolved gates
 
 | Gate | Verified observation | Remaining limit |
 | --- | --- | --- |
@@ -37,8 +49,8 @@ The first TEST must never be included in scored-event coverage.
 ## Monitor and alerts: what is actually running
 
 `eventdesk-monitor.timer` runs the independent host monitor once a minute.
-The latest inspected invocation succeeded, `ExecMainStatus=0`, and its state had
-`active_alerts=[]`. The installed monitor bytes match `ops/monitor.py` in deployed
+The initial inspected invocation succeeded, `ExecMainStatus=0`, and its state had
+`active_alerts=[]`; the later nightly follow-up has `official_delivery_or_submission_failures`. The installed monitor bytes match `ops/monitor.py` in deployed
 cee53c0. It reads health, scoreboard and competition observations, not order APIs.
 
 The health/backup alerts implemented in that source are:
@@ -79,9 +91,9 @@ Treat logs as private diagnostics; redact credentials and source materials befor
 sharing. Do not restart a healthy service just because a oneshot service is inactive:
 the timer stays active and the service's last result is the relevant observation.
 
-## Latest backup: rechecked bytes, existing restore only
+## Initial backup snapshot: rechecked bytes, existing restore only
 
-The latest receipt currently points to `eventdesk-20261007T165611Z.tar.gz.age`.
+At the initial inspection, the latest receipt pointed to `eventdesk-20261007T165611Z.tar.gz.age`.
 Fresh reads verified both encrypted files, including their actual bytes and SHA:
 `18bb82e983a660f8c929cc24bd15dbf1c6f0ca5262bc8ae05c308a6b12af00ad`.
 
@@ -94,7 +106,7 @@ restoration proof is retained separately in `restore-verification.json` and matc
 
 This archive was captured at 16:56 UTC, before the 22:03 TEST. Its restored jobs and
 deliveries were zero; it does not contain the later TEST or certify newer code.
-At the next nightly execution, require service exit 0 and a new latest receipt,
+For each subsequent nightly execution, require service exit 0 and a new latest receipt,
 then compare that exact file on both hosts. A previous matching restore cannot
 certify a later archive. Do not run `ops/verify_backup.py` under this read-only
 brief: it creates/restores/drops a disposable database and writes proof files.

@@ -1,0 +1,117 @@
+{
+  "checked_at": "2026-10-08T08:30:21.402140+00:00",
+  "kind": "isolated_real_two_proxy_fixture",
+  "source_commit": "cee53c02fded1e65976b42936cf50fcef69422b0",
+  "binary_manifest": [
+    {
+      "container": "eventdesk-caddy-1",
+      "path": "/usr/bin/caddy",
+      "sha256": "678ade3bfc088749c81a681adc603333ee0bb023b6a6cfe3c0f58bef8ff854e9",
+      "bytes": 51953826,
+      "remote_hash_matched": true
+    },
+    {
+      "container": "eventdesk-ingress-1",
+      "path": "/usr/local/sbin/haproxy",
+      "sha256": "80317bdb3be03b586eeac6c279eaa8e573a1ae1b05a78b782b89cff063aa1312",
+      "bytes": 26903360,
+      "remote_hash_matched": true
+    },
+    {
+      "container": "eventdesk-ingress-1",
+      "path": "/lib/ld-musl-x86_64.so.1",
+      "sha256": "38d022ce7425ff105ccfb53598f606e6e5f5f0a34bfbc793d65e6f34c9d72806",
+      "bytes": 670312,
+      "remote_hash_matched": true
+    },
+    {
+      "container": "eventdesk-ingress-1",
+      "path": "/usr/lib/libssl.so.3",
+      "sha256": "3bb7fa63a3d6fb71884976bcda01c2fb2cf4145774cfa480ee8a509103c7093a",
+      "bytes": 839544,
+      "remote_hash_matched": true
+    },
+    {
+      "container": "eventdesk-ingress-1",
+      "path": "/usr/lib/libcrypto.so.3",
+      "sha256": "b737ff6c1e585ba6be514d17c84e2d8347921558c13db2fdb5513578797d8413",
+      "bytes": 4989712,
+      "remote_hash_matched": true
+    },
+    {
+      "container": "eventdesk-ingress-1",
+      "path": "/usr/lib/liblua-5.4.so.0",
+      "sha256": "7ccc1c24a7b4bfc16ac49f963232ca0dc69d58069ee0af73d72f86bd4bcf7c98",
+      "bytes": 218824,
+      "remote_hash_matched": true
+    },
+    {
+      "container": "eventdesk-ingress-1",
+      "path": "/usr/lib/libpcre2-8.so.0",
+      "sha256": "c5e37308ec7231b700cebdcf2b49cc0572a4b4631e03da9921fc33e4bc970f6e",
+      "bytes": 784352,
+      "remote_hash_matched": true
+    }
+  ],
+  "archived_source_files_matched_git_blobs": 28,
+  "receiver_api_sha256": "062c7927028d76bcde515632511aebe8cc6fde000c9749e0664e579e39185ace",
+  "fixture_runtime_python": "3.14",
+  "origins": [
+    "https://localhost:19081",
+    "https://localhost:19443"
+  ],
+  "signed_ack_statuses": [
+    200,
+    200
+  ],
+  "altered_body_statuses": [
+    401,
+    401
+  ],
+  "raw_body_sha256": "ecbf565d597ae97adac79da2c3cbdc8b6d92f3e0a18c00698efa4fba05fbd482",
+  "raw_body_exact_match_both_paths": true,
+  "signing_header_exact_match_both_paths": true,
+  "signing_header_names": [
+    "webhook-id",
+    "webhook-signature",
+    "webhook-timestamp"
+  ],
+  "durable_deliveries": 1,
+  "durable_jobs": 1,
+  "job_state": "pending",
+  "ca_hostname_validation": true,
+  "production_mutations": false,
+  "official_requests": 0,
+  "limits": "Local WSL loopback with copied deployed proxy executables and receiver source; local CA/ports/DNS and disposable SQLite differ from production. No public cloud ingress, failed portal payload, official delivery, PostgreSQL concurrency, worker, score or latency claim. The fixture interpreter is Python 3.14; the production Dockerfile uses Python 3.12.",
+  "fixture_listener_ports_released": true,
+  "fixture_script_sha256": "c8a4ce543335211169ba14a07cf788d60ab53ee95036968e71615159a8a244b1",
+  "fixture_requirements": [
+    "fastapi==0.141.1",
+    "uvicorn==0.52.4",
+    "httpx==0.28.1",
+    "pydantic==2.12.5",
+    "sqlalchemy==2.0.52"
+  ],
+  "runtime_api_source_files_matched_git_blobs": 28,
+  "runtime_source_rechecked_at": "2026-10-08T08:20:52.073990+00:00",
+  "deployed_image_identities": {
+    "eventdesk-caddy-1": {
+      "image_id": "sha256:1a81ac3d1a49b2b385a5bfafb8bd39fb40fa1d717461d825ee0d65df91a6e97b",
+      "repo_digests": [
+        "caddy@sha256:1a81ac3d1a49b2b385a5bfafb8bd39fb40fa1d717461d825ee0d65df91a6e97b"
+      ]
+    },
+    "eventdesk-ingress-1": {
+      "image_id": "sha256:5d97434a423c2533cfeb42874d45cf6d69a840b60334582dfbfd5008e94c80be",
+      "repo_digests": [
+        "haproxy@sha256:5d97434a423c2533cfeb42874d45cf6d69a840b60334582dfbfd5008e94c80be"
+      ]
+    }
+  },
+  "negative_source_control": {
+    "changed_archive_source_rejected": true,
+    "exit_code": 1,
+    "rejected_before_extraction": true,
+    "no_fixture_database_created": true
+  }
+}
